@@ -3,7 +3,7 @@
  <img width=200px height=200px src="./imgs/cs_latt.png" alt="Project logo"></a>
 </p>
 
-<h3 align="center">Project Title</h3>
+<h3 align="center">Molecular Dynamics Simulation of a Van der Waals Gas</h3>
 
 <div align="center">
 
