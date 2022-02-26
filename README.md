@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="https://i.imgur.com/6wj0hh6.jpg" alt="Project logo"></a>
+ <img width=200px height=200px src="./imgs/cs_latt.png" alt="Project logo"></a>
 </p>
 
 <h3 align="center">Project Title</h3>
@@ -8,8 +8,8 @@
 <div align="center">
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![GitHub Issues](https://img.shields.io/github/issues/kylelobo/The-Documentation-Compendium.svg)](https://github.com/Eines-Informatiques-Avancades/Project-I/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/kylelobo/The-Documentation-Compendium.svg)](https://github.com/Eines-Informatiques-Avancades/Project-I/pulls)
+[![GitHub Issues](https://img.shields.io/github/issues/Eines-Informatiques-Avancades/Project-I.svg)](https://github.com/Eines-Informatiques-Avancades/Project-I/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/Eines-Informatiques-Avancades/Project-I.svg)](https://github.com/Eines-Informatiques-Avancades/Project-I/pulls)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
 
 </div>
@@ -96,16 +96,19 @@ Add additional notes about how to deploy this on a live system.
 
 ## Built Using <a name = "built_using"></a>
 
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Express](https://expressjs.com/) - Server Framework
-- [VueJs](https://vuejs.org/) - Web Framework
-- [NodeJs](https://nodejs.org/en/) - Server Environment
+- [Fortran](https://fortran-lang.org/) - Fortran
+- [Express](https://www.python.org/) - Python
+- Modules, etc...?
+
 
 ## Authors <a name = "authors"></a>
 
-- [@kylelobo](https://github.com/kylelobo) - Idea & Initial work
+- [@perasperadastra](https://github.com/perasperadastra) -> Initialization and integration
+- [@LucasFernandezStolpa](https://github.com/LucasFernandezStolpa) -> Boundary conditions and forces
+- [@pol-sb](https://github.com/pol-sb) -> Statistics and visualization of results
+- [@Mtunica](https://github.com/Mtunica) -> Main and makefile
 
-See also the list of [contributors](https://github.com/kylelobo/The-Documentation-Compendium/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/Eines-Informatiques-Avancades/Project-I/contributors) who participated in this project.
 
 ## Acknowledgements <a name = "acknowledgement"></a>
 
