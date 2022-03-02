@@ -6,6 +6,7 @@ import numpy as np
 
 
 def get_densities() -> set:
+
     """
     Gathers values for densities used in MD calculations from the filenames
     of '.dat' MD result files.
@@ -15,6 +16,7 @@ def get_densities() -> set:
     set
         A set containing all of the unique densities found in the CWD.
     """
+
     # Gathering all of the possible result files
     dat_files = [fil for fil in os.listdir() if fil.endswith(".dat")]
     dens_list = []
@@ -76,6 +78,7 @@ class MDSimulation:
         self._gather_results()
 
     def generate_plots(self):
+
         """
         Generate plots using the MD simulation results.
         The plots that can be generated consist of:
@@ -101,6 +104,7 @@ class MDSimulation:
         # self._plot_msd()
 
     def _gather_results(self):
+
         """
         Gathers the results from MD simulations in the CWD and loads their
         values into numpy arrays. These arrays are made available in the
@@ -111,6 +115,7 @@ class MDSimulation:
         - self.msd_results
 
         """
+
         # Filename treatment to be able to insert the density into the
         # filename, so results can be worked with iteratively.
         den_str = str(self.dens).replace(".", "")
@@ -124,9 +129,11 @@ class MDSimulation:
         # self.msd_results = np.loadtxt(msd)
 
     def _result_folder(self):
+
         """
         Creates a timestamped folder in the CWD to store plots.
         """
+
         # Getting the current time
         current_time = time.strftime("%d-%m_%H-%M")
 
@@ -138,11 +145,13 @@ class MDSimulation:
             os.mkdir(self.fold_name)
 
     def _plot_rdf(self):
+
         """
         Plots the radial distribution function using the results gathered
         from the MD simulation.
         The plots are stored in the results_%d-%m_%H-%M directory.
         """
+
         # Plotting the RDF
         plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1])
         plt.title("Radial Distribution Function")
@@ -160,11 +169,13 @@ class MDSimulation:
         plt.clf()
 
     def _plot_msd(self):
+
         """
         Plots the mean square displacement using the results gathered
         from the MD simulation.
         The plots are stored in the results_%d-%m_%H-%M directory.
         """
+
         # Plotting the MSD
         plt.plot(self.msd_results[:, 0], self.msd_results[:, 1])
         plt.title("Mean Square Displacement")
@@ -182,6 +193,7 @@ class MDSimulation:
         plt.clf()
 
     def _plot_energies(self):
+
         """
         Prepares several plots for the energies using the results gathered
         from the MD simulation.
@@ -193,6 +205,7 @@ class MDSimulation:
         - Total Energy
         - All of the energies in the same plot
         """
+
         # Preparing filenames for the plot images
         den_str = str(self.dens).replace(".", "")
         n_pot = self.fold_name + "/" + "ene-pot" + f"_{den_str}_" + "plot.png"
@@ -204,28 +217,37 @@ class MDSimulation:
         x_lab = "Time"
         y_lab = "Energy"
 
-        # Preparing plots
+        # Preparing the plot for the potential energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
         plt.title(f"Potential energy for ρ = {self.dens}")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+
+        # Saving the image and clearing the current plot.
         plt.savefig(n_pot)
         plt.clf()
 
+        # Preparing the plot for the kinetic energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 2])
         plt.title(f"Kinetic energy for ρ = {self.dens}")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+
+        # Saving the image and clearing the current plot.
         plt.savefig(n_kin)
         plt.clf()
 
+        # Preparing the plot for the total energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 3])
         plt.title(f"Total energy for ρ = {self.dens}")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+
+        # Saving the image and clearing the current plot.
         plt.savefig(n_tot)
         plt.clf()
 
+        # Plotting all of the energies at once
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 1],
@@ -246,6 +268,8 @@ class MDSimulation:
         plt.legend()
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+
+        # Saving the image and clearing the current plot.
         plt.savefig(n_all)
         plt.clf()
 
