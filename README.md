@@ -48,6 +48,18 @@ What things you need to install the software and how to install them.
 Give examples
 ```
 
+Python is used for the results plotting and representation. A python version higher or equal than `python 3.6` is needed, and additionally the following libraries are needed:
+
+- [numpy](https://numpy.org/)
+- [matplotlib](https://matplotlib.org/)
+
+To install these libraries, the python package manager `pip` can be used. The required versions are available from the included [requirements.txt](src/requirements.txt) file and can be easily installed using the following command while in the same directory:
+
+```
+python -m pip install -r requirements.txt
+```
+`pip` can normally be installed from your distribution package manager.
+
 ### Installing
 
 A step by step series of examples that tell you how to get a development env running.
