@@ -16,6 +16,7 @@
 !==============================================================================!
 module thermostat
 implicit none
+include "constants.h"
 
 contains
 
@@ -31,9 +32,10 @@ contains
 !      - random_number() : Intrinsic Fortran 90
 !      - normal_rand()  : Tool in this module
 !===========================================================================!
-   subroutine andersen_thermo(Temp,vel)
+   subroutine andersen_thermo(Temp,vel,natoms)
    double precision, intent(inout) :: vel(:,:)
    double precision, intent(in) :: Temp
+   integer, intent(in) :: natoms
    double precision :: nu, sigma
    double precision :: x_rand(size(vel,2))
    double precision :: vel_normalrand(4)
@@ -49,7 +51,7 @@ contains
        ! The subroutine normal_rand returns a random number from a normal
        ! distribution with standard deviation \sigma = sqrt(T)
        do jj = 1,3
-         vel(jj,ii) = vel_normalrand(jj)
+         vel(ii,jj) = vel_normalrand(jj)
        end do
      end if
    end do
@@ -82,18 +84,15 @@ contains
   
      end subroutine normal_rand
 
-end module tools
-
 
    !===========================================================================!
    !                        NORMAL RANDOM NUMBER GENERATOR
    !===========================================================================!
    double precision function kinetic(vel,natoms) result(ekin)
-   include "constants.h"
    integer,intent(in)::natoms
    double precision, allocatable, dimension(:,:), intent(in) :: vel
      do ii = 1,natoms
-       ekin = ekin + 0.5d0*(vel(1,ii)**2 + vel(2,ii)**2 + vel(3,ii)**2)
+       ekin = ekin + 0.5d0*(vel(ii,1)**2 + vel(ii,2)**2 + vel(ii,3)**2)
      end do
    end function kinetic
 endmodule thermostat
