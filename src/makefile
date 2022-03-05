@@ -61,7 +61,7 @@ tools.o: $(SRCDIR)/tools.f90
 
 
 #Main file
-main.o: boundary.mod forces.mod initialization.mod integrators.mod statistics.mod thermostats.mod tools.mod main.f90
+main.o: initialization.mod boundary.mod thermostats.mod tools.mod forces.mod integrators.mod statistics.mod main.f90
 	$(fc) -o $(BUILDDIR)/main.o -c $(OPT) main.f90 -J$(BUILDDIR)
 
 
