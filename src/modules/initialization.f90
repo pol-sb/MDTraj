@@ -36,18 +36,18 @@ module initialization
 !===========================================================================!
 !                       SIMPLE CUBIC CONFIGURATION (SC)
 !===========================================================================!
-! Input variables: N - number of particles of the system
+! Input variables: N - number of sides of the system
 !                  boxlength - length of the box of simulation
 !                  r - empty array
 ! Output:          
 !                  file with the configuration of a simple cubic network
 !                  r - array with the configuration
 !
-! N = total number of nodes
+! N = units cells in each dimension
 ! a = lattice spacing
 ! L = length of simulation box
 !===========================================================================!
-   subroutine initial_configuration_SC(boxlength,N, r)
+   subroutine initial_configuration_SC(N,boxlength, r)
    implicit none
       double precision, intent(out)::r(:,:)
       integer, intent(in) :: N
@@ -57,7 +57,6 @@ module initialization
       integer :: out_ref
       integer :: ii
 
-      M = int(N**(1.0/3.0)) ! M = units cells in each dimension
       a = boxlength/dfloat(M)
 
       ! Creating the .xyz file with the FCC structure
@@ -104,16 +103,16 @@ outer:do nx = 0,M-1
 !                   FACE CUBIC CENTERED CONFIGURATION (FCC)
 !===========================================================================!
 ! Input variables: 
-!                  N - number of particles of the system
+!                  N - number of sides of the system
 !                  boxlength - length of the box of simulation
 !                  r - empty array
 ! Output:          file with the configuration of a face centered cubic network
 !
-! N = total number of nodes
+! N = units cells in each dimension
 ! a = lattice spacing
 ! L = length of simulation box
 !===========================================================================!
-   subroutine initial_configuration_fcc(boxlength,N,r)
+   subroutine initial_configuration_fcc(N,boxlength,r)
    implicit none
       integer, intent(in) :: N
       double precision, intent(in) :: boxlength
@@ -124,7 +123,6 @@ outer:do nx = 0,M-1
       integer :: nx, ny, nz
       integer :: out_ref, ii, jj
 
-      M = int((float(N)/4.0)**(1.0/3.0)) ! M = units cells in each dimension
 
       a = boxlength/dfloat(M)
 
@@ -175,20 +173,20 @@ outer:do nx = 0,M-1
 !                              DIAMOND
 !===========================================================================!
 ! Input variables: 
-!                  N - number of particles of the system
+!                  N - number of sides of the system
 !                  boxlength - length of the box of simulation
 !                  r - empty array
 ! Output:          
 !                  file with the configuration of a diamond network
 !                  r - array ith the configuration
 !
-! N = total number of nodes
+! N = units cells in each dimension
 ! a = lattice spacing
 ! L = length of simulation box
 !===========================================================================!
-   subroutine initial_configuration_diamond(boxlength,N,r)
+   subroutine initial_configuration_diamond(N,boxlength,r)
    implicit none
-      integer, intent(in) :: N
+      integer, intent(in) :: N 
       double precision, intent(in) :: boxlength
       double precision,intent(out) :: r(:,:)
       double precision, allocatable :: r0(:,:)
@@ -200,7 +198,7 @@ outer:do nx = 0,M-1
 
 
 
-      M = int((float(N)/8.0d0)**(1.0/3.0)) ! M = units cells in each dimension
+
       print*,M, float(N)/8.0d0
       a = boxlength/dfloat(M)
       allocate(r0(8,3))
@@ -264,7 +262,7 @@ outer:do nz = 0, M - 1,1
 !                       READ FROM FILE
 !===========================================================================!
 ! Input variables: 
-!                  N (in)- number of particles of the system
+!                  N (in)- number of sides of the system
 !                  coord_path (in) - path to the xyz fle containing the structure
 !                  vel_path(inout) (OPTIONAL) : path to velocities file
 !                  initial_velocities(inout)(OPTIONAL) : empty array
@@ -277,14 +275,14 @@ outer:do nz = 0, M - 1,1
 subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
    implicit none
        integer,intent(in) :: N
-       real(8), intent(out) :: initial_position(:,:)
+       double precision, intent(out) :: initial_position(:,:)
        character(len=*), intent(in) :: coord_path
-       real(8), optional, intent(out) :: initial_velocities(:,:)
+       double precision, optional, intent(out) :: initial_velocities(:,:)
        character(len=*),optional,intent(in) :: vel_path
    
        ! Internal Parameters declaration
        character(len=4) ::atom_name
-       real(8) :: x,y,z
+       double precision :: x,y,z
        logical :: ext
        integer :: error
        integer :: file_id
