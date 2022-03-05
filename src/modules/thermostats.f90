@@ -4,7 +4,7 @@
 ! simulation.
 !==============================================================================!
 ! The module contains:
-!       -> Andersen_thermo: 
+!       -> andersen_thermo (temp,vel,natoms): 
 !           Thermostat that controls the kinetic energy of the  simulation
 !                   Input:
 !                       - Temp (temperature)(in) : double precision scalar
@@ -33,7 +33,7 @@ contains
 !      - random_number() : Intrinsic Fortran 90
 !      - normal_rand()  : Tool in this module
 !===========================================================================!
-   subroutine andersen_thermo(Temp,vel,natoms)
+   subroutine andersen_thermo(temp,vel,natoms)
    double precision, intent(inout) :: vel(:,:)
    double precision, intent(in) :: Temp
    integer, intent(in) :: natoms
@@ -87,9 +87,9 @@ contains
      end subroutine normal_rand
 
 
-   !===========================================================================!
-   !                        NORMAL RANDOM NUMBER GENERATOR
-   !===========================================================================!
+!===========================================================================!
+!                        NORMAL RANDOM NUMBER GENERATOR
+!===========================================================================!
    double precision function kinetic(vel,natoms) result(ekin)
    integer,intent(in)::natoms
    double precision, allocatable, dimension(:,:), intent(in) :: vel

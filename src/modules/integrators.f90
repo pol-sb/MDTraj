@@ -1,38 +1,92 @@
-!==============================================================================!
+!=====================================================================================!
 !                               MODULE INTEGRATORS
 ! This module includes all the principal integration algorithms used in the
 ! molecular dynamics code, as the principal algorithm and to check that it
 ! works properly.
-!
+! 
 ! This module needs the parameters module (params.f90) and tools (tools.f90)
 ! in order to work properly
-!==============================================================================!
+!=====================================================================================!
+! The module contains:
+!       -> euler (natoms,r,vel,F,dt,boxlength): 
+!           Euler Integration Method. It returns the new positions and velocities.
+!                   Input:
+!                     - natoms (número de átomos)(in) : integer scalar
+!	   				  - r (positions)(inout) : double precision array
+!      				  - F (force)(inout) : double precision array
+! 	   				  -dt (time step)(in) : double precision scalar
+!	   				  -boxlength (longitude of one side)(in) double precision scalar
+!                   Output:
+! 					   - r (positions)(inout) : double precision array
+!                      - vel (velocity)(inout) : double precision array
+! 
+! 
+!       -> vel_verlet (natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag): 
+!           The verlet algorithm method wihout considering the temperature. 
+!			It returns the new positions and velocities.
+!                   Input:
+!                      - natoms (número de átomos)(in) : integer scalar
+! 	   				   - r (positions)(inout) : double precision array
+!      				   - vel (velocity)(inout) : double precision array
+!      				   - F (force)(inout) : double precision array
+! 	   				   -dt (time step)(in) : double precision scalar
+!	   				   -rc (cut-off distance) (in) : double precision
+!	   				   -boxlength (longitude of one side)(in) : double precision scalar
+!	   				   -gr ()(in) : double precision array
+!      				   -deltag ()(in) : double precision scalar
+!                   Output:
+!                      - r (positions)(inout) : double precision array
+!      				   - vel (velocity)(inout) : double precision array
+!	   				   - Upot (potential energy) (out) : double precision scalar
+!	   				   - Pressp (pressure) (out) : double precision scalar
+! 
+! 
+!       -> vel_verlet_with_thermo (natoms,r,vel,F,Upot,dt,rc,boxlength,Temp,pressp,gr,deltag): 
+!           The verlet algorithm method considering the temperature. 
+!			It returns the new positions and velocities.
+!                   Input:
+!                      - natoms (número de átomos)(in) : integer scalar
+! 	   				   - r (positions)(inout) : double precision array
+!      				   - vel (velocity)(inout) : double precision array
+!      				   - F (force)(inout) : double precision array
+! 	   				   -dt (time step)(in) : double precision scalar
+!	   				   -rc (cut-off distance) (in) : double precision
+!	   				   -boxlength (longitude of one side)(in) : double precision scalar
+!	   				   -gr ()(in) : double precision array
+!      				   -deltag ()(in) : double precision scalar
+!                   Output:
+!                      - r (positions)(inout) : double precision array
+!      				   - vel (velocity)(inout) : double precision array
+!	   				   - Upot (potential energy)(out) : double precision scalar
+! 	   				   - temp (temperature)(in) : double precision scalar
+!	   				   - Pressp (pressure) (out) : double precision scalar
+!=====================================================================================!
 module integrators
-  use forces
+  	use forces
 	use thermostat
-	 implicit none
+	implicit none
 	  
    contains
 
-    !=========================================================================!
-	!                       				EULER ALGORITHM													 !
-	!=========================================================================!
+!=====================================================================================!
+!                   		  EULER INTEGRATION
+!=====================================================================================!
+!  Input:
+!      - natoms (número de átomos)(in) : integer scalar
+!	   - r (positions)(inout) : double precision array
+!      - F (force)(inout) : double precision array
+! 	   -dt (time step)(in) : double precision scalar
+!	   -boxlength (longitude of one side)(in) double precision scalar
+!  Output:
+! 	   - r (positions)(inout) : double precision array
+!      - vel (velocity)(inout) : double precision array
+!=====================================================================================!
    subroutine euler(natoms,r,vel,F,dt,boxlength)
 	integer,intent(in)::natoms
-   double precision, allocatable, dimension(:,:), intent(in) :: F
-   double precision, allocatable, dimension(:,:), intent(inout) :: r, vel
+   double precision, allocatable, intent(in) :: F(:,:)
+   double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
    double precision, intent(in) :: dt, boxlength
    
-   		 ! Input variables: r - array which contains the positions of the atoms
-		 !											in the lattice
-		 !					vel- array which contains the velocity of the atoms
-		 !											in the lattice.
-		 !					boxlength - length of the box of simulation
-		 !             
-		 ! 		             F - array of the interacting forces on each atom of the
-		 !											simulation box.
-		 !					
-
    do jj = 1,natoms
      do ii = 1,3
        r(jj,ii) = r(jj,ii) + vel(jj,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
@@ -41,30 +95,37 @@ module integrators
    end do
 
    end subroutine euler
-
-    !=========================================================================!
-	!                       VELOCITY VERLET ALGORITHM													 !
-	!=========================================================================!
+   
+!=====================================================================================!
+!                     VELOCITY VERLET INTEGRATION (Without temperature)
+!=====================================================================================!
+!  Input:
+!      - natoms (número de átomos)(in) : integer scalar
+! 	   - r (positions)(inout) : double precision array
+!      - vel (velocity)(inout) : double precision array
+!      - F (force)(inout) : double precision array
+! 	   -dt (time step)(in) : double precision scalar
+!	   -rc (cut-off distance) (in) : double precision
+!	   -boxlength (longitude of one side)(in) : double precision scalar
+!	   -gr ()(in) : double precision array
+!      -deltag ()(in) : double precision scalar
+!  Output:
+!	   - r (positions)(inout) : double precision array
+!      - vel (velocity)(inout) : double precision array
+!	   - Upot (potential energy) (out) : double precision scalar
+!	   - Pressp (pressure) (out) : double precision scalar
+!  Depencency:
+!      - force() : In module forces (src/modules/forces.f90)
+!=====================================================================================!
    subroutine vel_verlet(natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag)
      implicit none
      integer,intent(in)::natoms
-     double precision, allocatable, dimension(:,:), intent(inout) :: F
-     double precision, allocatable, dimension(:,:), intent(inout) :: r, vel
-     double precision, allocatable, dimension(:), intent(inout) :: gr
+     double precision, allocatable,intent(inout) :: F(:,:)
+     double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
+     double precision, allocatable, intent(inout) :: gr(:)
      double precision, intent(in) :: dt, rc, boxlength, deltag
      double precision, intent(out) :: Upot, pressp
       	 
-      	 ! Input variables: r - array which contains the positions of the atoms
-		 !											in the lattice
-		 !									boxlength - length of the box of simulation
-		 !                  rc - cutoff radius from which interactions are neglected
-		 !					dt - time step
-		 ! Output:          F - array of the interacting forces on each atom of the
-		 !											simulation box.
-		 !									Upot - potential energy term at time ti
-		 ! 									gr - vector which contains the radial distribution function.
-		 !                  deltag - width of the bin of the rdf
-		 !									pressp - potential pressure term at time ti
 
      do ii = 1,natoms
        do jj = 1,3
@@ -81,29 +142,36 @@ module integrators
      end do
    end subroutine vel_verlet
 
-    !=========================================================================!
-	!                       VELOCITY VERLET ALGORITHM													 !
-	!=========================================================================!
+!=====================================================================================!
+!                     VELOCITY VERLET INTEGRATION (With temperature)
+!=====================================================================================!
+!  Input:
+!      - natoms (número de átomos)(in) : integer scalar
+! 	   - r (positions)(inout) : double precision array
+!      - vel (velocity)(inout) : double precision array
+!      - F (force)(inout) : double precision array
+! 	   -dt (time step)(in) : double precision scalar
+!	   -rc (cut-off distance) (in) : double precision
+!	   -boxlength (longitude of one side)(in) : double precision scalar
+!	   -gr ()(in) : double precision array
+!      -deltag ()(in) : double precision scalar
+!  Output:
+!	   - r (positions)(inout) : double precision array
+!      - vel (velocity)(inout) : double precision array
+!	   - Upot (potential energy)(out) : double precision scalar
+! 	   - temp (temperature)(in) : double precision scalar
+!	   - Pressp (pressure) (out) : double precision scalar
+!  Depencency:
+!      - force() : In module forces (src/modules/forces.f90)
+!=====================================================================================!
    subroutine vel_verlet_with_thermo(natoms,r,vel,F,Upot,dt,rc,boxlength,Temp,pressp,gr,deltag)
      implicit none
      integer,intent(in)::natoms
-     double precision, allocatable, dimension(:,:), intent(inout) :: F
-     double precision, allocatable, dimension(:,:), intent(inout) :: r, vel
-     double precision, allocatable, dimension(:), intent(inout) :: gr
+     double precision, allocatable,  intent(inout) :: F(:,:)
+     double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
+     double precision, allocatable,  intent(inout) :: gr(:)
      double precision, intent(in) :: dt, rc, boxlength, Temp, deltag
      double precision, intent(out) :: Upot, pressp
-
-	! Input variables: r - array which contains the positions of the atoms
-		 !											in the lattice
-		 !									boxlength - length of the box of simulation
-		 !                  rc - cutoff radius from which interactions are neglected
-		 !					dt - time step
-		 ! Output:          F - array of the interacting forces on each atom of the
-		 !											simulation box.
-		 !									Upot - potential energy term at time ti
-		 ! 									gr - vector which contains the radial distribution function.
-		 !                  deltag - width of the bin of the rdf
-		 !									pressp - potential pressure term at time ti
 		 
 	  Upot = 0.d0; pressp = 0.d0
 

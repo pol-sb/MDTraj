@@ -1,56 +1,85 @@
-!==============================================================================!
+!=====================================================================================!
 !                             MODULE INITIALIZORS
 ! This module contains all the subroutines regarding the initialization of
 ! the spatial coordinates of the system and the velocities of the particles.
-!
-! The module needs the module $(params.f90) to work properly
-! It includes a simple cubic initialization, fcc initialization and a bimodal
-! velocity distribution.
-!==============================================================================!
+! 
+! It includes a simple cubic (sc), an face centered ccubic (FCC) and diamond 
+! cristalline initializarion of the structure.
+! 
+! It is included as well a subroutine to read an structure from a file.
+! 
+! It also contain a bimodal velocity distribution.
+!=====================================================================================!
 ! Contains
-!     initial_configuration_SC
-!
-!
-!
-!     initial_configuration_fcc:
-!
-!
-!
-!
-!  
-!       initial_configuration_diamond
-!
-!
-!
-!
-!
-!
-!===========================================================================!
+!     
+! 	  -> initial_configuration_SC (N, boxlength, r):
+! 		  This subroutine creates a SC cristalline structure.
+!				Input:
+!					- N (number particles of one side)(in): inegter scalar
+!					- Boxlength (longitude of one side)(in): double precision scalar
+!				Output: 
+!					- r (positions of the atoms)(out): double precision array
+! 
+! 
+!     -> initial_configuration_fcc (N, boxlength, r):
+! 		  This subroutine creates a FCC cristalline structure.
+!				Input:
+!					- N (number particles of one side)(in): inegter scalar
+!					- Boxlength (longitude of one side)(in): double precision scalar
+!				Output: 
+!					- r (positions of the atoms)(out): double precision array
+! 
+! 
+!      -> initial_configuration_diamond (N, boxlength, r):
+!		   This subroutine creates a SC cristalline structure.
+!				Input:
+!					- N (number particles of one side)(in): inegter scalar
+!					- Boxlength (longitude of one side)(in): double precision scalar	
+!				Output: 
+!					- r (positions of the atoms)(out): double precision array
+! 
+! 
+!      -> initial_reading (N, coord_path, initial_position, initial_velocities, vel_path):
+!		   This subroutine creates a SC cristalline structure.
+!				Input:
+!				   - N (number of sides of the system)(in): integer scalar
+!    			   - coord_path (path to the xyz fle containing the structure)(in): character
+!	 			   - vel_path (path to velocities file)(inout): OPTIONAL, empty array
+! 	 			   - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
+! 	       		   - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+!				Output: 
+!					- initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
+! 				    - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+! 
+! 
+!      -> bimodal (Temp,vel):
+!		   This subroutine generates the velocities of the atoms following a bimodal
+!		   distribution of a temperature.
+!				Input:
+!					- Temp (temperature)(in): double precision scalar
+!				Output: 
+!					- vel (velocities of the atoms)(inout): double precision array
+!=====================================================================================!
 
 module initialization
 !   use params
    implicit none
-   ! ## las variables que definamos aqui es por quermos guardarlas [ el comportamiento default es save]
-   integer, save :: M
+
    double precision, save :: a
    integer, save :: nn
 
    contains
 
-!===========================================================================!
+!=====================================================================================!
 !                       SIMPLE CUBIC CONFIGURATION (SC)
-!===========================================================================!
-! Input variables: N - number of sides of the system
-!                  boxlength - length of the box of simulation
-!                  r - empty array
-! Output:          
-!                  file with the configuration of a simple cubic network
-!                  r - array with the configuration
-!
-! N = units cells in each dimension
-! a = lattice spacing
-! L = length of simulation box
-!===========================================================================!
+!=====================================================================================!
+! Input:
+!	 - N (number particles of one side)(in): inegter scalar
+!	 - Boxlength (longitude of one side)(in): double precision scalar
+!					
+! Output: 
+!	 - r (positions of the atoms)(out): double precision array
+!=====================================================================================!
    subroutine initial_configuration_SC(N,boxlength, r)
    implicit none
       double precision, intent(out)::r(:,:)
@@ -90,14 +119,11 @@ outer:do nx = 0,N-1
             do nz = 0,N-1
                r(nn,:)=(/a*nx, a*ny, a*nz/)
 
-               nn = nn + 1
             end do
          end do
       end do outer
-      !Computing number of atoms.
-      nn = nn-1
 
-      write(out_ref,*) nn
+      write(out_ref,*) natoms
       write(out_ref,*) " "      
       do ii =1, nn 
          write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
@@ -106,31 +132,29 @@ outer:do nx = 0,N-1
       close(out_ref)
     end subroutine initial_configuration_SC
 
-!===========================================================================!
+!=====================================================================================!
 !                   FACE CUBIC CENTERED CONFIGURATION (FCC)
-!===========================================================================!
-! Input variables: 
-!                  N - number of sides of the system
-!                  boxlength - length of the box of simulation
-!                  r - empty array
-! Output:          file with the configuration of a face centered cubic network
-!
-! N = units cells in each dimension
-! a = lattice spacing
-! L = length of simulation box
-!===========================================================================!
+!=====================================================================================!
+! Input:
+!	 - N (number particles of one side)(in): inegter scalar
+!	 - Boxlength (longitude of one side)(in): double precision scalar
+!					
+! Output: 
+!	 - r (positions of the atoms)(out): double precision array
+!=====================================================================================!
    subroutine initial_configuration_fcc(N,boxlength,r)
    implicit none
       integer, intent(in) :: N
       double precision, intent(in) :: boxlength
       double precision,allocatable, intent(out) :: r(:,:)
       double precision, allocatable :: r0(:,:)
-
+      
       logical :: ext
-      integer :: nx, ny, nz
+      integer :: nx, ny, nz, natoms
       integer :: out_ref, ii, jj
 
-      a = boxlength/dfloat(M)
+      a = boxlength/dfloat(N)
+      natoms=N*N*N*4
 
       inquire(file="../output/",exist=ext)
       if (.NOT.ext) then
@@ -149,53 +173,46 @@ outer:do nx = 0,N-1
           open(newunit=out_ref,file="../output/structure/init_conf_fcc.xyz", status="replace")
       end if
 
-      M = int((float(N)/4.0)**(1.0/3.0)) ! M = units cells in each dimension
-      allocate(r(3,N),r0(3,4))
-      a = boxlength/dfloat(M)
+
+      allocate(r0(4,3))
    
-      r0(:,1) = [0.d0, 0.d0, 0.d0]
-      r0(:,2) = [a/2.d0, a/2.d0, 0.d0]
-      r0(:,3) = [0.d0, a/2.d0, a/2.d0]
-      r0(:,4) = [a/2.d0, 0.d0, a/2.d0]
+      r0(1,:) = [0.d0, 0.d0, 0.d0]
+      r0(2,:) = [a/2.d0, a/2.d0, 0.d0]
+      r0(3,:) = [0.d0, a/2.d0, a/2.d0]
+      r0(4,:) = [a/2.d0, 0.d0, a/2.d0]
       nn = 0
       ii = 0
-      do nx = 0,M-1,1
-        do ny = 0,M-1,1
-          do nz = 0,M-1,1
+      do nx = 0,N-1,1
+        do ny = 0,N-1,1
+          do nz = 0,N-1,1
             do jj = 1,4,1
               !print*, 4*ii+jj
-              r(:,4*ii + jj) = a*[nx, ny, nz] + r0(:,jj)
-              nn = nn +1
+              r(4*ii + jj,:) = a*[nx, ny, nz] + r0(jj,:)
             end do
             ii = ii+1
           end do
         end do
       end do
    
-      write(out_ref,*) nn
+      write(out_ref,*) natoms
       write(out_ref,*)
       do ii = 1,nn
-         write(out_ref,*) "A", r(1,nn), r(2,nn), r(3,nn)
+         write(out_ref,*) "A", r(nn,1), r(nn,2), r(nn,3)
       end do
       close(out_ref)
    end subroutine initial_configuration_fcc
 
 
-!===========================================================================!
+!=====================================================================================!
 !                              DIAMOND
-!===========================================================================!
-! Input variables: 
-!                  N - number of sides of the system
-!                  boxlength - length of the box of simulation
-!                  r - empty array
-! Output:          
-!                  file with the configuration of a diamond network
-!                  r - array ith the configuration
-!
-! N = units cells in each dimension
-! a = lattice spacing
-! L = length of simulation box
-!===========================================================================!
+!=====================================================================================!
+! Input:
+!	 - N (number particles of one side)(in): inegter scalar
+!	 - Boxlength (longitude of one side)(in): double precision scalar
+!					
+! Output: 
+!	 - r (positions of the atoms)(out): double precision array
+!=====================================================================================!
    subroutine initial_configuration_diamond(N,boxlength,r)
    implicit none
       integer, intent(in) :: N 
@@ -205,9 +222,10 @@ outer:do nx = 0,N-1
       logical :: ext
       integer :: nx, ny, nz
       integer :: out_ref
-      integer :: ii
+      integer :: ii, natoms
 
-      a = boxlength/dfloat(M)
+      a = boxlength/dfloat(N)
+      natoms=8*N*N*N
       allocate(r0(8,3))
 
       ! Vector of all atoms contained in a unit cell
@@ -241,9 +259,9 @@ outer:do nx = 0,N-1
 
       nn = 1
 
-outer:do nz = 0, M - 1,1
-         do nx = 0, M - 1,1
-            do ny = 0, M - 1,1
+outer:do nz = 0, N - 1,1
+         do nx = 0, N - 1,1
+            do ny = 0, N - 1,1
                do ii = 1, 8
                   
                   r(nn,:) = (/(( nx + r0(ii,1) ) * a), &
@@ -257,31 +275,31 @@ outer:do nz = 0, M - 1,1
       !Computing number of atoms.
       nn = nn - 1
 
-      write(out_ref,*) nn
+      write(out_ref,*) natoms
       write(out_ref,*) " "
       do ii =1, nn !
          write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
       end do
       close(out_ref)
       deallocate(r0)
-
-
    end subroutine initial_configuration_diamond
 
-!===========================================================================!
+!=====================================================================================!
 !                       READ FROM FILE
-!===========================================================================!
-! Input variables: 
-!                  N (in)- number of sides of the system
-!                  coord_path (in) - path to the xyz fle containing the structure
-!                  vel_path(inout) (OPTIONAL) : path to velocities file
-!                  initial_velocities(inout)(OPTIONAL) : empty array
-!                  initial_position(inout) : empty array
-! Output:
-!                  initial_velocities(inout)(OPTIONAL) : empty array
-!                  initial_position(inout) : empty array
-!
-!===========================================================================!
+!=====================================================================================!
+!=====================================================================================!
+! Input:
+!	 - N (number of sides of the system)(in): integer scalar
+!    - coord_path (path to the xyz fle containing the structure)(in): character
+!	 - vel_path (path to velocities file)(inout): OPTIONAL, empty array
+! 	 - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
+! 	 - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+!					
+! Output: 
+!	 - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
+! 	 - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+!=====================================================================================!
+
 subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
    implicit none
        integer,intent(in) :: N
@@ -334,9 +352,15 @@ subroutine initial_reading(N, coord_path, initial_position, initial_velocities, 
          end if
    end subroutine initial_reading
      
-   !===========================================================================!
-   !                      BIMODAL VELOCITY DISTRIBUTION
-   !===========================================================================!
+!=====================================================================================!
+!                      BIMODAL VELOCITY DISTRIBUTION
+!=====================================================================================!
+! Input:
+!	 - Temp (temperature)(in): double precision scalar
+!					
+! Output: 
+!	 - vel (velocities of the atoms)(inout): double precision array
+!=====================================================================================!
    subroutine bimodal(Temp,vel)
    double precision, intent(in) :: Temp
    double precision, allocatable, dimension(:,:), intent(inout) :: vel
@@ -347,7 +371,9 @@ subroutine initial_reading(N, coord_path, initial_position, initial_velocities, 
    ind_pos = 0; ind_neg = 0
 
    allocate(vel_decider(natoms))
+   
    call random_number(vel_decider)
+   
    do ii = 1,natoms,1
      if ((vel_decider(ii).lt.0.5).and.(ind_pos.lt.int(natoms/2))) then
        ind_pos = ind_pos + 1
