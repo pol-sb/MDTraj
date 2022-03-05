@@ -8,18 +8,17 @@
 ! in order to work properly
 !==============================================================================!
 module integrators
-   use forces
-	
+   	use forces
+	use thermostat
 	 implicit none
-	 integer::ii,jj
-	 
+	  
    contains
 
     !=========================================================================!
 	!                       				EULER ALGORITHM													 !
 	!=========================================================================!
-   subroutine euler(r,vel,F,dt,boxlength)
-
+   subroutine euler(natoms,r,vel,F,dt,boxlength)
+	integer,intent(in)::natoms
    double precision, allocatable, dimension(:,:), intent(in) :: F
    double precision, allocatable, dimension(:,:), intent(inout) :: r, vel
    double precision, intent(in) :: dt, boxlength
@@ -46,8 +45,9 @@ module integrators
     !=========================================================================!
 	!                       VELOCITY VERLET ALGORITHM													 !
 	!=========================================================================!
-   subroutine vel_verlet(r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag)
+   subroutine vel_verlet(natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag)
      implicit none
+     integer,intent(in)::natoms
      double precision, allocatable, dimension(:,:), intent(inout) :: F
      double precision, allocatable, dimension(:,:), intent(inout) :: r, vel
      double precision, allocatable, dimension(:), intent(inout) :: gr
@@ -73,7 +73,7 @@ module integrators
        end do
      end do
 
-     ccall forces(r,boxlength,rc,F,Upot,pressp,gr,deltag)
+     call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag)
      do ii = 1,natoms
        do jj = 1,3
          vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
@@ -84,8 +84,9 @@ module integrators
     !=========================================================================!
 	!                       VELOCITY VERLET ALGORITHM													 !
 	!=========================================================================!
-   subroutine vel_verlet_with_thermo(r,vel,F,Upot,dt,rc,boxlength,Temp,pressp,gr,deltag)
+   subroutine vel_verlet_with_thermo(natoms,r,vel,F,Upot,dt,rc,boxlength,Temp,pressp,gr,deltag)
      implicit none
+     integer,intent(in)::natoms
      double precision, allocatable, dimension(:,:), intent(inout) :: F
      double precision, allocatable, dimension(:,:), intent(inout) :: r, vel
      double precision, allocatable, dimension(:), intent(inout) :: gr
@@ -113,13 +114,13 @@ module integrators
        end do
      end do
 
-     call forces(r,boxlength,rc,F,Upot,pressp,gr,deltag)
+     call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag)
      do jj = 1,natoms
        do ii = 1,3
          vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
        end do
      end do
-     call andersen_thermo(Temp,vel)
+     call andersen_thermo(Temp,vel,natoms)
    end subroutine vel_verlet_with_thermo
 
 endmodule integrators

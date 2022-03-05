@@ -9,24 +9,26 @@
 !==============================================================================!
 
 module forces
-!   use params
-	 use boundary
+!   use boundary
+   use boundary
    implicit none
-   integer :: ii, jj, kk, M
-
+   include "constants.h"
    contains
 		 !=========================================================================!
 		 !                       				FORCES SUBROUTINE													 !
 		 !=========================================================================!
-		 subroutine forces(r,boxlength,rc,F,epot,press,gr,deltag)
+		 subroutine force(natoms,r,boxlength,rc,F,epot,press,gr,deltag)
+		   integer,intent(in)::natoms
 		   double precision, allocatable, dimension(:,:), intent(in) :: r
 		   double precision, allocatable, dimension(:,:), intent(inout) :: F
 		   double precision, allocatable, dimension(:), intent(inout) :: gr
+		   double precision::d
 		   double precision, intent(in) :: boxlength, rc, deltag
 		   double precision, intent(out) :: epot, press
 		   double precision :: vol, rho, factp, facte
-			 double precision :: cutoff_press, cutoff_pot, pot, piter
+		   double precision :: cutoff_press, cutoff_pot, pot, piter
 		   integer :: ig
+		   
 		 ! Input variables: r - array which contains the positions of the atoms
 		 !											in the lattice
 		 !									boxlength - length of the box of simulation
@@ -67,7 +69,7 @@ module forces
 			 press = (1.d0/(3.d0*vol))*press
 			 press = press + cutoff_press
 			 !epot = epot + etail; 			pressp = pressp + ptail
-		 end subroutine forces
+		 end subroutine force
 
 		 !=========================================================================!
 		 !                  LENNARD-JONES INTERACTION COMPUTATION									 !
