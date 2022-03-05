@@ -60,8 +60,10 @@ module initialization
       integer :: nx, ny, nz
       integer :: out_ref
       integer :: ii
+      integer :: natoms
 
-      a = boxlength/dfloat(M)
+      a = boxlength/dfloat(N)
+      natoms = N*N*N
 
       ! Creating the .xyz file with the FCC structure
 
@@ -83,14 +85,11 @@ module initialization
       nn = 1
 
 
-outer:do nx = 0,M-1
-         do ny = 0,M-1
-            do nz = 0,M-1
-                  r(nn,:)=(/a*nx, a*ny, a*nz/)
+outer:do nx = 0,N-1
+         do ny = 0,N-1
+            do nz = 0,N-1
+               r(nn,:)=(/a*nx, a*ny, a*nz/)
 
-               if (nn.eq.(N)) then  ! Controller of the number of atoms
-                  exit outer
-               end if
                nn = nn + 1
             end do
          end do
@@ -103,6 +102,7 @@ outer:do nx = 0,M-1
       do ii =1, nn 
          write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
       end do
+      
       close(out_ref)
     end subroutine initial_configuration_SC
 
@@ -165,7 +165,7 @@ outer:do nx = 0,M-1
             do jj = 1,4,1
               !print*, 4*ii+jj
               r(:,4*ii + jj) = a*[nx, ny, nz] + r0(:,jj)
-              nn +1
+              nn = nn +1
             end do
             ii = ii+1
           end do

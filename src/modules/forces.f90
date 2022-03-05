@@ -12,6 +12,8 @@ module forces
 !   use boundary
    use boundary
    implicit none
+   integer :: ll
+
    include "constants.h"
    contains
 		 !=========================================================================!
@@ -22,7 +24,7 @@ module forces
 		   double precision, allocatable, dimension(:,:), intent(in) :: r
 		   double precision, allocatable, dimension(:,:), intent(inout) :: F
 		   double precision, allocatable, dimension(:), intent(inout) :: gr
-		   double precision::d
+		   double precision:: d
 		   double precision, intent(in) :: boxlength, rc, deltag
 		   double precision, intent(out) :: epot, press
 		   double precision :: vol, rho, factp, facte
@@ -57,18 +59,24 @@ module forces
 					 ! calling function that computes the Lennard-Jones interaction between
 					 ! pair of particles i and j
 					 press = press + piter; epot = epot + pot
-
+					 
 					 if (d.lt.rc) then ! computation of the radial distribution function
 						 ! adding the each pair of interaction into the corresponding bin
-		         ig = int(d/deltag)
-		         gr(ig) = gr(ig) + 2
-		       end if
+						ig = int(d/deltag)
+						gr(ig) = gr(ig) + 2
+					end if
 				 end do
+				 !print*, (F(ii,ll),ll=1,3)
 			 end do
-			 pot = pot - cutoff_pot
+			 !stop
+			 
+			 
+
+			 !pot = pot - cutoff_pot
 			 press = (1.d0/(3.d0*vol))*press
-			 press = press + cutoff_press
+			 !press = press + cutoff_press
 			 !epot = epot + etail; 			pressp = pressp + ptail
+		
 		 end subroutine force
 
 		 !=========================================================================!
@@ -105,6 +113,7 @@ module forces
 
 			 if (d.lt.rc) then
 				 dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
+				 
 				 F(ii,1) = F(ii,1) + dU*dx
 				 F(ii,2) = F(ii,2) + dU*dy
 				 F(ii,3) = F(ii,3) + dU*dz

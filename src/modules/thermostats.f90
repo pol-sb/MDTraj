@@ -16,7 +16,8 @@
 !==============================================================================!
 module thermostat
 implicit none
-include "constants.h"
+integer :: pp, qq
+
 
 contains
 
@@ -44,14 +45,14 @@ contains
    sigma = dsqrt(Temp)
    call random_number(x_rand)
 
-   do ii = 1,natoms
-     if (x_rand(ii).lt.nu) then ! choosing if velocity of particle i gets changed
+   do pp = 1,natoms
+     if (x_rand(pp).lt.nu) then ! choosing if velocity of particle i gets changed
        call normal_rand(sigma,vel_normalrand(1),vel_normalrand(2))
        call normal_rand(sigma,vel_normalrand(3),vel_normalrand(4))
        ! The subroutine normal_rand returns a random number from a normal
        ! distribution with standard deviation \sigma = sqrt(T)
-       do jj = 1,3
-         vel(ii,jj) = vel_normalrand(jj)
+       do qq = 1,3
+         vel(pp,qq) = vel_normalrand(qq)
        end do
      end if
    end do
@@ -76,6 +77,7 @@ contains
      double precision :: sigma
      double precision xout1, xout2
      double precision :: x(2)
+     double precision, parameter :: PI = 4.d0*datan(1.d0)
   
      call random_number(x)
   
@@ -91,8 +93,9 @@ contains
    double precision function kinetic(vel,natoms) result(ekin)
    integer,intent(in)::natoms
    double precision, allocatable, dimension(:,:), intent(in) :: vel
-     do ii = 1,natoms
-       ekin = ekin + 0.5d0*(vel(ii,1)**2 + vel(ii,2)**2 + vel(ii,3)**2)
+   ekin = 0.d0
+     do pp = 1,natoms
+       ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
      end do
    end function kinetic
 endmodule thermostat

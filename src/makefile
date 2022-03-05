@@ -5,7 +5,7 @@ BUILDDIR = build
 
 
 fc = gfortran
-OPT= -O3
+OPT= -O1
 
 program.exe: build main.o boundary.o forces.o initialization.o integrators.o statistics.o thermostats.o tools.o
 	$(fc) -o program.exe $(OPT) $(BUILDDIR)/boundary.o $(BUILDDIR)/forces.o $(BUILDDIR)/initialization.o  $(BUILDDIR)/integrators.o $(BUILDDIR)/statistics.o $(BUILDDIR)/thermostats.o  $(BUILDDIR)/tools.o   $(BUILDDIR)/main.o -J$(BUILDDIR)

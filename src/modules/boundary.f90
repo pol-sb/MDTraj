@@ -2,7 +2,6 @@ module boundary
 
    implicit none
  
-
    contains
    
    !===========================================================================!
@@ -13,9 +12,9 @@ module boundary
 			 implicit none
 	     double precision, intent(in) :: boxlength,origin
 	     double precision, intent(inout) :: x
-	     if (x.gt.(boxlength/2.d0 + origin)) then
+	     if (x.gt.(origin + boxlength/2.d0)) then
 	       x = x - boxlength
-	     elseif (x.lt.-(boxlength/2.d0 - origin)) then
+	     elseif (x.lt.(origin - boxlength/2.d0)) then
 	       x = x + boxlength
 	     end if
 	   end subroutine pbc

@@ -8,7 +8,7 @@
 ! in order to work properly
 !==============================================================================!
 module integrators
-   	use forces
+  use forces
 	use thermostat
 	 implicit none
 	  
@@ -115,11 +115,13 @@ module integrators
      end do
 
      call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag)
+
      do jj = 1,natoms
        do ii = 1,3
          vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
        end do
      end do
+
      call andersen_thermo(Temp,vel,natoms)
    end subroutine vel_verlet_with_thermo
 
