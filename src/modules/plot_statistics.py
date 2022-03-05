@@ -11,11 +11,11 @@ class MDSimulation:
     """
 
     RDF_NAME = "rdf"
-    TMP_NAME = "temperature"
+    TMP_NAME = "temp"
     PRE_NAME = "pressure"
     ENE_NAME = "energy"
     F_EXTENS = ".dat"
-    OUT_PATH = "./output/"
+    OUT_PATH = "../../output/"
 
     def __init__(self):
 
@@ -27,7 +27,7 @@ class MDSimulation:
         plt.style.use("seaborn-colorblind")
 
         # Making the plot line thinner.
-        plt.rc("lines", linewidth=0.1)
+        plt.rc("lines", linewidth=1)
 
         self._gather_results()
 
@@ -82,10 +82,12 @@ class MDSimulation:
         # ene = self.ENE_NAME + f"-{den_str}" + self.F_EXTENS
         # msd = self.MSD_NAME + f"-{den_str}" + self.F_EXTENS
 
-        temp = self.TMP_NAME + self.F_EXTENS
-        ene = self.ENE_NAME + self.F_EXTENS
-        press = self.PRE_NAME + self.F_EXTENS
-        rdf = self.RDF_NAME + self.F_EXTENS
+        print(os.getcwd())
+
+        temp = self.OUT_PATH + self.TMP_NAME + self.F_EXTENS
+        ene = self.OUT_PATH + self.ENE_NAME + self.F_EXTENS
+        press = self.OUT_PATH + self.PRE_NAME + self.F_EXTENS
+        rdf = self.OUT_PATH + self.RDF_NAME + self.F_EXTENS
 
         # Loading the different results obtained in the MD simulation
         # into several arrays.
@@ -108,7 +110,7 @@ class MDSimulation:
         self.fold_name = f"plots_{current_time}"
 
         # Creating the folder if the folder does not already exist
-        if self.fold_name not in os.listdir():
+        if self.fold_name not in os.listdir(self.OUT_PATH):
             os.mkdir(self.OUT_PATH + self.fold_name)
 
     def _plot_rdf(self):
@@ -126,7 +128,6 @@ class MDSimulation:
         plt.ylabel("g(r)")
 
         # Preparing a filename for the RSD plot image.
-        den_str = str(self.dens).replace(".", "")
         filename = (
             self.OUT_PATH + self.fold_name + "/" + self.RDF_NAME + "plot.png"
         )
@@ -146,11 +147,10 @@ class MDSimulation:
         # Plotting the Temperature
         plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
         plt.title("Temperature")
-        plt.xlabel("Time []")
-        plt.ylabel("T [K]")
+        plt.xlabel("Time [r.u.]")
+        plt.ylabel("T [r.u.]")
 
         # Preparing a path for the T plot image.
-        den_str = str(self.dens).replace(".", "")
         filename = (
             self.OUT_PATH + self.fold_name + "/" + self.TMP_NAME + "plot.png"
         )
@@ -170,11 +170,10 @@ class MDSimulation:
         # Plotting the pressure
         plt.plot(self.press_results[:, 0], self.press_results[:, 1])
         plt.title("Pressure")
-        plt.xlabel("Time []")
-        plt.ylabel("Pressure []")
+        plt.xlabel("Time [r.u.]")
+        plt.ylabel("Pressure [r.u.]")
 
         # Preparing a path for the P plot image.
-        den_str = str(self.dens).replace(".", "")
         filename = (
             self.OUT_PATH + self.fold_name + "/" + self.PRE_NAME + "plot.png"
         )
@@ -198,7 +197,6 @@ class MDSimulation:
         plt.ylabel("g(r)")
 
         # Preparing a filename for the MSD plot image.
-        den_str = str(self.dens).replace(".", "")
         filename = (
             self.OUT_PATH + self.fold_name + "/" + self.MSD_NAME + "plot.png"
         )
@@ -228,8 +226,8 @@ class MDSimulation:
         n_all = self.OUT_PATH + self.fold_name + "/ene-all" + "plot.png"
 
         # Names for the x and y axis
-        x_lab = "Time"
-        y_lab = "Energy"
+        x_lab = "Time [r.u.]"
+        y_lab = "Energy [r.u.]"
 
         # Preparing the plot for the potential energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
