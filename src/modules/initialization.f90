@@ -1,177 +1,333 @@
 !==============================================================================!
-!                             MODULE INITIALIZATORS
+!                             MODULE INITIALIZORS
 ! This module contains all the subroutines regarding the initialization of
 ! the spatial coordinates of the system and the velocities of the particles.
-! 
-!It includes a simple cubic initialization, fcc initialization and a bimodal
+!
+! The module needs the module $(params.f90) to work properly
+! It includes a simple cubic initialization, fcc initialization and a bimodal
 ! velocity distribution.
 !==============================================================================!
+! Contains
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!===========================================================================!
 
 module initialization
-
+!   use params
    implicit none
-   integer :: ii, jj, kk, M
-   double precision :: a
-   integer :: nn, nx, ny, nz
+   ! ## las variables que definamos aqui es por quermos guardarlas [ el comportamiento default es save]
+   integer, save :: M
+   double precision, save :: a
+   integer, save :: nn
 
    contains
 
-   !===========================================================================!
-   !                       SIMPLE CUBIC CONFIGURATION (SC)
-   !===========================================================================!
-   subroutine sc(N,boxlength,r)
-   double precision, allocatable, intent(inout)::r(:,:)
-   integer, intent(inout) :: N
-   integer::natoms
-   double precision, intent(in) :: boxlength
-   ! Input variables: N - number of particles of the system
-   !                  L - length of the box of simulation
-   ! Output:          file with the configuration of a simple cubic network
-
-   ! N = total number of nodes
-   ! a = lattice spacing
-   ! D = dimensionality (D=3)
-   ! L = length of simulation box
-   !M = int(N**(1.0/3.0)) ! M = units cells in each dimension
-   a = boxlength/dfloat(N)
-   natoms=N*N*N
-   open(11,file="output/init_conf_sc.xyz")
-   write(11,*) natoms
-   write(11,*) " "
-
-   nn=0
-   do ii = 0,N-1
-     do jj = 0,N-1
-       do kk = 0,N-1
-       	 nn=nn+1
-       	 r(nn,:)= [a*ii,a*jj,a*kk]
-         write(11,*) "A", a*ii, a*jj, a*kk
-       end do
-     end do
-   end do
-
-   close(11)
-
-   end subroutine sc
-
-   !===========================================================================!
-   !                   FACE CUBIC CENTERED CONFIGURATION (FCC)
-   !===========================================================================!
-   subroutine fcc(N,boxlength,r)
-   double precision, allocatable, intent(inout)::r(:,:)
-   double precision, allocatable, dimension(:,:) :: r0
-   integer, intent(in) :: N
-   integer::natoms
-   double precision, intent(in) :: boxlength
-   ! Input variables: N - number of particles of the system
-   !                  L - length of the box of simulation
-   ! Output:          file with the configuration of a simple cubic network
-   !				  r- matrix with all the positions.
-   
-   !N = total number of nodes
-   ! a = lattice spacing
-   ! D = dimensionality (D=3)
-   ! L = length of simulation box
-   !M = int((float(N)/4.0)**(1.0/3.0)) ! M = units cells in each dimension
-   allocate(r0(4,3))
-   natoms=N*N*N*4
-   a = boxlength/dfloat(N)
-
-   
-   r0(1,:) = [0.d0, 0.d0, 0.d0]
-   r0(2,:) = [a/2.d0, a/2.d0, 0.d0]
-   r0(3,:) = [0.d0, a/2.d0, a/2.d0]
-   r0(4,:) = [a/2.d0, 0.d0, a/2.d0]
-
-   ii = 0
-   do nx = 0,N-1,1
-     do ny = 0,N-1,1
-       do nz = 0,N-1,1
-         do jj = 1,4,1
-           !print*, 4*ii+jj
-           write(*,*)r0(jj,:)
-           r(4*ii + jj,:) = a*[nx, ny, nz] + r0(jj,:)
-         end do
-         ii = ii+1
-       end do
-     end do
-   end do
-
-   open(12,file="output/init_conf_fcc.xyz")
-   write(12,*) natoms
-   write(12,*)
-   do nn = 1,natoms,1
-      write(12,*) "A", r(nn,1), r(nn,2), r(nn,3)
-   end do
-   close(12)
-	deallocate(r0)
-   end subroutine fcc
-
-
-
 !===========================================================================!
-!                             DIAMOND
+!                       SIMPLE CUBIC CONFIGURATION (SC)
 !===========================================================================!
-subroutine diamond(N,boxlength,r)
-double precision, allocatable, intent(inout)::r(:,:)
-double precision, allocatable, dimension(:,:) :: r0
-integer, intent(in) :: N
-double precision, intent(in) :: boxlength
-integer::natoms
-
 ! Input variables: N - number of particles of the system
 !                  boxlength - length of the box of simulation
-! Output:          file with the configuration of a simple cubic network
-!				   r- matrix with all the positions.
-
+!                  r - empty array
+! Output:          
+!                  file with the configuration of a simple cubic network
+!                  r - array with the configuration
+!
 ! N = total number of nodes
 ! a = lattice spacing
 ! L = length of simulation box
+!===========================================================================!
+   subroutine initial_configuration_SC(boxlength,N, r)
+   implicit none
+      double precision, intent(out)::r(:,:)
+      integer, intent(in) :: N
+      double precision, intent(in) :: boxlength
+      logical :: ext
+      integer :: nx, ny, nz
+      integer :: out_ref
+      integer :: ii
 
-!M = int((float(N)/8.0d0)**(1.0/3.0)) ! M = units cells in each dimension
-allocate(r0(8,3))
-	
-	natoms=N*N*N*8
-	a = boxlength/dfloat(N)
+      M = int(N**(1.0/3.0)) ! M = units cells in each dimension
+      a = boxlength/dfloat(M)
 
+      ! Creating the .xyz file with the FCC structure
 
-	r0(1,:) = [0.d0, 0.0d0, 0.0d0]
-	r0(2,:)= [0.25d0,0.25d0,0.25d0]
-	r0(3,:) = [0.0d0, 0.5d0, 0.5d0]
-	r0(5,:) = [0.5d0,0.5d0,0.0d0]
-	r0(6,:)=r0(3,:) + 0.25d0
-	r0(7,:)=[0.5d0,0.0d0,0.5d0]
-	r0(4,:)=r0(7,:) +0.25d0
-	r0(8,:)=r0(5,:)+0.25d0
+      inquire(file="../output/",exist=ext)
+      if (.NOT.ext) then
+          call execute_command_line("mkdir ../output/")
+      end if
 
+      inquire(file="../output/init_conf_sc.xyz",exist=ext)
+      if (.NOT.ext) then
+          open(newunit=out_ref,file="../output/init_conf_sc.xyz", status="new")
+      else 
+          open(newunit=out_ref,file="../output/init_conf_sc.xyz", status="replace")
+      end if
 
-	open(11,file="output/init_conf_diamond.xyz")
-    write(11,*) natoms
-	write(11,*) " "
-   	nn = 1
-
-   	do nz = 0, N - 1,1
-   		do nx = 0, N - 1,1
-   			do ny = 0, N - 1,1
-				do ii = 1, 8
-					r(nn,1) = ( nx + r0(ii,1) ) * a
-					r(nn,2) = ( ny + r0(ii,2) ) * a
-					r(nn,3) = ( nz + r0(ii,3) ) * a
-					write(11,*) "A", r(nn,1), r(nn,2), r(nn,3)
-         			nn = nn + 1
-       			end do
-   			end do
-		end do
-   	end do
-	!Computing number of atoms.
-   	nn = nn - 1
-
-	close(11)
-	deallocate(r0)
+      nn = 1
 
 
-end subroutine diamond
+outer:do nx = 0,M-1
+         do ny = 0,M-1
+            do nz = 0,M-1
+                  r(nn,:)=(/a*nx, a*ny, a*nz/)
 
+               if (nn.eq.(N)) then  ! Controller of the number of atoms
+                  exit outer
+               end if
+               nn = nn + 1
+            end do
+         end do
+      end do outer
+      !Computing number of atoms.
+      nn = nn-1
+
+      write(out_ref,*) nn
+      write(out_ref,*) " "      
+      do ii =1, nn 
+         write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
+      end do
+      close(out_ref)
+    end subroutine initial_configuration_SC
+
+!===========================================================================!
+!                   FACE CUBIC CENTERED CONFIGURATION (FCC)
+!===========================================================================!
+! Input variables: 
+!                  N - number of particles of the system
+!                  boxlength - length of the box of simulation
+!                  r - empty array
+! Output:          file with the configuration of a face centered cubic network
+!
+! N = total number of nodes
+! a = lattice spacing
+! L = length of simulation box
+!===========================================================================!
+   subroutine initial_configuration_fcc(boxlength,N,r)
+   implicit none
+      integer, intent(in) :: N
+      double precision, intent(in) :: boxlength
+      double precision,allocatable, intent(out) :: r(:,:)
+      double precision, allocatable :: r0(:,:)
+
+      logical :: ext
+      integer :: nx, ny, nz
+      integer :: out_ref, ii, jj
+
+      M = int((float(N)/4.0)**(1.0/3.0)) ! M = units cells in each dimension
+
+      a = boxlength/dfloat(M)
+
+      inquire(file="../output/",exist=ext)
+      if (.NOT.ext) then
+          call execute_command_line("mkdir ../output/")
+      end if
+
+      inquire(file="../output/init_conf_fcc.xyz",exist=ext)
+      if (.NOT.ext) then
+          open(newunit=out_ref,file="../output/init_conf_fcc.xyz", status="new")
+      else 
+          open(newunit=out_ref,file="../output/init_conf_fcc.xyz", status="replace")
+      end if
+
+      M = int((float(N)/4.0)**(1.0/3.0)) ! M = units cells in each dimension
+      allocate(r(3,N),r0(3,4))
+      a = boxlength/dfloat(M)
+   
+      r0(:,1) = [0.d0, 0.d0, 0.d0]
+      r0(:,2) = [a/2.d0, a/2.d0, 0.d0]
+      r0(:,3) = [0.d0, a/2.d0, a/2.d0]
+      r0(:,4) = [a/2.d0, 0.d0, a/2.d0]
+   
+      ii = 0
+      do nx = 0,M-1,1
+        do ny = 0,M-1,1
+          do nz = 0,M-1,1
+            do jj = 1,4,1
+              !print*, 4*ii+jj
+              r(:,4*ii + jj) = a*[nx, ny, nz] + r0(:,jj)
+            end do
+            ii = ii+1
+          end do
+        end do
+      end do
+   
+      write(out_ref,*) N
+      write(out_ref,*)
+      do nn = 1,N
+         write(out_ref,*) "A", r(1,nn), r(2,nn), r(3,nn)
+      end do
+      close(out_ref)
+   end subroutine initial_configuration_fcc
+
+
+!===========================================================================!
+!                              DIAMOND
+!===========================================================================!
+! Input variables: 
+!                  N - number of particles of the system
+!                  boxlength - length of the box of simulation
+!                  r - empty array
+! Output:          
+!                  file with the configuration of a diamond network
+!                  r - array ith the configuration
+!
+! N = total number of nodes
+! a = lattice spacing
+! L = length of simulation box
+!===========================================================================!
+   subroutine initial_configuration_diamond(boxlength,N,r)
+   implicit none
+      integer, intent(in) :: N
+      double precision, intent(in) :: boxlength
+      double precision,intent(out) :: r(:,:)
+      double precision, allocatable :: r0(:,:)
+      logical :: ext
+      integer :: nx, ny, nz
+      integer :: out_ref
+      integer :: ii
+
+
+
+
+      M = int((float(N)/8.0d0)**(1.0/3.0)) ! M = units cells in each dimension
+      print*,M, float(N)/8.0d0
+      a = boxlength/dfloat(M)
+      allocate(r0(8,3))
+
+      ! Vector of all atoms contained in a unit cell
+
+      r0(1,:) = [0.d0, 0.0d0, 0.0d0]
+      r0(2,:)= [0.25d0,0.25d0,0.25d0]
+      r0(3,:) = [0.0d0, 0.5d0, 0.5d0]
+      r0(5,:) = [0.5d0,0.5d0,0.0d0]
+      r0(6,:)=r0(3,:) + 0.25d0
+      r0(7,:)=[0.5d0,0.0d0,0.5d0]
+      r0(4,:)=r0(7,:) +0.25d0
+      r0(8,:)=r0(5,:)+0.25d0
+
+
+      ! Creating the .xyz file with the diamond structure
+
+      inquire(file="../output/",exist=ext)
+      if (.NOT.ext) then
+          call execute_command_line("mkdir ../output/")
+      end if
+
+      inquire(file="../output/init_conf_diamond.xyz",exist=ext)
+      if (.NOT.ext) then
+          open(newunit=out_ref,file="../output/init_conf_diamond.xyz", status="new")
+      else 
+          open(newunit=out_ref,file="../output/init_conf_diamond.xyz", status="replace")
+      end if
+
+      nn = 1
+
+outer:do nz = 0, M - 1,1
+         do nx = 0, M - 1,1
+            do ny = 0, M - 1,1
+               do ii = 1, 8
+                  
+                  r(nn,:) = (/(( nx + r0(ii,1) ) * a), &
+                            ((ny + r0(ii,2) ) * a), &
+                            ((nz + r0(ii,3) ) * a)/)
+                  nn = nn + 1
+               end do
+            end do
+         end do
+      end do outer
+      !Computing number of atoms.
+      nn = nn - 1
+
+      write(out_ref,*) nn
+      write(out_ref,*) " "
+      do ii =1, nn 
+         write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
+      end do
+      close(out_ref)
+      deallocate(r0)
+
+
+   end subroutine initial_configuration_diamond
+
+!===========================================================================!
+!                       READ FROM FILE
+!===========================================================================!
+! Input variables: 
+!                  N (in)- number of particles of the system
+!                  coord_path (in) - path to the xyz fle containing the structure
+!                  vel_path(inout) (OPTIONAL) : path to velocities file
+!                  initial_velocities(inout)(OPTIONAL) : empty array
+!                  initial_position(inout) : empty array
+! Output:
+!                  initial_velocities(inout)(OPTIONAL) : empty array
+!                  initial_position(inout) : empty array
+!
+!===========================================================================!
+subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
+   implicit none
+       integer,intent(in) :: N
+       real(8), intent(out) :: initial_position(:,:)
+       character(len=*), intent(in) :: coord_path
+       real(8), optional, intent(out) :: initial_velocities(:,:)
+       character(len=*),optional,intent(in) :: vel_path
+   
+       ! Internal Parameters declaration
+       character(len=4) ::atom_name
+       real(8) :: x,y,z
+       logical :: ext
+       integer :: error
+       integer :: file_id
+       integer :: i
+
+
+      !////////////// Read the old coordinates
+       open(newunit=file_id,file=coord_path)
+       read(file_id,*)
+       read(file_id,*)
+       do i=1,N
+           read(file_id,*,iostat=error)atom_name,x,y,z
+           if (error>0) then
+               print*, "Error in ",coord_path,"reading"
+           else if (error<0) then
+               exit
+           else
+               initial_position(i,:)=(/(x),(y),(z)/)
+           end if
+       end do
+       close(file_id)
+   
+   
+       !////////////// Read the old velocities
+       if (present(vel_path)) then 
+          open(newunit=file_id,file=vel_path)
+          read(file_id,*)
+          read(file_id,*)
+          do i=1,N
+              read(file_id,*,iostat=error) x,y,z
+              if (error>0) then
+              print*, "Error in ",vel_path,"reading"            
+              else if (error<0) then
+                  exit
+              else
+                  initial_velocities(i,:)= (/x,y,z/)
+              end if
+          end do
+         end if
+   end subroutine initial_reading
+   
+end module initialization
+   
    !===========================================================================!
    !                      BIMODAL VELOCITY DISTRIBUTION
    !===========================================================================!
@@ -207,4 +363,4 @@ end subroutine diamond
 
    end subroutine bimodal
 
-endmodule initialization
+end module initialization
