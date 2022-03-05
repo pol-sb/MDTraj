@@ -146,7 +146,7 @@ outer:do nx = 0,M-1
       r0(:,2) = [a/2.d0, a/2.d0, 0.d0]
       r0(:,3) = [0.d0, a/2.d0, a/2.d0]
       r0(:,4) = [a/2.d0, 0.d0, a/2.d0]
-   
+      nn = 0
       ii = 0
       do nx = 0,M-1,1
         do ny = 0,M-1,1
@@ -154,15 +154,16 @@ outer:do nx = 0,M-1
             do jj = 1,4,1
               !print*, 4*ii+jj
               r(:,4*ii + jj) = a*[nx, ny, nz] + r0(:,jj)
+              nn +1
             end do
             ii = ii+1
           end do
         end do
       end do
    
-      write(out_ref,*) N
+      write(out_ref,*) nn
       write(out_ref,*)
-      do nn = 1,N
+      do ii = 1,nn
          write(out_ref,*) "A", r(1,nn), r(2,nn), r(3,nn)
       end do
       close(out_ref)
@@ -249,7 +250,7 @@ outer:do nz = 0, M - 1,1
 
       write(out_ref,*) nn
       write(out_ref,*) " "
-      do ii =1, nn 
+      do ii =1, nn !
          write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
       end do
       close(out_ref)
