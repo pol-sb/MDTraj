@@ -4,11 +4,11 @@ module boundary
  
 
    contains
-
-		 !===========================================================================!
-	   !               				PERIODIC BOUNDARY CONDITIONS
-	   !===========================================================================!
-	   ! Periodic boundary conditions function
+   
+   !===========================================================================!
+   !               				PERIODIC BOUNDARY CONDITIONS
+   !===========================================================================!
+   ! Periodic boundary conditions function
 	   subroutine pbc(x,boxlength,origin)
 			 implicit none
 	     double precision, intent(in) :: boxlength,origin
