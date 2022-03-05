@@ -8,13 +8,17 @@
 ! velocity distribution.
 !==============================================================================!
 ! Contains
+!     initial_configuration_SC
+!
+!
+!
+!     initial_configuration_fcc:
 !
 !
 !
 !
-!
-!
-!
+!  
+!       initial_configuration_diamond
 !
 !
 !
@@ -65,12 +69,15 @@ module initialization
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/")
       end if
-
-      inquire(file="../output/init_conf_sc.xyz",exist=ext)
+      inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
-          open(newunit=out_ref,file="../output/init_conf_sc.xyz", status="new")
+          call execute_command_line("mkdir ../output/structure")
+      end if
+      inquire(file="../output/structure/init_conf_sc.xyz",exist=ext)
+      if (.NOT.ext) then
+          open(newunit=out_ref,file="../output/structure/init_conf_sc.xyz", status="new")
       else 
-          open(newunit=out_ref,file="../output/init_conf_sc.xyz", status="replace")
+          open(newunit=out_ref,file="../output/structure/init_conf_sc.xyz", status="replace")
       end if
 
       nn = 1
@@ -123,19 +130,23 @@ outer:do nx = 0,M-1
       integer :: nx, ny, nz
       integer :: out_ref, ii, jj
 
-
       a = boxlength/dfloat(M)
 
       inquire(file="../output/",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/")
       end if
+      
+      inquire(file="../output/structure",exist=ext)
+      if (.NOT.ext) then
+          call execute_command_line("mkdir ../output/structure/structure")
+      end if
 
       inquire(file="../output/init_conf_fcc.xyz",exist=ext)
       if (.NOT.ext) then
-          open(newunit=out_ref,file="../output/init_conf_fcc.xyz", status="new")
+          open(newunit=out_ref,file="../output/structure/init_conf_fcc.xyz", status="new")
       else 
-          open(newunit=out_ref,file="../output/init_conf_fcc.xyz", status="replace")
+          open(newunit=out_ref,file="../output/structure/init_conf_fcc.xyz", status="replace")
       end if
 
       M = int((float(N)/4.0)**(1.0/3.0)) ! M = units cells in each dimension
@@ -195,11 +206,6 @@ outer:do nx = 0,M-1
       integer :: out_ref
       integer :: ii
 
-
-
-
-
-      print*,M, float(N)/8.0d0
       a = boxlength/dfloat(M)
       allocate(r0(8,3))
 
@@ -221,12 +227,15 @@ outer:do nx = 0,M-1
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/")
       end if
-
-      inquire(file="../output/init_conf_diamond.xyz",exist=ext)
+      inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
-          open(newunit=out_ref,file="../output/init_conf_diamond.xyz", status="new")
+          call execute_command_line("mkdir ../output/structure")
+      end if
+      inquire(file="../output/structure/init_conf_diamond.xyz",exist=ext)
+      if (.NOT.ext) then
+          open(newunit=out_ref,file="../output/structure/init_conf_diamond.xyz", status="new")
       else 
-          open(newunit=out_ref,file="../output/init_conf_diamond.xyz", status="replace")
+          open(newunit=out_ref,file="../output/structure/init_conf_diamond.xyz", status="replace")
       end if
 
       nn = 1
@@ -323,9 +332,7 @@ subroutine initial_reading(N, coord_path, initial_position, initial_velocities, 
           end do
          end if
    end subroutine initial_reading
-   
-end module initialization
-   
+     
    !===========================================================================!
    !                      BIMODAL VELOCITY DISTRIBUTION
    !===========================================================================!
