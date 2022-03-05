@@ -16,7 +16,7 @@
 
 ---
 
-<p align="center"> Few lines describing your project.
+<p align="center"> The main of this project is to create a simple parelling Molecular Dynamics simulation code. The present code is the final project of the Advanced computation tools for the Atomistic and Multiscale Computational Modelling in Physics, Chemistry and Biochemistry at the Universitat de Barcelona.
     <br> 
 </p>
 
@@ -33,8 +33,7 @@
 - [Acknowledgments](#acknowledgement)
 
 ## About <a name = "about"></a>
-
-Write about 1-2 paragraphs describing the purpose of your project.
+In this project we aim to develope a simple parelling Molecular Dynamics simulation code...
 
 ## Getting Started <a name = "getting_started"></a>
 
