@@ -15,11 +15,9 @@
 !                       - x (distance)(inout) : double precision scalar
 !==============================================================================!
 module boundary
-
-   implicit none
+	implicit none
  
-   contains
-   
+contains   
 !===========================================================================!
 !               				PERIODIC BOUNDARY CONDITIONS
 !===========================================================================!
@@ -34,15 +32,19 @@ module boundary
 !		- origin (in) : double precision scalar
 !					Origin of the cell of simulation.
 !===========================================================================!
-	   subroutine pbc(x,boxlength,origin)
-			 implicit none
-	     double precision, intent(in) :: boxlength,origin
-	     double precision, intent(inout) :: x
-	     if (x.gt.(origin + boxlength/2.d0)) then
-	       x = x - boxlength
-	     elseif (x.lt.(origin - boxlength/2.d0)) then
-	       x = x + boxlength
-	     end if
-	   end subroutine pbc
+	subroutine pbc(x,boxlength,origin)
+		double precision, intent(in) :: boxlength,origin
+		double precision, intent(inout) :: x
 
-end module boundary
+		if (x.gt.(origin + boxlength/2.d0)) then
+			x = x - boxlength
+			
+		elseif (x.lt.(origin - boxlength/2.d0)) then
+			x = x + boxlength
+			
+		endif
+		
+	endsubroutine pbc
+
+
+endmodule boundary

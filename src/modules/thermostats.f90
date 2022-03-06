@@ -11,19 +11,27 @@
 !                       - vel (velocity)(inout) : double precision array
 !                   Output:
 !                       - vel (velocity)(inout) : double precision array
-!      -> normal_rand:
+! 
+! 
+!     -> normal_rand:
 !           Returns a normal distribution
+! 
+! 
+!      -> kinetic(vel,natoms):
+!           Function that given the velocities of the atoms computes the
+!           associated kinetic energy.
+!                   Input:
+!                       - vel(velocity of the atoms)(in) : double precision array
+!                       - natoms(number of atoms)(in) : integer scalar
 !==============================================================================!
 module thermostat
-implicit none
-integer :: pp, qq
+	implicit none
 
 
 contains
-
-!===========================================================================!
+!==============================================================================!
 !                   ANDERSEN THERMOSTAT
-!===========================================================================!
+!==============================================================================!
 !  Input:
 !      - Temp (temperature)(in) : double precision scalar
 !      - vel (velocity)(inout) : double precision array
@@ -32,37 +40,37 @@ contains
 !  Depencency:
 !      - random_number() : Intrinsic Fortran 90
 !      - normal_rand()  : Tool in this module
-!===========================================================================!
+!==============================================================================!
    subroutine andersen_thermo(temp,vel,natoms)
-   double precision, intent(inout) :: vel(:,:)
-   double precision, intent(in) :: Temp
-   integer, intent(in) :: natoms
-   double precision :: nu, sigma
-   double precision :: x_rand(size(vel,2))
-   double precision :: vel_normalrand(4)
+   	double precision, intent(inout) :: vel(:,:)
+   	double precision, intent(in) :: Temp
+   	integer, intent(in) :: natoms
+   	double precision :: nu, sigma
+   	double precision :: x_rand(size(vel,2))
+		double precision :: vel_normalrand(4)
+		integer :: pp, qq
+   	nu = 1e-3
+   	sigma = dsqrt(Temp)
+   	call random_number(x_rand)
 
-   nu = 1e-3
-   sigma = dsqrt(Temp)
-   call random_number(x_rand)
+   	do pp = 1,natoms
+     		if (x_rand(pp).lt.nu) then ! choosing if velocity of particle i gets changed
+       		call normal_rand(sigma,vel_normalrand(1),vel_normalrand(2))
+       		call normal_rand(sigma,vel_normalrand(3),vel_normalrand(4))
+      	   ! The subroutine normal_rand returns a random number from a normal
+       		! distribution with standard deviation \sigma = sqrt(T)
+      	 	do qq = 1,3
+      	   	vel(pp,qq) = vel_normalrand(qq)
+      	 	enddo
+     		endif
+   	enddo
 
-   do pp = 1,natoms
-     if (x_rand(pp).lt.nu) then ! choosing if velocity of particle i gets changed
-       call normal_rand(sigma,vel_normalrand(1),vel_normalrand(2))
-       call normal_rand(sigma,vel_normalrand(3),vel_normalrand(4))
-       ! The subroutine normal_rand returns a random number from a normal
-       ! distribution with standard deviation \sigma = sqrt(T)
-       do qq = 1,3
-         vel(pp,qq) = vel_normalrand(qq)
-       end do
-     end if
-   end do
-
-   end subroutine
+   endsubroutine  andersen_thermo
 
 
-!===========================================================================!
+!==============================================================================!
 !                        NORMAL RANDOM NUMBER GENERATOR
-!===========================================================================!
+!==============================================================================!
 !  Input:
 !      - sigma(standar deviation)(in) : double precision
 !
@@ -72,7 +80,7 @@ contains
 !  Depencency:
 !      - random_number() : Intrinsic Fortran 90
 !
-!===========================================================================!
+!==============================================================================!
    subroutine normal_rand(sigma, xout1, xout2)
      double precision :: sigma
      double precision xout1, xout2
@@ -84,18 +92,28 @@ contains
      xout1 = sigma*dsqrt(-2d0*(dlog(1d0-x(1))))*dcos(2d0*PI*x(2))
      xout2 = sigma*dsqrt(-2d0*(dlog(1d0-x(1))))*dsin(2d0*PI*x(2))
   
-     end subroutine normal_rand
+	endsubroutine normal_rand
 
-
-!===========================================================================!
-!                        NORMAL RANDOM NUMBER GENERATOR
-!===========================================================================!
+!==============================================================================!
+!                        kinetic function
+!==============================================================================!
+!  Input:
+!		 - vel(velocity of the atoms)(in) : double precision array
+!      - natoms(number of atoms)(in) : integer scalar
+! 
+!==============================================================================!
    double precision function kinetic(vel,natoms) result(ekin)
-   integer,intent(in)::natoms
-   double precision, allocatable, dimension(:,:), intent(in) :: vel
-   ekin = 0.d0
-     do pp = 1,natoms
-       ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
-     end do
-   end function kinetic
+   	integer,intent(in)::natoms
+   	double precision, allocatable, intent(in) :: vel(:,:)
+   	integer::pp
+   
+			ekin = 0.d0
+			
+			do pp = 1,natoms
+		   	ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
+		  enddo
+		  
+   endfunction kinetic
+   
+   
 endmodule thermostat
