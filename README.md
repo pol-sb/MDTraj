@@ -24,6 +24,9 @@
 
 - [About](#about)
 - [Getting Started](#getting_started)
+- [Prerequisites](#prerequisites)
+- [Installing](#installing)
+- [Input parameters](#parameters)
 - [Deployment](#deployment)
 - [Usage](#usage)
 - [Built Using](#built_using)
@@ -39,12 +42,12 @@ In this project we aim to develope a simple parelling Molecular Dynamics simulat
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
 
-### Prerequisites
+### Prerequisites  <a name = "prerequisites"></a>
 
-What things you need to install the software and how to install them.
-
+The core of this program works in FORTRAN 90, so a FORTRAN compiler must be installed before trying to build the code. We higly reccoment to install [gfortran](https://gcc.gnu.org/wiki/GFortran). It can be installed using the following commands:
 ```
-Give examples
+sudo apt-get update
+sudo apt-get install gfortran
 ```
 
 Python is used for the results plotting and representation. A python version higher or equal than `python 3.6` is needed, and additionally the following libraries are needed:
@@ -59,43 +62,52 @@ python -m pip install -r requirements.txt
 ```
 `pip` can normally be installed from your distribution package manager.
 
-### Installing
+### Installing. <a name = "installing"></a>
 
-A step by step series of examples that tell you how to get a development env running.
+Donwload the zip file and uncompress in your working directory, you can use:
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
 
 ```
-until finished
+ unzip Project-I-master.zip 
 ```
 
-End with an example of getting some data out of the system or using it for a little demo.
+Move to main directory and tip:
+
+```
+make build
+make
+```
+
+To run a simulation you must modify the parameter.h file, in the input directory, se the input parameter section.
+
+## Input parameters. <a name = "parameters"></a>
+
+The number of unit cells that are simulated is choosed in the **nc** parameters, 
+
+The density have units of (particles / reduced units of distances), take special care in avoid density greater than 0.6 .
+
+The dimension parameters can't be changed in this version.
+
+Can be generated three type of lattice: Simple cubic (=1), face cubic centered (=2), diamond (=3). Also it will be implemented a read from file subroutine in the next version.
+
+Temperature is in kelvin units.
+
+The initial velocities of the particles can be setted up to 0 or to a bimodal distribution. To choose use the **vel_opt** parameter (= 1, bimodal) (= 0, zero initial velocities).
+
+To control de time step change the **dt** parameter (in ps units) less than 0.01 ps make in the simulation unstable. The number of steps that will be computed is selected in the **ntimes** parameter. 
+
+The output information frequency is controlled by the **everyt** parameter. AVOID HIGH RATES OF PRINTIN!!! Printing is a limiting stage in this software.
+
+The **rc** parameter represents the cut-off of the forces calculation, at higher cut-off better precision but higher times of calculation.
+
+At last, you must choose the parameters for the force-field ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type). **σ** is the distance to the zero potential point in hte potential and **ε** is the depth of the potential well.
+
 
 ## Running the tests <a name = "tests"></a>
 
-Explain how to run the automated tests for this system.
-
+Tests will be implemented in the next version
 ### Break down into end to end tests
 
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
 
 ## Usage <a name="usage"></a>
 
