@@ -16,6 +16,8 @@
 	integer::everyt=10
 	double precision:: dt= 0.005 !Time step (ps)
 
+	integer::thermostat=1 !For no thermostat:0, for active thermostat:1
+
 	!Force parameters
 	!----------------
 	double precision::rc= 0.05d0 !Cut-off
