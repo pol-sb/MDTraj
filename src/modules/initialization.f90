@@ -62,13 +62,12 @@
 !=====================================================================================!
 
 module initialization
-!   use params
-   implicit none
+	implicit none
 
    double precision, save :: a
    integer, save :: nn
 
-   contains
+contains
 
 !=====================================================================================!
 !                       SIMPLE CUBIC CONFIGURATION (SC)
@@ -80,9 +79,8 @@ module initialization
 ! Output: 
 !	 - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
-   subroutine initial_configuration_SC(N,boxlength, r)
-   implicit none
-      double precision, intent(out)::r(:,:)
+	subroutine initial_configuration_SC(N,boxlength, r)
+		double precision, intent(out)::r(:,:)
       integer, intent(in) :: N
       double precision, intent(in) :: boxlength
       logical :: ext
@@ -99,17 +97,19 @@ module initialization
       inquire(file="../output/",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/")
-      end if
+      endif
+      
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/structure")
-      end if
+      endif
+      
       inquire(file="../output/structure/init_conf_sc.xyz",exist=ext)
       if (.NOT.ext) then
           open(newunit=out_ref,file="../output/structure/init_conf_sc.xyz", status="new")
       else 
           open(newunit=out_ref,file="../output/structure/init_conf_sc.xyz", status="replace")
-      end if
+      endif
 
       nn = 1
 
@@ -119,18 +119,19 @@ outer:do nx = 0,N-1
             do nz = 0,N-1
                r(nn,:)=(/a*nx, a*ny, a*nz/)
 
-            end do
-         end do
-      end do outer
+            enddo
+         enddo
+      enddo outer
 
       write(out_ref,*) natoms
       write(out_ref,*) " "      
       do ii =1, nn 
          write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
-      end do
+      enddo
       
       close(out_ref)
-    end subroutine initial_configuration_SC
+      
+    endsubroutine initial_configuration_SC
 
 !=====================================================================================!
 !                   FACE CUBIC CENTERED CONFIGURATION (FCC)
@@ -143,7 +144,6 @@ outer:do nx = 0,N-1
 !	 - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
    subroutine initial_configuration_fcc(N,boxlength,r)
-   implicit none
       integer, intent(in) :: N
       double precision, intent(in) :: boxlength
       double precision,allocatable, intent(out) :: r(:,:)
@@ -159,20 +159,19 @@ outer:do nx = 0,N-1
       inquire(file="../output/",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/")
-      end if
+      endif
       
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/structure/structure")
-      end if
+      endif
 
       inquire(file="../output/init_conf_fcc.xyz",exist=ext)
       if (.NOT.ext) then
           open(newunit=out_ref,file="../output/structure/init_conf_fcc.xyz", status="new")
       else 
           open(newunit=out_ref,file="../output/structure/init_conf_fcc.xyz", status="replace")
-      end if
-
+      endif
 
       allocate(r0(4,3))
    
@@ -180,6 +179,7 @@ outer:do nx = 0,N-1
       r0(2,:) = [a/2.d0, a/2.d0, 0.d0]
       r0(3,:) = [0.d0, a/2.d0, a/2.d0]
       r0(4,:) = [a/2.d0, 0.d0, a/2.d0]
+      
       nn = 0
       ii = 0
       do nx = 0,N-1,1
@@ -188,20 +188,23 @@ outer:do nx = 0,N-1
             do jj = 1,4,1
               !print*, 4*ii+jj
               r(4*ii + jj,:) = a*[nx, ny, nz] + r0(jj,:)
-            end do
+            enddo
             ii = ii+1
-          end do
-        end do
-      end do
+          enddo
+        enddo
+      enddo
    
       write(out_ref,*) natoms
       write(out_ref,*)
+      
       do ii = 1,nn
          write(out_ref,*) "A", r(nn,1), r(nn,2), r(nn,3)
-      end do
+      enddo
+      
       close(out_ref)
-   end subroutine initial_configuration_fcc
-
+      deallocate(r0)
+      
+   endsubroutine initial_configuration_fcc
 
 !=====================================================================================!
 !                              DIAMOND
@@ -214,7 +217,6 @@ outer:do nx = 0,N-1
 !	 - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
    subroutine initial_configuration_diamond(N,boxlength,r)
-   implicit none
       integer, intent(in) :: N 
       double precision, intent(in) :: boxlength
       double precision,intent(out) :: r(:,:)
@@ -245,17 +247,17 @@ outer:do nx = 0,N-1
       inquire(file="../output/",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/")
-      end if
+      endif
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
           call execute_command_line("mkdir ../output/structure")
-      end if
+      endif
       inquire(file="../output/structure/init_conf_diamond.xyz",exist=ext)
       if (.NOT.ext) then
           open(newunit=out_ref,file="../output/structure/init_conf_diamond.xyz", status="new")
       else 
           open(newunit=out_ref,file="../output/structure/init_conf_diamond.xyz", status="replace")
-      end if
+      endif
 
       nn = 1
 
@@ -268,21 +270,25 @@ outer:do nz = 0, N - 1,1
                             ((ny + r0(ii,2) ) * a), &
                             ((nz + r0(ii,3) ) * a)/)
                   nn = nn + 1
-               end do
-            end do
-         end do
-      end do outer
+               enddo
+            enddo
+         enddo
+      enddo outer
+      
       !Computing number of atoms.
       nn = nn - 1
 
       write(out_ref,*) natoms
       write(out_ref,*) " "
+      
       do ii =1, nn !
          write(out_ref,*) "A", r(ii,1), r(ii,2), r(ii,3)
-      end do
+      enddo
+      
       close(out_ref)
       deallocate(r0)
-   end subroutine initial_configuration_diamond
+      
+   endsubroutine initial_configuration_diamond
 
 !=====================================================================================!
 !                       READ FROM FILE
@@ -300,57 +306,61 @@ outer:do nz = 0, N - 1,1
 ! 	 - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
 !=====================================================================================!
 
-subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
-   implicit none
-       integer,intent(in) :: N
-       double precision, intent(out) :: initial_position(:,:)
-       character(len=*), intent(in) :: coord_path
-       double precision, optional, intent(out) :: initial_velocities(:,:)
-       character(len=*),optional,intent(in) :: vel_path
+	subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
+		integer,intent(in) :: N
+      double precision, intent(out) :: initial_position(:,:)
+      character(len=*), intent(in) :: coord_path
+      double precision, optional, intent(out) :: initial_velocities(:,:)
+      character(len=*),optional,intent(in) :: vel_path
    
-       ! Internal Parameters declaration
-       character(len=4) ::atom_name
-       double precision :: x,y,z
-       logical :: ext
-       integer :: error
-       integer :: file_id
-       integer :: i
+      ! Internal Parameters declaration
+      character(len=4) ::atom_name
+      double precision :: x,y,z
+      logical :: ext
+      integer :: error
+		integer :: file_id
+      integer :: i
 
 
       !////////////// Read the old coordinates
-       open(newunit=file_id,file=coord_path)
-       read(file_id,*)
-       read(file_id,*)
-       do i=1,N
-           read(file_id,*,iostat=error)atom_name,x,y,z
-           if (error>0) then
-               print*, "Error in ",coord_path,"reading"
-           else if (error<0) then
-               exit
-           else
-               initial_position(i,:)=(/(x),(y),(z)/)
-           end if
-       end do
+      open(newunit=file_id,file=coord_path)
+      read(file_id,*)
+      read(file_id,*)
+      do i=1,N
+			read(file_id,*,iostat=error)atom_name,x,y,z
+			
+			if (error>0) then
+				print*, "Error in ",coord_path,"reading"
+			else if (error<0) then
+				exit
+			else
+				initial_position(i,:)=(/(x),(y),(z)/)
+           endif
+       enddo
+       
        close(file_id)
    
    
        !////////////// Read the old velocities
-       if (present(vel_path)) then 
-          open(newunit=file_id,file=vel_path)
-          read(file_id,*)
-          read(file_id,*)
-          do i=1,N
-              read(file_id,*,iostat=error) x,y,z
-              if (error>0) then
-              print*, "Error in ",vel_path,"reading"            
-              else if (error<0) then
-                  exit
-              else
-                  initial_velocities(i,:)= (/x,y,z/)
-              end if
-          end do
-         end if
-   end subroutine initial_reading
+      if (present(vel_path)) then 
+			open(newunit=file_id,file=vel_path)
+			read(file_id,*)
+			read(file_id,*)
+			
+			do i=1,N
+				read(file_id,*,iostat=error) x,y,z
+
+				if (error>0) then
+					print*, "Error in ",vel_path,"reading"            
+				else if (error<0) then
+					exit
+				else
+					initial_velocities(i,:)= (/x,y,z/)
+				endif
+			enddo
+		endif
+   
+   endsubroutine initial_reading
      
 !=====================================================================================!
 !                      BIMODAL VELOCITY DISTRIBUTION
@@ -361,38 +371,38 @@ subroutine initial_reading(N, coord_path, initial_position, initial_velocities, 
 ! Output: 
 !	 - vel (velocities of the atoms)(inout): double precision array
 !=====================================================================================!
-   subroutine bimodal(Temp,vel)
-   double precision, intent(in) :: Temp
-   double precision, allocatable, dimension(:,:), intent(inout) :: vel
-   double precision, allocatable, dimension(:) :: vel_decider
-   integer :: ii, jj, dims, ind_pos, ind_neg, natoms
+	subroutine bimodal(Temp,vel)
+   	double precision, intent(in) :: Temp
+   	double precision, allocatable, intent(inout) :: vel(:,:)
+   	double precision, allocatable :: vel_decider(:)
+   	integer :: ii, jj, dims, ind_pos, ind_neg, natoms
 
-   natoms = size(vel,1); dims = size(vel,2)
-   ind_pos = 0; ind_neg = 0
+		natoms = size(vel,1); dims = size(vel,2)
+		ind_pos = 0; ind_neg = 0
 
-   allocate(vel_decider(natoms))
+		allocate(vel_decider(natoms))
+		
+		call random_number(vel_decider)
    
-   call random_number(vel_decider)
-   
-   do ii = 1,natoms,1
-     if ((vel_decider(ii).lt.0.5).and.(ind_pos.lt.int(natoms/2))) then
-       ind_pos = ind_pos + 1
-       do jj = 1,dims,1
-         vel(ii,jj) = dsqrt(Temp)!/dsqrt(3.d0)
-       end do
-     elseif (ind_neg.lt.int(natoms/2)) then
-       ind_neg = ind_neg + 1
-       do jj = 1,dims,1
-         vel(ii,jj) = -dsqrt(Temp)!/dsqrt(3.d0)
-       end do
-     else
-       ind_pos = ind_pos + 1
-       do jj = 1,dims,1
-         vel(ii,jj) = dsqrt(Temp)!/dsqrt(3.d0)
-       end do
-     end if
-   end do
+   	do ii = 1,natoms,1
+      	if ((vel_decider(ii).lt.0.5).and.(ind_pos.lt.int(natoms/2))) then
+       		ind_pos = ind_pos + 1
+       		do jj = 1,dims,1
+         		vel(ii,jj) = dsqrt(Temp)!/dsqrt(3.d0)
+       		enddo
+     		elseif (ind_neg.lt.int(natoms/2)) then
+       		ind_neg = ind_neg + 1
+       		do jj = 1,dims,1
+         		vel(ii,jj) = -dsqrt(Temp)!/dsqrt(3.d0)
+       		enddo
+     		else
+       		ind_pos = ind_pos + 1
+       		do jj = 1,dims,1
+         		vel(ii,jj) = dsqrt(Temp)!/dsqrt(3.d0)
+       		enddo
+     		endif
+   	enddo
 
-   end subroutine bimodal
+   endsubroutine bimodal
 
-end module initialization
+endmodule initialization
