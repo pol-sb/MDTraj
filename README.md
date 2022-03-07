@@ -28,8 +28,7 @@
 - [Installing](#installing)
 - [Input parameters](#parameters)
 - [Output files and plots](#output)
-- [Deployment](#deployment)
-- [Usage](#usage)
+- [Tests](#tests)
 - [Built Using](#built_using)
 - [TODO](#todo)
 - [Contributing](../CONTRIBUTING.md)
@@ -145,19 +144,11 @@ The plots:
  * **rdfplot.png**:  Radial distribution function.
  * **tempplot.png**: Evolution of the temperature. 
 
+This directory also contains a folder with the plots of an example consisting of the MD simulation of and Helium gas at 300 K.
+
 ## Running the tests <a name = "tests"></a>
 
-Tests will be implemented in the next version
-### Break down into end to end tests
-
-
-## Usage <a name="usage"></a>
-
-Add notes about how to use the system.
-
-## Deployment <a name = "deployment"></a>
-
-Add additional notes about how to deploy this on a live system.
+Tests will be implemented in the next version.
 
 ## Built Using <a name = "built_using"></a>
 
