@@ -18,3 +18,10 @@ Containing the thermodynamics parameters:
   * **rdf.dat**: It contains the data of the radial distribution function.
 
 The plots:
+ * **ene-allplot.png**: Evolution of the kinetic, potential and total energy.
+ * **ene-kinplot.png**: Evolution of the kinetic energy.
+ * **ene-potplot.png**: Evolution of the potential energy.
+ * **ene-totplot.png**: Evolution of the tiotal energy.
+ * **presseplot.png**: Evolution of the pressure.
+ * **rdfplot.png**:  Radial distribution function.
+ * **tempplot.png**: Evolution of the temperature. 
