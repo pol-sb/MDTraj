@@ -165,7 +165,7 @@ class MDSimulation:
         plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
         plt.title("Temperature")
         plt.xlabel("Time [r.u.]")
-        plt.ylabel("T [r.u.]")
+        plt.ylabel("T [K]")
 
         # Preparing a path for the T plot image.
         filename = (
