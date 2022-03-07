@@ -45,7 +45,7 @@ integer::nhis
 	endif
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-   allocate(gr(nhis)); gr(:) = 0.d0
+  allocate(gr(nhis)); gr = 0.d0
 
 	!initialization of velocity
 	if (vel_opt .eq. 1) then
@@ -62,6 +62,13 @@ integer::nhis
 
 	do tt = 1,ntimes,1
 		ti = ti+dt ! Actualizing the instant time
+
+		! set g(r) = 0.d0 while the initial structure is melting (equilibrating)
+		! in order to obtain a clean plot of the rdf
+		if (tt.lt.tmelt) then
+			gr = 0.d0; ngr = 0
+		end if
+
     if (thermo.eq.0) then
       call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag)
     elseif (thermo.eq.1) then
@@ -84,8 +91,10 @@ integer::nhis
 
 		if (mod(tt,everyt).eq.0) then
 			write(11,*) ti, temperature
-			write(12,*) ti, epot, ekin, epot+ekin
-			write(13,*) ti, pressp, density*temperature, pressp+density*temperature
+			write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
+			(epot+ekin)/dble(natoms)
+			write(13,*) ti, pressp/dble(natoms), density*temperature/dble(natoms), &
+		  (pressp+density*temperature)/dble(natoms)
 		end if
    end do
 
