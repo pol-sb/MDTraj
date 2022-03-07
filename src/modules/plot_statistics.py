@@ -148,7 +148,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename)
+        plt.savefig(filename, bbox_inches='tight')
         plt.clf()
 
     def _plot_temperature(self):
@@ -171,7 +171,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename)
+        plt.savefig(filename, bbox_inches='tight')
         plt.clf()
 
     def _plot_pressure(self):
@@ -194,7 +194,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename)
+        plt.savefig(filename, bbox_inches='tight')
         plt.clf()
 
     def _plot_msd(self):
@@ -217,7 +217,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename)
+        plt.savefig(filename, bbox_inches='tight')
         plt.clf()
 
     def _plot_energies(self):
