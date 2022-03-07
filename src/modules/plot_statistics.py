@@ -163,6 +163,7 @@ class MDSimulation:
 
         # Plotting the Temperature
         plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
+        plt.xlim(self.temp_results[0, 0], self.temp_results[-1, 0])
         plt.title("Temperature")
         plt.xlabel("Time [r.u.]")
         plt.ylabel("T [K]")
@@ -186,6 +187,7 @@ class MDSimulation:
 
         # Plotting the pressure
         plt.plot(self.press_results[:, 0], self.press_results[:, 1])
+        plt.xlim(self.press_results[0, 0], self.press_results[-1, 0])
         plt.title("Pressure")
         plt.xlabel("Time [r.u.]")
         plt.ylabel("Pressure [r.u.]")
@@ -210,6 +212,7 @@ class MDSimulation:
 
         # Plotting the MSD
         plt.plot(self.msd_results[:, 0], self.msd_results[:, 1])
+        plt.xlim(self.msd_results[0, 0], self.msd_results[-1, 0])
         plt.title("Mean Square Displacement")
         plt.xlabel("r [Å]")
         plt.ylabel("g(r)")
@@ -251,6 +254,7 @@ class MDSimulation:
         # Preparing the plot for the potential energy
         plt.tight_layout()
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
+        plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.title(f"Potential energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
@@ -262,6 +266,7 @@ class MDSimulation:
 
         # Preparing the plot for the kinetic energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 2])
+        plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.title(f"Kinetic energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
@@ -273,6 +278,7 @@ class MDSimulation:
 
         # Preparing the plot for the total energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 3])
+        plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.title(f"Total energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
@@ -303,6 +309,7 @@ class MDSimulation:
         plt.legend()
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+        plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.grid()
 
         # Saving the image and clearing the current plot.
