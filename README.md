@@ -16,7 +16,7 @@
 
 ---
 
-<p align="center"> The main of this project is to create a simple parelling Molecular Dynamics simulation code. The present code is the final project of the Advanced computation tools for the Atomistic and Multiscale Computational Modelling in Physics, Chemistry and Biochemistry at the Universitat de Barcelona.
+<p align="center"> The main of this project is to create a simple parallel Molecular Dynamics simulation code. It is the final project of Advanced computation tools course of the Atomistic and Multiscale Computational Modelling in Physics, Chemistry and Biochemistry Master at the Universitat de Barcelona.
     <br> 
 </p>
 
@@ -30,13 +30,12 @@
 - [Deployment](#deployment)
 - [Usage](#usage)
 - [Built Using](#built_using)
-- [TODO](../TODO.md)
+- [TODO](#todo)
 - [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
 
 ## About <a name = "about"></a>
-In this project we aim to develope a simple parelling Molecular Dynamics simulation code...
+In this project we aim to develope a simple parelling Molecular Dynamics simulation code. 
 
 ## Getting Started <a name = "getting_started"></a>
 
@@ -123,18 +122,31 @@ Add additional notes about how to deploy this on a live system.
 - [Express](https://www.python.org/) - Python
 - Modules, etc...?
 
+## TODO <a name = "todo"></a>
+**Parallelization:**
+- Initialization:
+  - sc: Raul
+  - fcc: Raul
+  - diamond: Marc
+  - bimodal: Marc
+- Thermostat:
+  - kinetic: Lucas
+  - andersen thermostat: Raul
+- Integration:
+  - euler: Pol
+  - velocity verlet: Pol
+  - velocity verlet with thermostat: Marc
+- Forces:
+  - Force + Lj: Lucas
+- Statistic:
+  - g(r): Pol     
 
 ## Authors <a name = "authors"></a>
 
-- [@perasperadastra](https://github.com/perasperadastra) -> Initialization and integration
-- [@LucasFernandezStolpa](https://github.com/LucasFernandezStolpa) -> Boundary conditions and forces
-- [@pol-sb](https://github.com/pol-sb) -> Statistics and visualization of results
-- [@Mtunica](https://github.com/Mtunica) -> Main and makefile
+- [@perasperadastra]
+- [@LucasFernandezStolpa]
+- [@pol-sb]
+- [@Mtunica]
 
 See also the list of [contributors](https://github.com/Eines-Informatiques-Avancades/Project-I/contributors) who participated in this project.
 
-## Acknowledgements <a name = "acknowledgement"></a>
-
-- Hat tip to anyone whose code was used
-- Inspiration
-- References
