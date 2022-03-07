@@ -19,10 +19,7 @@
 	double precision:: dt= 0.001 !Time step (ps)
 
 	integer::thermo=1 !For no thermostat:0, for active thermostat:1
-
-	!Force parameters
-	!----------------
-	double precision::rc  !Cut-off
+		
 
 	!Lennard-Jones parameters
 	!----------------
