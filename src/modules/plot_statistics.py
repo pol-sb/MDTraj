@@ -1,8 +1,19 @@
 import os
+import sys
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
+try:
+    import matplotlib.pyplot as plt
+    import numpy as np
+except ModuleNotFoundError:
+    print(
+        "[!] ERROR: One or more python module(s) have not been found. Please,"
+        " install the following modules and then run again: "
+    )
+    with open("./src/requirements.txt", "r") as f:
+        for line in f:
+            print(f"\t{line.strip()}")
+    sys.exit(1)
 
 
 class MDSimulation:
@@ -15,7 +26,7 @@ class MDSimulation:
     PRE_NAME = "pressure"
     ENE_NAME = "energy"
     F_EXTENS = ".dat"
-    OUT_PATH = "../../output/"
+    OUT_PATH = "./output/"
 
     def __init__(self):
 
@@ -336,7 +347,6 @@ class MDSimulation:
 
 
 if __name__ == "__main__":
-
     sim = MDSimulation()
     sim.generate_plots()
 
