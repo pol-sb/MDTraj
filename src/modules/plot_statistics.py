@@ -138,6 +138,7 @@ class MDSimulation:
 
         # Plotting the RDF
         plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1])
+        plt.xlim(self.rdf_results[0, 0], self.rdf_results[-2, 0])
         plt.title("Radial Distribution Function")
         plt.xlabel("r [Å]")
         plt.ylabel("g(r)")
