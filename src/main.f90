@@ -7,7 +7,7 @@ use integrators
 implicit none
 include "../input/parameter.h"
 integer::natoms
-double precision::L
+double precision::L, rc
 integer::tt,gg,si,sj
 double precision::ti
 double precision,allocatable::r(:,:),v(:,:),F(:,:)
