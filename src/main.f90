@@ -16,8 +16,11 @@ double precision::epot, ekin, temperature, deltag
 double precision::rpos, vb, nid
 double precision, allocatable, dimension(:) ::  gr
 integer::nhis
-
-
+integer, allocatable :: seed(:)
+        ! Random seed initializtaion
+	allocate(seed(33))
+	seed(1:33) = rng_seed
+	call random_seed(put=seed)
 	!Initialization of the structure
 	if (structure .eq. 1) then
 		natoms=Nc*Nc*Nc
