@@ -7,12 +7,17 @@ try:
     import numpy as np
 except ModuleNotFoundError:
     print(
-        "[!] ERROR: One or more python module(s) have not been found. Please,"
+        "\n[!] ERROR: One or more python module(s) have not been found. Please,"
         " install the following modules and then run again: "
     )
     with open("./src/requirements.txt", "r") as f:
         for line in f:
             print(f"\t{line.strip()}")
+
+    print(
+        "Check the README.md file for instructions in how to install the"
+        " required python modules.\n"
+    )
     sys.exit(1)
 
 
@@ -68,6 +73,7 @@ class MDSimulation:
         self._plot_pressure()
         self._plot_energies()
         self._plot_rdf()
+        print(f"Done - Result plots saved in ./output/{self.fold_name}")
         # self._plot_msd()
 
     def _gather_results(self):
@@ -92,8 +98,6 @@ class MDSimulation:
         # rdf = self.RDF_NAME + f"-{den_str}" + self.F_EXTENS
         # ene = self.ENE_NAME + f"-{den_str}" + self.F_EXTENS
         # msd = self.MSD_NAME + f"-{den_str}" + self.F_EXTENS
-
-        print(os.getcwd())
 
         temp = self.OUT_PATH + self.TMP_NAME + self.F_EXTENS
         ene = self.OUT_PATH + self.ENE_NAME + self.F_EXTENS
@@ -238,16 +242,17 @@ class MDSimulation:
 
         # Names for the x and y axis
         x_lab = "Time [r.u.]"
-        y_lab = "Energy [r.u.]"
+        y_lab = r"$\frac{Energy}{Num. Part.}\ \ [r.u.]$"
 
         # Preparing the plot for the potential energy
+        plt.tight_layout()
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
         plt.title(f"Potential energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_pot)
+        plt.savefig(n_pot, bbox_inches='tight')
         plt.clf()
 
         # Preparing the plot for the kinetic energy
@@ -257,7 +262,7 @@ class MDSimulation:
         plt.ylabel(y_lab)
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_kin)
+        plt.savefig(n_kin, bbox_inches='tight')
         plt.clf()
 
         # Preparing the plot for the total energy
@@ -267,7 +272,7 @@ class MDSimulation:
         plt.ylabel(y_lab)
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_tot)
+        plt.savefig(n_tot, bbox_inches='tight')
         plt.clf()
 
         # Plotting all of the energies at once
@@ -293,7 +298,7 @@ class MDSimulation:
         plt.ylabel(y_lab)
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_all)
+        plt.savefig(n_all, bbox_inches='tight')
         plt.clf()
 
 
