@@ -109,6 +109,11 @@ Can be generated three type of lattice: Simple cubic (=1), face cubic centered (
 
 Temperature is in kelvin units.
 
+At **tmelt** parameter you can decide some initial steps that initialize the system, represents the time steps of melting the initial structure.
+
+For reproducibility you can decide a seed for the random number generator that are inside of the software. Remember to be consistent with the seed you use.
+
+
 The initial velocities of the particles can be setted up to 0 or to a bimodal distribution. To choose use the **vel_opt** parameter (= 1, bimodal) (= 0, zero initial velocities).
 
 To control de time step change the **dt** parameter (in ps units) less than 0.01 ps make in the simulation unstable. The number of steps that will be computed is selected in the **ntimes** parameter. 
