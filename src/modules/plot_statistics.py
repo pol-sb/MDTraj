@@ -141,6 +141,7 @@ class MDSimulation:
         plt.title("Radial Distribution Function")
         plt.xlabel("r [Å]")
         plt.ylabel("g(r)")
+        plt.grid()
 
         # Preparing a filename for the RSD plot image.
         filename = (
@@ -187,6 +188,7 @@ class MDSimulation:
         plt.title("Pressure")
         plt.xlabel("Time [r.u.]")
         plt.ylabel("Pressure [r.u.]")
+        plt.grid()
 
         # Preparing a path for the P plot image.
         filename = (
@@ -210,6 +212,7 @@ class MDSimulation:
         plt.title("Mean Square Displacement")
         plt.xlabel("r [Å]")
         plt.ylabel("g(r)")
+        plt.grid()
 
         # Preparing a filename for the MSD plot image.
         filename = (
@@ -250,6 +253,7 @@ class MDSimulation:
         plt.title(f"Potential energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+        plt.grid()
 
         # Saving the image and clearing the current plot.
         plt.savefig(n_pot, bbox_inches='tight')
@@ -260,6 +264,7 @@ class MDSimulation:
         plt.title(f"Kinetic energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+        plt.grid()
 
         # Saving the image and clearing the current plot.
         plt.savefig(n_kin, bbox_inches='tight')
@@ -270,6 +275,7 @@ class MDSimulation:
         plt.title(f"Total energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+        plt.grid()
 
         # Saving the image and clearing the current plot.
         plt.savefig(n_tot, bbox_inches='tight')
@@ -296,6 +302,7 @@ class MDSimulation:
         plt.legend()
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
+        plt.grid()
 
         # Saving the image and clearing the current plot.
         plt.savefig(n_all, bbox_inches='tight')
