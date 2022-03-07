@@ -62,9 +62,9 @@ integer::nhis
 
 	do tt = 1,ntimes,1
 		ti = ti+dt ! Actualizing the instant time
-    if (thermostat.eq.0) then
+    if (thermo.eq.0) then
       call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag)
-    elseif (thermostat.eq.1) then
+    elseif (thermo.eq.1) then
      	call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,gr,deltag)
     else
       write(*,*)"Error, no thermostat status found"
