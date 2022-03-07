@@ -25,3 +25,5 @@ The plots:
  * **presseplot.png**: Evolution of the pressure.
  * **rdfplot.png**:  Radial distribution function.
  * **tempplot.png**: Evolution of the temperature. 
+
+This directory also contains a folder with the plots of an example consisting of the MD simulation of and Helium gas at 300 K.
