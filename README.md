@@ -27,6 +27,7 @@
 - [Prerequisites](#prerequisites)
 - [Installing](#installing)
 - [Input parameters](#parameters)
+- [Output files and plots](#output)
 - [Deployment](#deployment)
 - [Usage](#usage)
 - [Built Using](#built_using)
@@ -35,7 +36,7 @@
 - [Authors](#authors)
 
 ## About <a name = "about"></a>
-In this project we aim to develope a simple parelling Molecular Dynamics simulation code. 
+In this project we aim to develope a simple parelling Molecular Dynamics simulation code. We implement three possible initial structures (sc, fcc, diamond) and two initial configurations (bimodal distribution or to 0). We implement two different integration algorithms (the velocity verlet with and without thermostat andersen). The potential used is the Lennard-Jones.
 
 ## Getting Started <a name = "getting_started"></a>
 
@@ -73,13 +74,30 @@ Donwload the zip file and uncompress in your working directory, you can use:
 Move to main directory and tip:
 
 ```
-make build
 make
 ```
 
-To run a simulation you must modify the parameter.h file, in the input directory, se the input parameter section.
+To run a simulation you must modify the parameter.h file, in the input directory, se the input parameter section. Since it is necessary to recompile if you want to add the changes on the input parameters, we recommend to use the command
+
+```
+make
+```
+or
+```
+make all
+``` 
+Nonetheles, it can be done in three steps by the following terminal commands:
+```
+make compile
+make run
+make plot
+```
+
+
 
 ## Input parameters. <a name = "parameters"></a>
+
+**If not specified, all the units are in reduced units**
 
 The number of unit cells that are simulated is choosed in the **nc** parameters, 
 
@@ -101,6 +119,31 @@ The **rc** parameter represents the cut-off of the forces calculation, at higher
 
 At last, you must choose the parameters for the force-field ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type). **σ** is the distance to the zero potential point in hte potential and **ε** is the depth of the potential well.
 
+
+## Output files and plots <a name = "output"></a>
+
+
+Containing the initial structure:
+
+  * **init_conf_sc.xyz**: The initial simple cubic structure is stored.
+  * **init_conf_fcc.xyz**: The initial face centered cubic structure is stored.
+  * **init_conf_diamond.xyz**: The initial diamond structure is stored.
+
+Containing the thermodynamics parameters:
+
+  * **temp.dat**: It contains the temperatures of the temperature for some time-steps.
+  * **energy.dat**: It contains the energy of the temperature for some time-steps
+  * **pressure.dat**: It contains the pressure of the temperature for some time-steps
+  * **rdf.dat**: It contains the data of the radial distribution function.
+
+The plots:
+ * **ene-allplot.png**: Evolution of the kinetic, potential and total energy.
+ * **ene-kinplot.png**: Evolution of the kinetic energy.
+ * **ene-potplot.png**: Evolution of the potential energy.
+ * **ene-totplot.png**: Evolution of the tiotal energy.
+ * **presseplot.png**: Evolution of the pressure.
+ * **rdfplot.png**:  Radial distribution function.
+ * **tempplot.png**: Evolution of the temperature. 
 
 ## Running the tests <a name = "tests"></a>
 
@@ -142,11 +185,10 @@ Add additional notes about how to deploy this on a live system.
   - g(r): Pol     
 
 ## Authors <a name = "authors"></a>
-
-- [@perasperadastra]
-- [@LucasFernandezStolpa]
-- [@pol-sb]
-- [@Mtunica]
+- [@LucasFernandezStolpa](https://github.com/LucasFernandezStolpa) - Coordinator
+- [@perasperadastra](https://github.com/perasperadastra)
+- [@pol-sb](https://github.com/pol-sb)
+- [@Mtunica](https://github.com/Mtunica)
 
 See also the list of [contributors](https://github.com/Eines-Informatiques-Avancades/Project-I/contributors) who participated in this project.
 
