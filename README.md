@@ -35,7 +35,7 @@
 - [Authors](#authors)
 
 ## About <a name = "about"></a>
-In this project we aim to develope a simple parelling Molecular Dynamics simulation code. We implement three possible initial structures (sc, fcc, diamond) and two initial configurations (bimodal distribution or to 0). We implement two different integration algorithms (the velocity verlet with and without thermostat andersen). The potential used is the Lennard-Jones.
+In this project we aim to develop a simple parallel Molecular Dynamics simulation code. We implement three possible initial structures (sc, fcc, diamond) and two initial configurations (bimodal distribution or velocities starting at 0). Additionally, we implement two different integration algorithms (the velocity verlet with and without thermostat andersen). The Lennard-Jones potential is used.
 
 ## Getting Started <a name = "getting_started"></a>
 
@@ -43,10 +43,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites  <a name = "prerequisites"></a>
 
-The core of this program works in FORTRAN 90, so a FORTRAN compiler must be installed before trying to build the code. We higly reccoment to install [gfortran](https://gcc.gnu.org/wiki/GFortran). It can be installed using the following commands:
+The core of this program works in FORTRAN 90, so a FORTRAN compiler must be installed before trying to build the code. We higly reccoment to install [gfortran](https://gcc.gnu.org/wiki/GFortran). The following commands demonstrate how to install it in Ubuntu Linux:
 ```
-sudo apt-get update
-sudo apt-get install gfortran
+sudo apt update && sudo apt install gfortran -y
 ```
 
 Python is used for the results plotting and representation. A python version higher or equal than `python 3.6` is needed, and additionally the following libraries are needed:
@@ -61,16 +60,17 @@ python -m pip install -r requirements.txt
 ```
 `pip` can normally be installed from your distribution package manager.
 
-### Installing. <a name = "installing"></a>
+
+### Installing <a name = "installing"></a>
 
 Donwload the zip file and uncompress in your working directory, you can use:
 
 
 ```
- unzip Project-I-master.zip 
+unzip Project-I-master.zip 
 ```
 
-Move to main directory and tip:
+Move to main directory and run:
 
 ```
 make
@@ -85,7 +85,7 @@ or
 ```
 make all
 ``` 
-Nonetheles, it can be done in three steps by the following terminal commands:
+Nonetheless, it can be done in three steps by the following terminal commands:
 ```
 make compile
 make run
@@ -93,35 +93,45 @@ make plot
 ```
 
 
-
 ## Input parameters. <a name = "parameters"></a>
 
 **If not specified, all the units are in reduced units**
 
-The number of unit cells that are simulated is choosed in the **nc** parameters, 
+- The `number of unit cells` that are simulated is chosen by the `nc` parameter 
 
-The density have units of (particles / reduced units of distances), take special care in avoid density greater than 0.6 .
+- The `density` has units of (particles / reduced units of distances), take **special care in avoiding densities greater than 0.6**.
 
-The dimension parameters can't be changed in this version.
+- The `dimension` parameters can't be changed in the current version.
 
-Can be generated three type of lattice: Simple cubic (=1), face cubic centered (=2), diamond (=3). Also it will be implemented a read from file subroutine in the next version.
+- Three types of lattice can be generated:
+  - Simple cubic (=1),
+  - Face centered cubic (=2)
+  - Diamond (=3).
+  - Aditionally, a read from file subroutine will be implemented in the next version.
 
-Temperature is in kelvin units.
+- `Temperature` is in kelvin units.
 
-At **tmelt** parameter you can decide some initial steps that initialize the system, represents the time steps of melting the initial structure.
+- With the `tmelt` parameter you can decide some initial steps that will serve as system initialization. This represents the number of allocated time steps to melt the initial structure.
 
-For reproducibility you can decide a seed for the random number generator that are inside of the software. Remember to be consistent with the seed you use.
+- For reproducibility you can decide a `seed for the random number` generator that are inside of the software with the `rng_seed`. Remember to be consistent with the seed you use.
 
+- The `initial velocities` of the particles can be set up to either:
+  - start at 0
+  - start with bimodal distribution.
 
-The initial velocities of the particles can be setted up to 0 or to a bimodal distribution. To choose use the **vel_opt** parameter (= 1, bimodal) (= 0, zero initial velocities).
+  To choose use the `vel_opt` parameter (= 1, bimodal) (= 0, zero initial velocities).
 
-To control de time step change the **dt** parameter (in ps units) less than 0.01 ps make in the simulation unstable. The number of steps that will be computed is selected in the **ntimes** parameter. 
+- To control the `time step` change the `dt` parameter (in ps units). Setting the dt to less than 0.01 ps will make in the simulation unstable.
 
-The output information frequency is controlled by the **everyt** parameter. AVOID HIGH RATES OF PRINTIN!!! Printing is a limiting stage in this software.
+- The number of steps that will be computed is selected in the `ntimes` parameter. 
 
-The **rc** parameter represents the cut-off of the forces calculation, at higher cut-off better precision but higher times of calculation.
+- The output information frequency is controlled by the `everyt` parameter. AVOID HIGH RATES OF PRINTIN. Printing is a limiting stage in this software.
 
-At last, you must choose the parameters for the force-field ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type). **σ** is the distance to the zero potential point in hte potential and **ε** is the depth of the potential well.
+- The `rc` parameter represents the `cut-off` of the forces calculation, at higher cut-off values better precision but higher times of calculation.
+
+- At last, you must choose the `parameters for the force-field` ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type):
+  - `σ` is the distance to the zero potential point in the potential
+  - `ε` is the depth of the potential well.
 
 
 ## Output files and plots <a name = "output"></a>
@@ -129,27 +139,27 @@ At last, you must choose the parameters for the force-field ([Lennard-Jones](htt
 
 Containing the initial structure:
 
-  * **init_conf_sc.xyz**: The initial simple cubic structure is stored.
-  * **init_conf_fcc.xyz**: The initial face centered cubic structure is stored.
-  * **init_conf_diamond.xyz**: The initial diamond structure is stored.
+  * `init_conf_sc.xyz`: The initial simple cubic structure is stored.
+  * `init_conf_fcc.xyz`: The initial face centered cubic structure is stored.
+  * `init_conf_diamond.xyz`: The initial diamond structure is stored.
 
 Containing the thermodynamics parameters:
 
-  * **temp.dat**: It contains the temperatures of the temperature for some time-steps.
-  * **energy.dat**: It contains the energy of the temperature for some time-steps
-  * **pressure.dat**: It contains the pressure of the temperature for some time-steps
-  * **rdf.dat**: It contains the data of the radial distribution function.
+  * `temp.dat`: It contains the temperatures of the temperature for some time-steps.
+  * `energy.dat`: It contains the energy of the temperature for some time-steps
+  * `pressure.dat`: It contains the pressure of the temperature for some time-steps
+  * `rdf.dat`: It contains the data of the radial distribution function.
 
 The plots:
- * **ene-allplot.png**: Evolution of the kinetic, potential and total energy.
- * **ene-kinplot.png**: Evolution of the kinetic energy.
- * **ene-potplot.png**: Evolution of the potential energy.
- * **ene-totplot.png**: Evolution of the tiotal energy.
- * **presseplot.png**: Evolution of the pressure.
- * **rdfplot.png**:  Radial distribution function.
- * **tempplot.png**: Evolution of the temperature. 
+ * `ene-allplot.png`: Evolution of the kinetic, potential and total energy.
+ * `ene-kinplot.png`: Evolution of the kinetic energy.
+ * `ene-potplot.png`: Evolution of the potential energy.
+ * `ene-totplot.png`: Evolution of the total energy.
+ * `presseplot.png`: Evolution of the pressure.
+ * `rdfplot.png`:  Radial distribution function.
+ * `tempplot.png`: Evolution of the temperature. 
 
-This directory also contains a folder with the plots of an example consisting of the MD simulation of and Helium gas at 300 K.
+This directory also contains a [folder](./output/Helium@300K_example/) with the plots of an example consisting of the MD simulation for Helium gas at 300 K.
 
 ## Running the tests <a name = "tests"></a>
 
@@ -158,8 +168,10 @@ Tests will be implemented in the next version.
 ## Built Using <a name = "built_using"></a>
 
 - [Fortran](https://fortran-lang.org/) - Fortran
-- [Express](https://www.python.org/) - Python
-- Modules, etc...?
+- [Python](https://www.python.org/) - Python
+- [Numpy](https://numpy.org/) - numpy module
+- [Matplotlib](https://matplotlib.org/) - matplotlib module
+
 
 ## TODO <a name = "todo"></a>
 **Parallelization:**
