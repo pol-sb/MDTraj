@@ -97,41 +97,43 @@ make plot
 
 **If not specified, all the units are in reduced units**
 
-- The `number of unit cells` that are simulated is chosen by the `nc` parameter 
+- The **number of unit cells** that are simulated is chosen by the `nc` parameter 
 
-- The `density` has units of (particles / reduced units of distances), take **special care in avoiding densities greater than 0.6**.
+- The **density**, set by the `density` parameter, has units of (particles / reduced units of distances), take **special care in avoiding densities greater than 0.6**.
 
-- The `dimension` parameters can't be changed in the current version.
+- The **dimension** parameters can't be changed in the current version.
 
-- Three types of lattice can be generated:
+- Three types of lattice can be generated for the **initial structure**:
   - Simple cubic (=1),
   - Face centered cubic (=2)
   - Diamond (=3).
   - Aditionally, a read from file subroutine will be implemented in the next version.
+  
+  This has to be set by using the `structure` parameter.
 
-- `Temperature` is in kelvin units.
+- **Temperature** is set with the `temp` parameter and is in kelvin units.
 
-- With the `tmelt` parameter you can decide some initial steps that will serve as system initialization. This represents the number of allocated time steps to melt the initial structure.
+- With the `tmelt` parameter you can decide some initial steps that will serve as **system initialization**. This represents the number of allocated time steps to melt the initial structure.
 
-- For reproducibility you can decide a `seed for the random number` generator that are inside of the software with the `rng_seed`. Remember to be consistent with the seed you use.
+- For reproducibility you can decide a **seed for the random number** generator that are inside of the software with the `rng_seed`. Remember to be consistent with the seed you use.
 
-- The `initial velocities` of the particles can be set up to either:
+- The **initial velocities** of the particles can be set up to either:
   - start at 0
   - start with bimodal distribution.
 
   To choose use the `vel_opt` parameter (= 1, bimodal) (= 0, zero initial velocities).
 
-- To control the `time step` change the `dt` parameter (in ps units). Setting the dt to less than 0.01 ps will make in the simulation unstable.
+- To control the **time step** change the `dt` parameter (in ps units). Setting the dt to less than 0.01 ps will make in the simulation unstable.
 
-- The number of steps that will be computed is selected in the `ntimes` parameter. 
+- The **number of steps** that will be computed is selected in the `ntimes` parameter. 
 
-- The output information frequency is controlled by the `everyt` parameter. AVOID HIGH RATES OF PRINTIN. Printing is a limiting stage in this software.
+- The **output** information frequency is controlled by the `everyt` parameter. AVOID HIGH RATES OF PRINTIN. Printing is a limiting stage in this software.
 
-- The `rc` parameter represents the `cut-off` of the forces calculation, at higher cut-off values better precision but higher times of calculation.
+- The `rc` parameter represents the **cut-off** used during the forces calculation, at higher cut-off values better precision but higher times of calculation.
 
-- At last, you must choose the `parameters for the force-field` ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type):
-  - `σ` is the distance to the zero potential point in the potential
-  - `ε` is the depth of the potential well.
+- At last, you must choose the **parameters for the force-field** ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type):
+  - `sigma`: (σ) is the distance to the zero potential point in the potential
+  - `epsilon`: (ε) is the depth of the potential well.
 
 
 ## Output files and plots <a name = "output"></a>
