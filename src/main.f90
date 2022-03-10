@@ -21,6 +21,7 @@ integer, allocatable :: seed(:)
 	allocate(seed(33))
 	seed(1:33) = rng_seed
 	call random_seed(put=seed)
+	
 	!Initialization of the structure
 	if (structure .eq. 1) then
 		natoms=Nc*Nc*Nc
@@ -48,7 +49,7 @@ integer, allocatable :: seed(:)
 	endif
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-  allocate(gr(nhis)); gr = 0.d0
+  	allocate(gr(nhis)); gr = 0.d0
 
 	!initialization of velocity
 	if (vel_opt .eq. 1) then
@@ -62,6 +63,7 @@ integer, allocatable :: seed(:)
 	open(11,file='output/temp.dat',status='unknown')
 	open(12,file='output/energy.dat',status='unknown')
 	open(13,file='output/pressure.dat',status='unknown')
+	open(14,file='output/trajectory.xyz',status='unknown')
 
 	do tt = 1,ntimes,1
 		ti = ti+dt ! Actualizing the instant time
@@ -72,36 +74,42 @@ integer, allocatable :: seed(:)
 			gr = 0.d0; ngr = 0
 		end if
 
-    if (thermo.eq.0) then
-      call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag)
-    elseif (thermo.eq.1) then
-     	call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,gr,deltag)
-    else
-      write(*,*)"Error, no thermostat status found"
-  		stop
-    endif
+		if (thermo.eq.0) then
+			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag)
+		elseif (thermo.eq.1) then
+			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,gr,deltag)
+		else
+			write(*,*)"Error, no thermostat status found"
+			stop
+		endif
 
 		ekin = kinetic(v,natoms)
 		temperature = 2.d0*ekin/(3.d0*dble(natoms)-3.d0)
 
-    ngr = ngr+1
+    	ngr = ngr+1
 
-   	do si = 1,natoms
-      do sj = 1,3
-        call pbc(r(si,sj),L,L/2.d0)
-      end do
-    end do
+		do si = 1,natoms
+			do sj = 1,3
+				call pbc(r(si,sj),L,L/2.d0)
+			end do
+		end do
 
 		if (mod(tt,everyt).eq.0) then
 			write(11,*) ti, temperature
 			write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
 			(epot+ekin)/dble(natoms)
 			write(13,*) ti, pressp/dble(natoms), density*temperature/dble(natoms), &
-		  (pressp+density*temperature)/dble(natoms)
-		end if
-   end do
+		  	(pressp+density*temperature)/dble(natoms)
 
-	open(14,file='output/rdf.dat',status='unknown')
+			write(14,*) natoms
+			write(14,*)
+			do si = 1,natoms
+				write(14,*) 'He', (r(si,sj), sj=1,3)
+			end do
+		end if
+   	end do
+
+	open(15,file='output/rdf.dat',status='unknown')
 	do ii= 1,nhis
 		rpos = deltag*(ii + 0.5) ! Distance r
 		vb = ((ii+1)**3 - ii**3)*(deltag**3)
@@ -109,10 +117,10 @@ integer, allocatable :: seed(:)
 		nid = (4.d0*PI/3.d0)*vb*density
 		! Number of ideal gas part . in vb
 		gr(ii) = gr(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
-		write(14,*) rpos*sigma, gr(ii)
+		write(15,*) rpos*sigma, gr(ii)
 	enddo
-	close(14)
+	close(15)
 
-	deallocate(r,v,F, gr)
+	deallocate(r,v,F,gr)
 
 endprogram main
