@@ -17,7 +17,7 @@ Containing the thermodynamics parameters:
   * **pressure.dat**: It contains the pressure of the temperature for some time-steps
   * **rdf.dat**: It contains the data of the radial distribution function.
 
-Containing the thermodynamics parameters:
+Containing the temporal evolution:
 
   * **trajectory.xyz**: It contains the trajectory of the system time evolution every given number of time steps specified in the input in a xyz format, intended to be rendered using VMD software.
 
