@@ -21,7 +21,7 @@ integer, allocatable :: seed(:)
 	allocate(seed(33))
 	seed(1:33) = rng_seed
 	call random_seed(put=seed)
-
+	
 	!Initialization of the structure
 	if (structure .eq. 1) then
 		natoms=Nc*Nc*Nc
@@ -104,7 +104,7 @@ integer, allocatable :: seed(:)
 			write(14,*) natoms
 			write(14,*)
 			do si = 1,natoms
-				write(14,*) 'He', (r(si,sj)*sigma, sj=1,3)
+				write(14,*) 'He', (r(si,sj), sj=1,3)
 			end do
 		end if
    	end do
