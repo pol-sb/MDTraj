@@ -1,8 +1,8 @@
 
 	!	Initialization parameters
 	!---------------------------
-	integer::nc=6 !Number of particles per side
-	double precision::density=0.5d0 !Lomgitude of the size box
+	integer::nc=5 !Number of particles per side
+	double precision::density=0.005d0 !Lomgitude of the size box
 
 	integer::structure=1 !For SC:1, for fcc:2, for diamond 3.
 
@@ -19,7 +19,7 @@
 	double precision:: dt= 0.001 !Time step (ps)
 
 	integer::thermo=1 !For no thermostat:0, for active thermostat:1
-		
+
 
 	!Lennard-Jones parameters
 	!----------------
