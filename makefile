@@ -6,7 +6,7 @@ MAKEFLAGS += --no-print-directory
 ## 1. make all - to compile, execute and plot.
 all:
 	$(MAKE) -C src/
-	@./src/program.exe
+	@make run
 	@$(MAKE) plot
 
 ## 2. make compile - to compile.
@@ -15,7 +15,7 @@ compile:
 	
 ## 3. make run - to run.
 run:
-	 ./src/program.exe
+	 mpirun -np 4 ./src/program.exe
 
 ## 4. make plot - to plot the graphics
 plot:
