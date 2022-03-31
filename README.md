@@ -152,6 +152,10 @@ Containing the thermodynamics parameters:
   * `pressure.dat`: It contains the pressure of the temperature for some time-steps
   * `rdf.dat`: It contains the data of the radial distribution function.
 
+Containing the temporal evolution:
+
+  * `trajectory.xyz`:  It contains the trajectory of the system time evolution every given number of time steps specified in the input in a xyz format, intended to be rendered using VMD software.
+
 The plots:
  * `ene-allplot.png`: Evolution of the kinetic, potential and total energy.
  * `ene-kinplot.png`: Evolution of the kinetic energy.
