@@ -6,7 +6,7 @@ BUILD_DIR := ./build
 SRC_FILES := $(SRC_DIR)/mtfort.f90 $(SRC_DIR)/observable_measures.f90 $(SRC_DIR)/monte_carlo.f90 $(SRC_DIR)/input.f90 $(SRC_DIR)/initialize_geometry.f90
 
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.f90,$(BUILD_DIR)/%.o,$(SRC_FILES))
-FC := gfortran
+FC := mpif90 -o
 FFLAGS := -O1
 
 Sources = main.f90 input.f90 initialize_geometry.f90 monte_carlo.f90 mtfort.f90 input.f90
