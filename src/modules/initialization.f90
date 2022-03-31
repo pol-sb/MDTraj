@@ -96,19 +96,19 @@ contains
 
       inquire(file="./output/",exist=ext)
       if (.NOT.ext) then
-          call execute_command_line("mkdir ./output/")
+          call system("mkdir ./output/")
       endif
 
       inquire(file="./output/structure",exist=ext)
       if (.NOT.ext) then
-          call execute_command_line("mkdir ./output/structure")
+          call system("mkdir ./output/structure")
       endif
 
       inquire(file="../output/structure/init_conf_sc.xyz",exist=ext)
       if (.NOT.ext) then
-          open(newunit=out_ref,file="./output/structure/init_conf_sc.xyz", status="new")
+          open(unit=100,file="./output/structure/init_conf_sc.xyz", status="new")
       else
-          open(newunit=out_ref,file="./output/structure/init_conf_sc.xyz", status="replace")
+          open(unit=100,file="./output/structure/init_conf_sc.xyz", status="replace")
       endif
 
       nn = 1
@@ -158,19 +158,19 @@ outer:do nx = 0,N-1
 
       inquire(file="./output/",exist=ext)
       if (.NOT.ext) then
-          call execute_command_line("mkdir ./output/")
+          call system("mkdir ./output/")
       endif
 
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
-          call execute_command_line("mkdir ./output/structure/structure")
+          call system("mkdir ./output/structure/structure")
       endif
 
       inquire(file="./output/init_conf_fcc.xyz",exist=ext)
       if (.NOT.ext) then
-          open(newunit=out_ref,file="./output/structure/init_conf_fcc.xyz", status="new")
+          open(unit=100,file="./output/structure/init_conf_fcc.xyz", status="new")
       else
-          open(newunit=out_ref,file="./output/structure/init_conf_fcc.xyz", status="replace")
+          open(unit=100,file="./output/structure/init_conf_fcc.xyz", status="replace")
       endif
 
       allocate(r0(4,3))
@@ -246,17 +246,17 @@ outer:do nx = 0,N-1
 
       inquire(file="./output/",exist=ext)
       if (.NOT.ext) then
-          call execute_command_line("mkdir ./output/")
+          call system("mkdir ./output/")
       endif
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
-          call execute_command_line("mkdir ./output/structure")
+          call system("mkdir ./output/structure")
       endif
       inquire(file="./output/structure/init_conf_diamond.xyz",exist=ext)
       if (.NOT.ext) then
-          open(newunit=out_ref,file="./output/structure/init_conf_diamond.xyz", status="new")
+          open(unit=100,file="./output/structure/init_conf_diamond.xyz", status="new")
       else
-          open(newunit=out_ref,file="./output/structure/init_conf_diamond.xyz", status="replace")
+          open(unit=100,file="./output/structure/init_conf_diamond.xyz", status="replace")
       endif
 
       nn = 1
@@ -323,7 +323,7 @@ outer:do nz = 0, N - 1,1
 
 
       !////////////// Read the old coordinates
-      open(newunit=file_id,file=coord_path)
+      open(unit=101,file=coord_path)
       read(file_id,*)
       read(file_id,*)
       do i=1,N
@@ -343,7 +343,7 @@ outer:do nz = 0, N - 1,1
 
        !////////////// Read the old velocities
       if (present(vel_path)) then
-			open(newunit=file_id,file=vel_path)
+			open(unit=102,file=vel_path)
 			read(file_id,*)
 			read(file_id,*)
 
