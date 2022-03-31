@@ -6,6 +6,7 @@ use integrators
 
 implicit none
 include "../input/parameter.h"
+include 'mpif.h' ! Include declarations of MPI functions and constants
 integer::natoms
 double precision::L, rc
 integer::tt,gg,si,sj
@@ -16,12 +17,31 @@ double precision::epot, ekin, temperature, deltag
 double precision::rpos, vb, nid
 double precision, allocatable, dimension(:) ::  gr
 integer::nhis
+integer :: ii, jj, kk, M
 integer, allocatable :: seed(:)
-        ! Random seed initializtaion
+integer comm, taskid, numproc, ierror, message
+integer blocksize, residu, first_particle, last_particle
+integer num_interacts, inter_residu, inter_blocksize, first_inter, last_inter
+integer, allocatable :: interact_list(:,:)
+integer :: particle_range(2), interact_range(2)
+
+
+	call MPI_INIT(ierror) ! Begin parallel execution code
+
+	call MPI_COMM_RANK(MPI_COMM_WORLD,taskid,ierror) ! Find out which is the current
+	! process from the set of processes defined by the communicator MPI_COMM_WORLD
+	! (MPI shorthand for all the processors running this program). Value stored in
+	! rank variable.
+
+	call MPI_COMM_SIZE(MPI_COMM_WORLD,numproc,ierror)
+
+	! -------------------------------------------------------------------------- !
+
+				! Random seed initializtaion
 	allocate(seed(33))
 	seed(1:33) = rng_seed
 	call random_seed(put=seed)
-	
+
 	!Initialization of the structure
 	if (structure .eq. 1) then
 		natoms=Nc*Nc*Nc
@@ -47,6 +67,53 @@ integer, allocatable :: seed(:)
 		stop
 
 	endif
+
+
+	! -------------------------------------------------------------------------- !
+	! 							Select range of particles for each processor
+	! -------------------------------------------------------------------------- !
+	print*, 'Numproc = ', numproc, ' natoms = ', natoms
+	print*, '-----------------------------------------------------------------'
+	blocksize = natoms/numproc
+	residu = mod(natoms,numproc)
+	if (taskid.lt.residu) then
+		first_particle = taskid*(blocksize+1) + 1
+		last_particle = blocksize + first_particle
+	elseif (taskid.ge.residu) then
+		first_particle = taskid*blocksize + 1 + residu
+		last_particle = (blocksize-1) + first_particle
+	end if
+	particle_range(1) = first_particle; particle_range(2) = last_particle;
+	print*, taskid, particle_range
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	print*, '-----------------------------------------------------------------'
+
+	! -------------------------------------------------------------------------- !
+	! 							Select range of interactions for each processor
+	! -------------------------------------------------------------------------- !
+	num_interacts = natoms*(natoms-1)/2
+	allocate(interact_list(num_interacts,2))
+	kk = 1
+	do ii = 1,natoms-1
+		do jj = ii+1,natoms
+			interact_list(kk,:) = [ii,jj]; kk = kk+1
+		enddo
+	enddo
+
+	inter_blocksize = num_interacts/numproc
+	inter_residu = mod(num_interacts,numproc)
+	if (taskid.lt.inter_residu) then
+		first_inter = taskid*(inter_blocksize+1) + 1
+		last_inter = inter_blocksize + first_inter
+	elseif (taskid.ge.inter_residu) then
+		first_inter = taskid*inter_blocksize + 1 + inter_residu
+		last_inter = (inter_blocksize-1) + first_inter
+	end if
+	interact_range(1) = first_inter; interact_range(2) = last_inter;
+	print*, taskid, interact_range
+
+  ! -------------------------------------------------------------------------- !
+  ! -------------------------------------------------------------------------- !
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
   	allocate(gr(nhis)); gr = 0.d0
@@ -75,11 +142,13 @@ integer, allocatable :: seed(:)
 		end if
 
 		if (thermo.eq.0) then
-			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag)
+			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag,&
+											particle_range,interact_range,interact_list)
 		elseif (thermo.eq.1) then
-			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,gr,deltag)
+			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,gr,deltag,&
+																	particle_range,interact_range,interact_list)
 		else
-			write(*,*)"Error, no thermostat status found"
+			write(*,*) "Error, no thermostat status found"
 			stop
 		endif
 
@@ -108,6 +177,8 @@ integer, allocatable :: seed(:)
 			end do
 		end if
    	end do
+
+		call MPI_FINALIZE(ierror) ! End parallel execution
 
 	open(15,file='output/rdf.dat',status='unknown')
 	do ii= 1,nhis
