@@ -1,59 +1,31 @@
+SRC_DIR := ./modules
+BUILD_DIR := ./build
+# Si no tuvienes dependencias internas los modulos prodriamos usar esta linea para tener todos los modulos
+#SRC_FILES := $(wildcard $(SRC_DIR)/* *.f90)
 
+SRC_FILES := $(SRC_DIR)/mtfort.f90 $(SRC_DIR)/observable_measures.f90 $(SRC_DIR)/monte_carlo.f90 $(SRC_DIR)/input.f90 $(SRC_DIR)/initialize_geometry.f90
 
-SRCDIR = modules
-BUILDDIR = build
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.f90,$(BUILD_DIR)/%.o,$(SRC_FILES))
+FC := gfortran
+FFLAGS := -O1
 
+Sources = main.f90 input.f90 initialize_geometry.f90 monte_carlo.f90 mtfort.f90 input.f90
 
-fc = gfortran
-OPT= -O1
-
-program.exe: build main.o boundary.o forces.o initialization.o integrators.o thermostats.o
-	$(fc) -o program.exe $(OPT) $(BUILDDIR)/boundary.o $(BUILDDIR)/forces.o $(BUILDDIR)/initialization.o  $(BUILDDIR)/integrators.o $(BUILDDIR)/thermostats.o  $(BUILDDIR)/main.o -J$(BUILDDIR)
-
-#Boundary module
-boundary.mod: boundary.o $(SRCDIR)/boundary.f90
-	$(fc) -o $(BUILDDIR)/boundary.o -c $(OPT) $(SRCDIR)/boundary.f90 -J$(BUILDDIR)
-
-boundary.o: $(SRCDIR)/boundary.f90
-	$(fc) -o $(BUILDDIR)/boundary.o -c $(OPT) $(SRCDIR)/boundary.f90 -J$(BUILDDIR)
-
-#Forces module
-forces.mod: forces.o $(SRCDIR)/forces.f90
-	$(fc) -o $(BUILDDIR)/forces.o -c $(OPT) $(SRCDIR)/forces.f90 -J$(BUILDDIR)
-
-forces.o: $(SRCDIR)/forces.f90
-	$(fc) -o $(BUILDDIR)/forces.o -c $(OPT) $(SRCDIR)/forces.f90 -J$(BUILDDIR)
-
-#Initialization module
-initialization.mod: initialization.o $(SRCDIR)/initialization.f90
-	$(fc) -o $(BUILDDIR)/initialization.o -c $(OPT) $(SRCDIR)/initialization.f90 -J$(BUILDDIR)
-
-initialization.o: $(SRCDIR)/initialization.f90
-	$(fc) -o $(BUILDDIR)/initialization.o -c $(OPT) $(SRCDIR)/initialization.f90 -J$(BUILDDIR)
-
-#Integrators module
-integrators.mod: integrators.o $(SRCDIR)/integrators.f90
-	$(fc) -o $(BUILDDIR)/integrators.o -c $(OPT) $(SRCDIR)/integrators.f90 -J$(BUILDDIR)
-
-integrators.o: $(SRCDIR)/integrators.f90
-	$(fc) -o $(BUILDDIR)/integrators.o -c $(OPT) $(SRCDIR)/integrators.f90 -J$(BUILDDIR)
-
-#Thermostat module
-thermostats.mod: thermostats.o $(SRCDIR)/thermostats.f90
-	$(fc) -o $(BUILDDIR)/thermostats.o -c $(OPT) $(SRCDIR)/thermostats.f90 -J$(BUILDDIR)
-
-thermostats.o: $(SRCDIR)/thermostats.f90
-	$(fc) -o $(BUILDDIR)/thermostats.o -c $(OPT) $(SRCDIR)/thermostats.f90 -J$(BUILDDIR)
+MC.exe: build $(OBJ_FILES)
+	@$(FC) $(FFLAGS) -o $@ main.f90 $(OBJ_FILES)
+	@echo "Compiled"
+	@mv *.mod $(BUILD_DIR)
 
 
 
-#Main file
-main.o: initialization.mod boundary.mod thermostats.mod forces.mod integrators.mod main.f90
-	$(fc) -o $(BUILDDIR)/main.o -c $(OPT) main.f90 -J$(BUILDDIR)
+#%.mod: $(SRC_DIR)/%.f90
+#	$(FC) $(FFLAGS) -c -o $(SRC)/$@  $^
+#
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.f90 build
+	@$(FC) $(FFLAGS) -c -o 	$@ $<
+# si no hubiese interdepencias tambien estaría bien
+#rm *.mod
 
 
 build:
-	mkdir $(BUILDDIR)
-
-run:
-	./program.exe
+	@mkdir $(BUILD_DIR)
