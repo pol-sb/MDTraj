@@ -124,14 +124,15 @@ module integrators
 !      - force() : In module forces (src/modules/forces.f90)
 !=====================================================================================!
    subroutine vel_verlet(natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag,&
-     particle_range,interact_range)
+     particle_range,interact_range,interact_list)
 		integer,intent(in)::natoms, particle_range(2), interact_range(2)
-     	double precision, allocatable,intent(inout) :: F(:,:)
-     	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
-     	double precision, allocatable, intent(inout) :: gr(:)
-     	double precision, intent(in) :: dt, rc, boxlength, deltag
-     	double precision, intent(out) :: Upot, pressp
-      integer :: ii, jj
+    integer, allocatable, intent(in):: interact_list(:,:)
+   	double precision, allocatable,intent(inout) :: F(:,:)
+   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
+   	double precision, allocatable, intent(inout) :: gr(:)
+   	double precision, intent(in) :: dt, rc, boxlength, deltag
+   	double precision, intent(out) :: Upot, pressp
+    integer :: ii, jj
 
 
 		do jj = particle_range(1),particle_range(2)
@@ -178,7 +179,7 @@ module integrators
 	subroutine vel_verlet_with_thermo(natoms,r,vel,F,Upot,dt,rc,boxlength,Temp,pressp,&
     gr,deltag,particle_range,interact_range,interact_list)
 		integer,intent(in)::natoms, particle_range(2), interact_range(2)
-    integer, allocatable, intent(in)::interact_list(:,:)
+    integer, allocatable, intent(in):: interact_list(:,:)
    	double precision, allocatable,  intent(inout) :: F(:,:)
    	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
    	double precision, allocatable,  intent(inout) :: gr(:)
@@ -188,22 +189,25 @@ module integrators
 
 		Upot = 0.d0; pressp = 0.d0
 
+    ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
+
 		do jj = particle_range(1),particle_range(2)
 			do ii = 1,3
          	r(jj,ii) = r(jj,ii) + vel(jj,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
 				vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
 			enddo
 		enddo
-    ! allgather should be applied into the the r and vel array
 
+    ! allgather should be applied into the the r and vel array
+    ! <------- aqui se necesita haber repartido todas las posiciones
 		call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag,interact_range,&
               interact_list)
 
-    call MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, comm, ierror)
+    !call MPI_Reduce(sendbuf, recvbuf, count, datatype, MPI_SUM, root, comm, ierror)
     ! reduce should be applied into Upot,pressp, and gr
 
-    call MPI_ALLGATHER(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT,
-                  RECVTYPE, COMM, IERROR)
+    !call MPI_ALLGATHER(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT,
+    !              RECVTYPE, COMM, IERROR)
     ! allgather should be applied into the the F array
 
 		do jj = particle_range(1),particle_range(2)

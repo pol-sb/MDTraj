@@ -47,33 +47,29 @@ integer :: particle_range(2), interact_range(2)
 		natoms=Nc*Nc*Nc
 		L= (float(natoms)/density)**(1.0/3.0)
 		write(*,*) L
-		allocate(r(natoms,3),v(natoms,3),F(natoms,3))
+		!allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
 		call initial_configuration_SC(Nc,L,r)
 
 	elseif (structure .eq. 2) then
 		natoms=Nc*Nc*Nc*4
 		L= (float(natoms)/density)**(1.0/3.0)
-		allocate(r(natoms,3),v(natoms,3),F(natoms,3))
+		!allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
 		call initial_configuration_fcc(Nc,L,r)
 
 	elseif (structure .eq. 3) then
 		natoms=Nc*Nc*Nc*8
 		L= (float(natoms)/density)**(1.0/3.0)
-		allocate(r(natoms,3),v(natoms,3),F(natoms,3))
-		call initial_configuration_diamond( Nc,L,r)
+		!allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
+		call initial_configuration_diamond(Nc,L,r)
 
 	else
 		write(*,*)"Error, no structure found"
 		stop
-
 	endif
-
 
 	! -------------------------------------------------------------------------- !
 	! 							Select range of particles for each processor
 	! -------------------------------------------------------------------------- !
-	print*, 'Numproc = ', numproc, ' natoms = ', natoms
-	print*, '-----------------------------------------------------------------'
 	blocksize = natoms/numproc
 	residu = mod(natoms,numproc)
 	if (taskid.lt.residu) then
@@ -84,9 +80,6 @@ integer :: particle_range(2), interact_range(2)
 		last_particle = (blocksize-1) + first_particle
 	end if
 	particle_range(1) = first_particle; particle_range(2) = last_particle;
-	print*, taskid, particle_range
-	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-	print*, '-----------------------------------------------------------------'
 
 	! -------------------------------------------------------------------------- !
 	! 							Select range of interactions for each processor
@@ -110,13 +103,14 @@ integer :: particle_range(2), interact_range(2)
 		last_inter = (inter_blocksize-1) + first_inter
 	end if
 	interact_range(1) = first_inter; interact_range(2) = last_inter;
-	print*, taskid, interact_range
+
+	allocate(r(natoms,3),v(last_particle-first_particle+1,3),F(natoms,3))
 
   ! -------------------------------------------------------------------------- !
   ! -------------------------------------------------------------------------- !
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-  	allocate(gr(nhis)); gr = 0.d0
+  allocate(gr(nhis)); gr = 0.d0
 
 	!initialization of velocity
 	if (vel_opt .eq. 1) then
@@ -125,7 +119,8 @@ integer :: particle_range(2), interact_range(2)
 		v(:,:)=0.0d0
 	endif
 
-	call force(natoms,r,L,rc,F,epot,pressp,gr,deltag)
+	call force(natoms,r,L,rc,F,epot,pressp,gr,deltag,interact_range,&
+						interact_list)
 
 	open(11,file='output/temp.dat',status='unknown')
 	open(12,file='output/energy.dat',status='unknown')
@@ -155,7 +150,7 @@ integer :: particle_range(2), interact_range(2)
 		ekin = kinetic(v,natoms)
 		temperature = 2.d0*ekin/(3.d0*dble(natoms)-3.d0)
 
-    	ngr = ngr+1
+    ngr = ngr+1
 
 		do si = 1,natoms
 			do sj = 1,3

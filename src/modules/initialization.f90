@@ -1,7 +1,7 @@
 !=====================================================================================!
 !                             MODULE INITIALIZORS
 ! This module contains all the subroutines regarding the initialization of
-! the spatial coordinates of the system and the velocities of the particles.
+! the spatial coordinates of the execute_command_line and the velocities of the particles.
 !
 ! It includes a simple cubic (sc), an face centered ccubic (FCC) and diamond
 ! cristalline initializarion of the structure.
@@ -42,7 +42,7 @@
 !      -> initial_reading (N, coord_path, initial_position, initial_velocities, vel_path):
 !		   This subroutine creates a SC cristalline structure.
 !				Input:
-!				   - N (number of sides of the system)(in): integer scalar
+!				   - N (number of sides of the execute_command_line)(in): integer scalar
 !    			   - coord_path (path to the xyz fle containing the structure)(in): character
 !	 			   - vel_path (path to velocities file)(inout): OPTIONAL, empty array
 ! 	 			   - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
@@ -97,19 +97,19 @@ contains
 
       inquire(file="./output/",exist=ext)
       if (.NOT.ext) then
-          call system("mkdir ./output/")
+          call execute_command_line("mkdir ./output/")
       endif
 
       inquire(file="./output/structure",exist=ext)
       if (.NOT.ext) then
-          call system("mkdir ./output/structure")
+          call execute_command_line("mkdir ./output/structure")
       endif
 
-      inquire(file="../output/structure/init_conf_sc.xyz",exist=ext)
+      inquire(file="./output/structure/init_conf_sc.xyz",exist=ext)
       if (.NOT.ext) then
-          open(unit=100,file="./output/structure/init_conf_sc.xyz", status="new")
+          open(newunit=out_ref,file="./output/structure/init_conf_sc.xyz", status="new")
       else
-          open(unit=100,file="./output/structure/init_conf_sc.xyz", status="replace")
+          open(newunit=out_ref,file="./output/structure/init_conf_sc.xyz", status="replace")
       endif
 
       nn = 1
@@ -162,19 +162,19 @@ outer:do nx = 0,N-1
 
       inquire(file="./output/",exist=ext)
       if (.NOT.ext) then
-          call system("mkdir ./output/")
+          call execute_command_line("mkdir ./output/")
       endif
 
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
-          call system("mkdir ./output/structure/structure")
+          call execute_command_line("mkdir ./output/structure/structure")
       endif
 
       inquire(file="./output/init_conf_fcc.xyz",exist=ext)
       if (.NOT.ext) then
-          open(unit=100,file="./output/structure/init_conf_fcc.xyz", status="new")
+          open(newunit=out_ref,file="./output/structure/init_conf_fcc.xyz", status="new")
       else
-          open(unit=100,file="./output/structure/init_conf_fcc.xyz", status="replace")
+          open(newunit=out_ref,file="./output/structure/init_conf_fcc.xyz", status="replace")
       endif
 
       allocate(r0(4,3))
@@ -253,17 +253,17 @@ outer:do nx = 0,N-1
 
       inquire(file="./output/",exist=ext)
       if (.NOT.ext) then
-          call system("mkdir ./output/")
+          call execute_command_line("mkdir ./output/")
       endif
       inquire(file="../output/structure",exist=ext)
       if (.NOT.ext) then
-          call system("mkdir ./output/structure")
+          call execute_command_line("mkdir ./output/structure")
       endif
       inquire(file="./output/structure/init_conf_diamond.xyz",exist=ext)
       if (.NOT.ext) then
-          open(unit=100,file="./output/structure/init_conf_diamond.xyz", status="new")
+          open(newunit=out_ref,file="./output/structure/init_conf_diamond.xyz", status="new")
       else
-          open(unit=100,file="./output/structure/init_conf_diamond.xyz", status="replace")
+          open(newunit=out_ref,file="./output/structure/init_conf_diamond.xyz", status="replace")
       endif
 
       nn = 1
@@ -303,7 +303,7 @@ outer:do nz = 0, N - 1,1
 !=====================================================================================!
 !=====================================================================================!
 ! Input:
-!	 - N (number of sides of the system)(in): integer scalar
+!	 - N (number of sides of the execute_command_line)(in): integer scalar
 !    - coord_path (path to the xyz fle containing the structure)(in): character
 !	 - vel_path (path to velocities file)(inout): OPTIONAL, empty array
 ! 	 - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
