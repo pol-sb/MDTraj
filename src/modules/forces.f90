@@ -43,6 +43,7 @@
 
 module forces
    use boundary
+   use mpi
    implicit none
 
    include "constants.h"
@@ -81,7 +82,8 @@ contains
 !
 !==============================================================================!
 	subroutine force(natoms,r,boxlength,rc,F,epot,press,gr,deltag,interact_range,&
-    interact_list)
+    interact_list,taskid)
+    include "../declaration_variables/parallel_variables.h"
 		integer,intent(in)::natoms, interact_range(2)
     integer, allocatable, intent(in) :: interact_list(:,:)
 		double precision, allocatable, intent(in) :: r(:,:)
@@ -94,6 +96,11 @@ contains
 		double precision :: cutoff_press, cutoff_pot, pot, piter
 		integer :: ig
     integer :: ii, is, js, kk, M
+
+    print*, "hi from forces"
+    print*, 'taskid = ', taskid, 'interaction range = ', interact_range
+    print*, 'taskid = ', taskid, ' size = ', size(interact_list,1), size(interact_list,2)
+    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
 		vol = boxlength**3.; rho = dble(natoms)/vol
 		facte = (8.d0/3.d0)*pi*dfloat(natoms)*rho
@@ -163,7 +170,6 @@ contains
 		double precision, intent(out) :: pot, piter
 		double precision :: dx, dy, dz, d, dU
 
-
 		pot = 0.d0; piter = 0.d0
 		dx = r(ii,1)-r(jj,1); dy = r(ii,2)-r(jj,2); dz = r(ii,3)-r(jj,3)
 		! Apply the boundary conditions to the particles distance
@@ -185,7 +191,7 @@ contains
 
 			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.))
 			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
-		 endif
+    endif
 	endsubroutine
 
 endmodule forces

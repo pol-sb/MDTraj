@@ -71,7 +71,6 @@ module integrators
 	use thermostat
   use mpi
 	implicit none
-  include "../declaration_variables/parallel_variables.h"
 
   contains
 
@@ -126,8 +125,8 @@ module integrators
 !      - force() : In module forces (src/modules/forces.f90)
 !=====================================================================================!
    subroutine vel_verlet(natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag,&
-     particle_range,interact_range,interact_list)
-		integer,intent(in)::natoms, particle_range(2), interact_range(2)
+     particle_range,interact_range,interact_list,taskid)
+		integer,intent(in)::natoms, particle_range(2), interact_range(2), taskid
     integer, allocatable, intent(in):: interact_list(:,:)
    	double precision, allocatable,intent(inout) :: F(:,:)
    	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
@@ -145,7 +144,7 @@ module integrators
 		enddo
 
 		call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag,interact_range,&
-              interact_list)
+              interact_list,taskid)
 
 		do jj = particle_range(1),particle_range(2)
 			do ii = 1,3
@@ -179,7 +178,8 @@ module integrators
 !      - andersen_thermo() : In module thermostat (src/modules/thermostats.f90)
 !=====================================================================================!
 	subroutine vel_verlet_with_thermo(natoms,r,vel,F,epot,dt,rc,boxlength,Temp,pressp,&
-    gr,deltag,particle_range,interact_range,interact_list)
+    gr,deltag,particle_range,interact_range,interact_list,taskid)
+    include "../declaration_variables/parallel_variables.h"
 		integer,intent(in)::natoms, particle_range(2), interact_range(2)
     integer, allocatable, intent(in):: interact_list(:,:)
    	double precision, allocatable,  intent(inout) :: F(:,:)
@@ -195,7 +195,6 @@ module integrators
     epot = 0.d0
 
     ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
-
 		do jj = particle_range(1),particle_range(2)
 			do ii = 1,3
         r(jj,ii) = r(jj,ii) + vel(jj,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
@@ -209,10 +208,20 @@ module integrators
           MPI_DOUBLE_PRECISION, MPI_COMM_WORLD, ierror)
 
     print*, "after allgather"
+    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+    print*, "============================================================="
+    print*, 'taskid = ', taskid, interact_list(1,:), interact_list(1939,:)
+    print*, 'taskid = ', taskid, interact_list(2,:), interact_list(1940,:)
+    print*, "============================================================="
+    print*, "============================================================="
+    print*, "============================================================="
+    if (taskid.eq.0) then
+      print*, interact_list(1:2*1939,1)
+    end if
     ! allgather should be applied into the the r and vel array
     ! <------- aqui se necesita haber repartido todas las posiciones
 		call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag,interact_range,&
-              interact_list)
+              interact_list,taskid)
     call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
     print*, "before allreduce"

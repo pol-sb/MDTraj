@@ -6,7 +6,7 @@ use integrators
 use mpi
 
 implicit none
-!include "declaration_variables/parallel_variables.h"
+include "declaration_variables/parallel_variables.h"
 include "../input/parameter.h"
 
 integer::natoms
@@ -21,6 +21,8 @@ double precision, allocatable, dimension(:) ::  gr
 integer::nhis
 integer :: ii, jj, kk, M
 integer, allocatable :: seed(:)
+integer, allocatable :: interact_list(:,:)
+integer :: particle_range(2), interact_range(2)
 
 
 	call MPI_INIT(ierror) ! Begin parallel execution code
@@ -123,7 +125,7 @@ integer, allocatable :: seed(:)
 
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	call force(natoms,r,L,rc,F,epot,pressp,gr,deltag,interact_range,&
-						interact_list)
+						interact_list,taskid)
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	!call MPI_ALLGATHER(r, natoms*3, MPI_DOUBLE_PRECISION, r, natoms*3,&
   !      MPI_DOUBLE, MPI_COMM_WORLD, ierror)
@@ -150,10 +152,10 @@ integer, allocatable :: seed(:)
 
 		if (thermo.eq.0) then
 			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag,&
-											particle_range,interact_range,interact_list)
+											particle_range,interact_range,interact_list,taskid)
 		elseif (thermo.eq.1) then
-			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,gr,deltag,&
-																	particle_range,interact_range,interact_list)
+			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,temp,pressp,&
+		    gr,deltag,particle_range,interact_range,interact_list,taskid)
 		else
 			write(*,*) "Error, no thermostat status found"
 			stop
@@ -202,6 +204,6 @@ integer, allocatable :: seed(:)
 	enddo
 	close(15)
 
-	deallocate(r,v,F,F_root,gr)
+	deallocate(r,v,F,F_root,gr,interact_list)
 
 endprogram main
