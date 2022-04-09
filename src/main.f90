@@ -5,6 +5,7 @@ use boundary
 use integrators
 
 implicit none
+include "declaration_variables/parallel_variables.h"
 include "../input/parameter.h"
 include 'mpif.h' ! Include declarations of MPI functions and constants
 integer::natoms
@@ -19,11 +20,7 @@ double precision, allocatable, dimension(:) ::  gr
 integer::nhis
 integer :: ii, jj, kk, M
 integer, allocatable :: seed(:)
-integer comm, taskid, numproc, ierror, message
-integer blocksize, residu, first_particle, last_particle
-integer num_interacts, inter_residu, inter_blocksize, first_inter, last_inter
-integer, allocatable :: interact_list(:,:)
-integer :: particle_range(2), interact_range(2)
+
 
 
 	call MPI_INIT(ierror) ! Begin parallel execution code
@@ -47,20 +44,20 @@ integer :: particle_range(2), interact_range(2)
 		natoms=Nc*Nc*Nc
 		L= (float(natoms)/density)**(1.0/3.0)
 		write(*,*) L
-		!allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
-		call initial_configuration_SC(Nc,L,r)
-
+		allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
+		call initial_configuration_SC(Nc,L,r,taskid)
+		
 	elseif (structure .eq. 2) then
 		natoms=Nc*Nc*Nc*4
 		L= (float(natoms)/density)**(1.0/3.0)
-		!allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
-		call initial_configuration_fcc(Nc,L,r)
+		allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
+		call initial_configuration_fcc(Nc,L,r,taskid)
 
 	elseif (structure .eq. 3) then
 		natoms=Nc*Nc*Nc*8
 		L= (float(natoms)/density)**(1.0/3.0)
-		!allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
-		call initial_configuration_diamond(Nc,L,r)
+		allocate(r(natoms,3),v(last_particle-first_particle,3),F(natoms,3))
+		call initial_configuration_diamond(Nc,L,r,taskid)
 
 	else
 		write(*,*)"Error, no structure found"
