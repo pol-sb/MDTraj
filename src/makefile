@@ -3,7 +3,7 @@ BUILD_DIR := ./build
 
 
 
-FC := mpif90
+FC := mpifort
 FFLAGS := -O1
 
 SRC_FILES := $(SRC_DIR)/boundary.f90  $(SRC_DIR)/thermostats.f90   $(SRC_DIR)/initialization.f90   $(SRC_DIR)/forces.f90   $(SRC_DIR)/integrators.f90

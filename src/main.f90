@@ -3,11 +3,12 @@ program main
 use	initialization
 use boundary
 use integrators
+use mpi
 
 implicit none
-include "declaration_variables/parallel_variables.h"
+!include "declaration_variables/parallel_variables.h"
 include "../input/parameter.h"
-include 'mpif.h' ! Include declarations of MPI functions and constants
+
 integer::natoms
 double precision::L, rc
 integer::tt,gg,si,sj
@@ -43,21 +44,24 @@ integer, allocatable :: seed(:)
 		natoms=Nc*Nc*Nc
 		L= (float(natoms)/density)**(1.0/3.0)
 		!write(*,*) L
-		allocate(r(natoms,3),F(natoms,3))
-		call initial_configuration_SC(Nc,L,r,taskid)
-
+		allocate(r(natoms,3))
+		if (taskid.eq.0) then
+			call initial_configuration_SC(Nc,L,r,taskid)
+		end if
 	elseif (structure .eq. 2) then
 		natoms=Nc*Nc*Nc*4
 		L= (float(natoms)/density)**(1.0/3.0)
-		allocate(r(natoms,3),F(natoms,3))
-		call initial_configuration_fcc(Nc,L,r,taskid)
-
+		allocate(r(natoms,3))
+		if (taskid.eq.0) then
+			call initial_configuration_fcc(Nc,L,r,taskid)
+		end if
 	elseif (structure .eq. 3) then
 		natoms=Nc*Nc*Nc*8
 		L= (float(natoms)/density)**(1.0/3.0)
-		allocate(r(natoms,3),F(natoms,3))
-		call initial_configuration_diamond(Nc,L,r,taskid)
-
+		allocate(r(natoms,3))
+		if (taskid.eq.0) then
+			call initial_configuration_diamond(Nc,L,r,taskid)
+		end if
 	else
 		write(*,*)"Error, no structure found"
 		stop
@@ -105,7 +109,7 @@ integer, allocatable :: seed(:)
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
   allocate(gr(nhis)); gr = 0.d0
-	allocate(v(last_particle-first_particle+1,3),F_root(natoms,3))
+	allocate(v(last_particle-first_particle+1,3),F(natoms,3),F_root(natoms,3))
 
 	!initialization of velocity
 	if (vel_opt .eq. 1) then
@@ -114,14 +118,26 @@ integer, allocatable :: seed(:)
 		v(:,:)=0.0d0
 	endif
 
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	call MPI_Bcast(r,natoms*3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierror)
+
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	call force(natoms,r,L,rc,F,epot,pressp,gr,deltag,interact_range,&
 						interact_list)
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	!call MPI_ALLGATHER(r, natoms*3, MPI_DOUBLE_PRECISION, r, natoms*3,&
+  !      MPI_DOUBLE, MPI_COMM_WORLD, ierror)
+	call MPI_ALLREDUCE(F,F_root,natoms*3,MPI_DOUBLE_PRECISION,MPI_SUM,&
+									MPI_COMM_WORLD,ierror)
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	F = F_root
 
-
-	open(11,file='output/temp.dat',status='unknown')
-	open(12,file='output/energy.dat',status='unknown')
-	open(13,file='output/pressure.dat',status='unknown')
-	open(14,file='output/trajectory.xyz',status='unknown')
+	if (taskid.eq.0) then
+		open(11,file='output/temp.dat',status='unknown')
+		open(12,file='output/energy.dat',status='unknown')
+		open(13,file='output/pressure.dat',status='unknown')
+		open(14,file='output/trajectory.xyz',status='unknown')
+	end if
 
 	do tt = 1,ntimes,1
 		ti = ti+dt ! Actualizing the instant time
@@ -154,22 +170,25 @@ integer, allocatable :: seed(:)
 			end do
 		end do
 
-		if (mod(tt,everyt).eq.0) then
-			write(11,*) ti, temperature
-			write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
-			(epot+ekin)/dble(natoms)
-			write(13,*) ti, pressp/dble(natoms), density*temperature/dble(natoms), &
-		  	(pressp+density*temperature)/dble(natoms)
+		if (taskid.eq.0) then
+			if (mod(tt,everyt).eq.0) then
+				write(11,*) ti, temperature
+				write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
+				(epot+ekin)/dble(natoms)
+				write(13,*) ti, pressp/dble(natoms), density*temperature/dble(natoms), &
+			  	(pressp+density*temperature)/dble(natoms)
 
-			write(14,*) natoms
-			write(14,*)
-			do si = 1,natoms
-				write(14,*) 'He', (r(si,sj), sj=1,3)
-			end do
+				write(14,*) natoms
+				write(14,*)
+				do si = 1,natoms
+					write(14,*) 'He', (r(si,sj), sj=1,3)
+				end do
+			end if
 		end if
-   	end do
 
-		call MPI_FINALIZE(ierror) ! End parallel execution
+  end do
+
+	call MPI_FINALIZE(ierror) ! End parallel execution
 
 	open(15,file='output/rdf.dat',status='unknown')
 	do ii= 1,nhis
@@ -183,6 +202,6 @@ integer, allocatable :: seed(:)
 	enddo
 	close(15)
 
-	deallocate(r,v,F,gr)
+	deallocate(r,v,F,F_root,gr)
 
 endprogram main
