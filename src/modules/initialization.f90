@@ -88,6 +88,7 @@ contains
       integer :: out_ref
       integer :: ii
       integer :: natoms
+			double precision :: r_pert(size(r,2))
 
       a = boxlength/dfloat(N)
       natoms = N*N*N
@@ -117,7 +118,9 @@ contains
 outer:do nx = 0,N-1
          do ny = 0,N-1
             do nz = 0,N-1
-               r(nn,:)=(/a*nx, a*ny, a*nz/)
+							 call random_number(r_pert)
+							 r_pert = (r_pert - 0.5d0)*a/4.d0
+               r(nn,:)=(/a*nx + r_pert(1), a*ny + r_pert(2), a*nz + r_pert(3)/)
 							 nn = nn+1
             enddo
          enddo
@@ -152,6 +155,7 @@ outer:do nx = 0,N-1
       logical :: ext
       integer :: nx, ny, nz, natoms
       integer :: out_ref, ii, jj
+			double precision :: r_pert(size(r,2))
 
       a = boxlength/dfloat(N)
       natoms=N*N*N*4
@@ -187,7 +191,9 @@ outer:do nx = 0,N-1
           do nz = 0,N-1,1
             do jj = 1,4,1
               !print*, 4*ii+jj
-              r(4*ii + jj,:) = a*[nx, ny, nz] + r0(jj,:)
+							call random_number(r_pert)
+							r_pert = (r_pert - 0.5d0)*a/4.d0
+              r(4*ii + jj,:) = a*[nx, ny, nz] + r0(jj,:) + r_pert(:)
             enddo
             ii = ii+1
           enddo
@@ -225,6 +231,7 @@ outer:do nx = 0,N-1
       integer :: nx, ny, nz
       integer :: out_ref
       integer :: ii, natoms
+			double precision :: r_pert(size(r,2))
 
       a = boxlength/dfloat(N)
       natoms=8*N*N*N
@@ -265,10 +272,11 @@ outer:do nz = 0, N - 1,1
          do nx = 0, N - 1,1
             do ny = 0, N - 1,1
                do ii = 1, 8
-
-                  r(nn,:) = (/(( nx + r0(ii,1) ) * a), &
-                            ((ny + r0(ii,2) ) * a), &
-                            ((nz + r0(ii,3) ) * a)/)
+								 call random_number(r_pert)
+								 r_pert = (r_pert - 0.5d0)*a/4.d0
+                  r(nn,:) = (/(( nx + r0(ii,1) ) * a + r_pert(1)), &
+                            ((ny + r0(ii,2) ) * a + r_pert(2)), &
+                            ((nz + r0(ii,3) ) * a + r_pert(3))/)
                   nn = nn + 1
                enddo
             enddo
