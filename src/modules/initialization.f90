@@ -90,7 +90,7 @@ contains
       integer :: natoms
       double precision :: r_pert(size(r,2))
 
-        
+
       a = boxlength/dfloat(N)
       natoms = N*N*N
 
@@ -98,22 +98,20 @@ contains
 
       nn = 1
 
-	print*, size(r_pert)
-
 outer:do nx = 0,N-1
          do ny = 0,N-1
             do nz = 0,N-1
-	       
+
 	     call random_number(r_pert)
 	     r_pert = (r_pert - 0.5d0)*a/4.d0
             r(nn,:)=(/a*nx + r_pert(1), a*ny + r_pert(2), a*nz + r_pert(3)/)
             nn = nn+1
-            
+
             enddo
          enddo
       enddo outer
 
-  
+
       if (rank.eq.0) then
 	      inquire(file="./output/",exist=ext)
 	      if (.NOT.ext) then
@@ -167,7 +165,7 @@ outer:do nx = 0,N-1
       a = boxlength/dfloat(N)
       natoms=N*N*N*4
 
- 
+
 
       allocate(r0(4,3))
 
@@ -219,7 +217,7 @@ outer:do nx = 0,N-1
 
 	      close(out_ref)
       endif
-      
+
       deallocate(r0)
 
    endsubroutine initial_configuration_fcc
@@ -261,7 +259,7 @@ outer:do nx = 0,N-1
       r0(8,:)=r0(5,:)+0.25d0
 
 
-      
+
 
       nn = 1
 
@@ -282,7 +280,7 @@ outer:do nz = 0, N - 1,1
 
       !Computing number of atoms.
       nn = nn - 1
-  
+
       if (rank.eq.0) then
 	      ! Creating the .xyz file with the diamond structure
 
@@ -331,7 +329,7 @@ outer:do nz = 0, N - 1,1
 !=====================================================================================!
 
 	subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
-	
+
 	integer,intent(in) :: N
       double precision, intent(out) :: initial_position(:,:)
       character(len=*), intent(in) :: coord_path
