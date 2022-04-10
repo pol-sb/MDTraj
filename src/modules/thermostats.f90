@@ -25,8 +25,7 @@
 !                       - natoms(number of atoms)(in) : integer scalar
 !==============================================================================!
 module thermostat
-	implicit none
-
+    implicit none
 
 contains
 !==============================================================================!
@@ -41,32 +40,34 @@ contains
 !      - random_number() : Intrinsic Fortran 90
 !      - normal_rand()  : Tool in this module
 !==============================================================================!
-   subroutine andersen_thermo(temp,vel,natoms,particle_range)
-   	double precision, intent(inout) :: vel(:,:)
-   	double precision, intent(in) :: Temp
-   	integer, intent(in) :: natoms, particle_range(2)
-   	double precision :: nu, sigma
-   	double precision :: x_rand(size(vel,2))
-		double precision :: vel_normalrand(4)
-		integer :: pp, qq
-   	nu = 1e-3
-   	sigma = dsqrt(Temp)
-   	call random_number(x_rand)
+    subroutine andersen_thermo(temp, vel, natoms, particle_range)
+        double precision, intent(inout) :: vel(:, :)
+        double precision, intent(in) :: Temp
+        integer, intent(in) :: natoms, particle_range(2)
+        double precision :: nu, sigma
+        double precision :: x_rand(size(vel, 2))
+        double precision :: vel_normalrand(4)
+        integer :: pp, qq
+        nu = 1e-3
+        sigma = dsqrt(Temp)
+        call random_number(x_rand)
 
-   	do pp = particle_range(1),particle_range(2)
-     		if (x_rand(pp).lt.nu) then ! choosing if velocity of particle i gets changed
-       		call normal_rand(sigma,vel_normalrand(1),vel_normalrand(2))
-       		call normal_rand(sigma,vel_normalrand(3),vel_normalrand(4))
-      	   ! The subroutine normal_rand returns a random number from a normal
-       		! distribution with standard deviation \sigma = sqrt(T)
-      	 	do qq = 1,3
-      	   	vel(pp,qq) = vel_normalrand(qq)
-      	 	enddo
-     		endif
-   	enddo
+        do pp = particle_range(1), particle_range(2)
 
-   endsubroutine  andersen_thermo
+            ! choosing if the velocity of particle i gets changed
+            if (x_rand(pp) .lt. nu) then
+                call normal_rand(sigma, vel_normalrand(1), vel_normalrand(2))
+                call normal_rand(sigma, vel_normalrand(3), vel_normalrand(4))
 
+                ! The subroutine normal_rand returns a random number from a normal
+                ! distribution with standard deviation \sigma = sqrt(T)
+                do qq = 1, 3
+                    vel(pp, qq) = vel_normalrand(qq)
+                end do
+            end if
+        end do
+
+    end subroutine andersen_thermo
 
 !==============================================================================!
 !                        NORMAL RANDOM NUMBER GENERATOR
@@ -81,39 +82,39 @@ contains
 !      - random_number() : Intrinsic Fortran 90
 !
 !==============================================================================!
-   subroutine normal_rand(sigma, xout1, xout2)
-     double precision :: sigma
-     double precision xout1, xout2
-     double precision :: x(2)
-     double precision, parameter :: PI = 4.d0*datan(1.d0)
+    subroutine normal_rand(sigma, xout1, xout2)
+        double precision :: sigma
+        double precision xout1, xout2
+        double precision :: x(2)
+        double precision, parameter :: PI = 4.d0*datan(1.d0)
 
-     call random_number(x)
+        call random_number(x)
 
-     xout1 = sigma*dsqrt(-2d0*(dlog(1d0-x(1))))*dcos(2d0*PI*x(2))
-     xout2 = sigma*dsqrt(-2d0*(dlog(1d0-x(1))))*dsin(2d0*PI*x(2))
+        xout1 = sigma*dsqrt(-2d0*(dlog(1d0 - x(1))))*dcos(2d0*PI*x(2))
+        xout2 = sigma*dsqrt(-2d0*(dlog(1d0 - x(1))))*dsin(2d0*PI*x(2))
 
-	endsubroutine normal_rand
+    end subroutine normal_rand
 
 !==============================================================================!
 !                        kinetic function
 !==============================================================================!
 !  Input:
-!		 - vel(velocity of the atoms)(in) : double precision array
+!                 - vel(velocity of the atoms)(in) : double precision array
 !      - natoms(number of atoms)(in) : integer scalar
 !
 !==============================================================================!
-   double precision function kinetic(vel,natoms) result(ekin)
-   	integer,intent(in)::natoms
-   	double precision, allocatable, intent(in) :: vel(:,:)
-   	integer::pp
+    double precision function kinetic(vel, natoms, particle_range) result(ekin)
+        integer, intent(in)::natoms, particle_range(2)
+        double precision, allocatable, intent(in) :: vel(:, :)
+        integer::pp, pv
 
-			ekin = 0.d0
+        ekin = 0.d0
 
-			do pp = 1,natoms
-		   	ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
-		  enddo
+        do pp = particle_range(1), particle_range(2)
+            pv = pp - particle_range(1) + 1
+            ekin = ekin + 0.5d0*(vel(pv, 1)**2 + vel(pv, 2)**2 + vel(pv, 3)**2)
+        end do
 
-   endfunction kinetic
+    end function kinetic
 
-
-endmodule thermostat
+end module thermostat
