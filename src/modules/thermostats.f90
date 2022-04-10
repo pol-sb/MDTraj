@@ -53,7 +53,7 @@ contains
    	sigma = dsqrt(Temp)
    	call random_number(x_rand)
 
-   	do pp = particle_range(1),particle_range(2)
+   	do pp = particle_range(1)-particle_range(1)+1,particle_range(2)-particle_range(1)+1
      		if (x_rand(pp).lt.nu) then ! choosing if velocity of particle i gets changed
        		call normal_rand(sigma,vel_normalrand(1),vel_normalrand(2))
        		call normal_rand(sigma,vel_normalrand(3),vel_normalrand(4))
@@ -108,8 +108,7 @@ contains
    	integer::pp
 
 			ekin = 0.d0
-
-			do pp = particle_range(1),particle_range(2)
+			do pp = particle_range(1)-particle_range(1)+1,particle_range(2)-particle_range(1)+1
 		   	ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
 		  enddo
 

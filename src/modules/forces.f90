@@ -89,36 +89,32 @@ contains
     integer :: ii, is, js, kk, M
 
 		F = 0.d0
-
     do is = particle_range(1),particle_range(2)
-      do js = 1,is-1
-  			call lj(r,boxlength,rc,is,js,F,pot,piter,d)
-  			! calling function that computes the Lennard-Jones interaction between
-  			! pair of particles i and j
+      do js = 1,natoms
+        if (js.ne.is) then
+    			call lj(r,boxlength,rc,is,js,F,particle_range)
+    			! calling function that computes the Lennard-Jones interaction between
+    			! pair of particles i and j
+        end if
       end do
-
-      do js = is+1,natoms
-        call lj(r,boxlength,rc,is,js,F,pot,piter,d)
-  			! calling function that computes the Lennard-Jones interaction between
-  			! pair of particles i and j
-      end do
-		enddo
+    end do
 	endsubroutine force
-
 
 !==============================================================================!
 !                       				POTENTIAL SUBROUTINE
 !==============================================================================!
-  subroutine potential(natoms,r,boxlength,rc,epot,press,gr,deltag,particle_range,taskid)
-		integer,intent(in)::natoms, particle_range(2), taskid
+  subroutine potential(natoms,r,boxlength,rc,Upot,pressp,gr,deltag,particle_range,taskid)
+    include "../declaration_variables/parallel_variables.h"
+		integer,intent(in)::natoms, particle_range(2)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: gr(:)
 		double precision, intent(in) :: boxlength, rc, deltag
-		double precision, intent(out) :: epot, press
-		double precision :: vol, rho, factp, facte, d
-		double precision :: cutoff_press, cutoff_pot, pot, piter
+		double precision, intent(out) :: Upot, pressp
+		double precision :: vol, rho, factp, facte
+    double precision :: dx, dy, dz, d, dU
+		double precision :: cutoff_press, cutoff_pot, pot, piter, epot, press
 		integer :: ig
-    integer :: ii, is, js, kk, M
+    integer :: is, js, kk, M
 
 		vol = boxlength**3.; rho = dble(natoms)/vol
 		facte = (8.d0/3.d0)*pi*dfloat(natoms)*rho
@@ -128,7 +124,7 @@ contains
 		cutoff_press = factp*((2.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
 		!cutoff_pot = facte*((1.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
 
-		press = 0.d0; epot = 0.d0
+		press = 0.d0; epot = 0.d0; Upot = 0.d0; pressp = 0.d0
 
     do is = particle_range(1),particle_range(2)
       do js = 1,is-1
@@ -155,11 +151,11 @@ contains
       end do
     end do
 
-    call MPI_REDUCE(epot,epot,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
-    call MPI_REDUCE(press,press,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
+    call MPI_REDUCE(epot,Upot,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
+    call MPI_REDUCE(press,pressp,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
     if (taskid.eq.0) then
-      epot = epot/2.d0; press = press/2
-      press = press/(3.d0*vol)
+      Upot = Upot/2.d0; pressp = pressp/2
+      pressp = pressp/(3.d0*vol)
     end if
 
   end subroutine potential
@@ -192,13 +188,16 @@ contains
 ! Depencency:
 !     -pbc(): Tool in boundary module
 !==============================================================================!
-	subroutine lj(r,boxlength,rc,ii,jj,F)
+	subroutine lj(r,boxlength,rc,ii,jj,F,particle_range)
+    integer, intent(in) :: particle_range(2)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: F(:,:)
 		double precision, intent(in) :: boxlength, rc
 		integer, intent(in) :: ii, jj
 		double precision :: dx, dy, dz, d, dU
+    integer :: iv
 
+    iv = ii - particle_range(1) + 1
 		dx = r(ii,1)-r(jj,1); dy = r(ii,2)-r(jj,2); dz = r(ii,3)-r(jj,3)
 		! Apply the boundary conditions to the particles distance
 		call pbc(dx,boxlength,0.d0)
@@ -208,9 +207,9 @@ contains
 
 		if (d.lt.rc) then
 			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
-			F(ii,1) = F(ii,1) + dU*dx
-			F(ii,2) = F(ii,2) + dU*dy
-			F(ii,3) = F(ii,3) + dU*dz
+			F(iv,1) = F(iv,1) + dU*dx
+			F(iv,2) = F(iv,2) + dU*dy
+			F(iv,3) = F(iv,3) + dU*dz
     endif
 	endsubroutine
 

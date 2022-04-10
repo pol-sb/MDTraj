@@ -91,37 +91,15 @@ integer :: particle_range(2), interact_range(2)
 		end if
 		displs(ii) =  count; count = count+sizes(ii)
 	end do
-	particle_range(1) = first_particle; particle_range(2) = last_particle;
-
-	! -------------------------------------------------------------------------- !
-	! 							Select range of interactions for each processor
-	! -------------------------------------------------------------------------- !
-	num_interacts = natoms*(natoms-1)/2
-	allocate(interact_list(num_interacts,2))
-	kk = 1
-	do ii = 1,natoms-1
-		do jj = ii+1,natoms
-			interact_list(kk,:) = (/ii,jj/); kk = kk+1
-		enddo
-	enddo
-
-	inter_blocksize = num_interacts/numproc
-	inter_residu = mod(num_interacts,numproc)
-	if (taskid.lt.inter_residu) then
-		first_inter = taskid*(inter_blocksize+1) + 1
-		last_inter = inter_blocksize + first_inter
-	elseif (taskid.ge.inter_residu) then
-		first_inter = taskid*inter_blocksize + 1 + inter_residu
-		last_inter = (inter_blocksize-1) + first_inter
-	end if
-	interact_range(1) = first_inter; interact_range(2) = last_inter;
+	particle_range(1) = first_particle; particle_range(2) = last_particle
 
   ! -------------------------------------------------------------------------- !
   ! -------------------------------------------------------------------------- !
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
   allocate(gr(nhis)); gr = 0.d0; ngr = 0
-	allocate(v(last_particle-first_particle+1,3),F(natoms,3),F_root(natoms,3))
+	allocate(v(last_particle-first_particle+1,3))
+	allocate(F(last_particle-first_particle+1,3))
 
 	!initialization of velocity
 	if (vel_opt .eq. 1) then
@@ -131,19 +109,12 @@ integer :: particle_range(2), interact_range(2)
 	endif
 
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+
 	call MPI_Bcast(r,natoms*3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ierror)
 
+	call force(natoms,r,L,rc,F,particle_range)
+
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-	call force(natoms,r,L,rc,F,epot,pressp,gr,deltag,interact_range,&
-						interact_list)
-	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-	!call MPI_ALLGATHER(r, natoms*3, MPI_DOUBLE_PRECISION, r, natoms*3,&
-  !      MPI_DOUBLE, MPI_COMM_WORLD, ierror)
-	call MPI_ALLREDUCE(F,F_root,natoms*3,MPI_DOUBLE_PRECISION,MPI_SUM,&
-									MPI_COMM_WORLD,ierror)
-	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-	F = F_root
-	deallocate(F_root)
 
 	if (taskid.eq.0) then
 		open(11,file='output/temp.dat',status='unknown')
@@ -163,21 +134,19 @@ integer :: particle_range(2), interact_range(2)
 
 		if (thermo.eq.0) then
 			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag,&
-											particle_range,interact_range,interact_list)
+	      particle_range,taskid)
 		elseif (thermo.eq.1) then
-			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,temp,pressp,&
-		    gr,deltag,particle_range,interact_range,interact_list,&
-				sizes,displs)
+			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,&
+		    gr,deltag,particle_range,sizes,displs,taskid)
 		else
 			write(*,*) "Error, no thermostat status found"
 			stop
 		endif
 
-		ekin = kinetic(v,natoms,particle_range)
-		call MPI_REDUCE(ekin,ekin,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
+		ekin_paralel = kinetic(v,natoms,particle_range)
+		call MPI_REDUCE(ekin_paralel,ekin,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
                   									MPI_COMM_WORLD,ierror)
 		if (taskid.eq.0) then
-			print*, "kinetic energy", ekin
 			temperature = 2.d0*ekin/(3.d0*dble(natoms)-3.d0)
 			ngr = ngr+1
 		end if
@@ -190,13 +159,11 @@ integer :: particle_range(2), interact_range(2)
 
 		if (taskid.eq.0) then
 			if (mod(tt,everyt).eq.0) then
-				print*, tt, epot/dble(natoms)
 				write(11,*) ti, temperature
 				write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
 				(epot+ekin)/dble(natoms)
 				write(13,*) ti, pressp/dble(natoms), density*temperature/dble(natoms), &
 			  	(pressp+density*temperature)/dble(natoms)
-
 				write(14,*) natoms
 				write(14,*)
 				do si = 1,natoms
@@ -210,14 +177,6 @@ integer :: particle_range(2), interact_range(2)
 	if (taskid.eq.0) then
 		close(11); close(12); close(13); close(14)
 	end if
-	print*, "arrived after close", taskid
-	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-
-	deallocate(r)
-	print*, 'first deallocate passed', taskid
-
-	deallocate(F)
-	print*, 'second deallocate passed', taskid
 
 	if (taskid.eq.0) then
 		open(15,file='output/rdf.dat',status='unknown')
@@ -233,10 +192,9 @@ integer :: particle_range(2), interact_range(2)
 		close(15)
 	end if
 
+	deallocate(r,F,v,gr,sizes,displs)
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
-	deallocate(gr,interact_list,sizes,displs,v)
-	print*, "Now into finalize"
 	call MPI_FINALIZE(ierror) ! End parallel execution
 
 endprogram main
