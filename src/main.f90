@@ -17,7 +17,7 @@ double precision,allocatable::r(:,:),v(:,:),F(:,:), F_root(:,:)
 double precision::ngr, pressp
 double precision::epot, ekin, ekin_paralel, temperature, deltag
 double precision::rpos, vb, nid
-double precision, allocatable, dimension(:) ::  gr
+double precision, allocatable, dimension(:) ::  gr, gr_main
 integer::nhis
 integer :: ii, jj, kk, M, count, seed(33)
 integer, allocatable :: interact_list(:,:), sizes(:), displs(:)
@@ -97,7 +97,7 @@ integer :: particle_range(2), interact_range(2)
   ! -------------------------------------------------------------------------- !
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-  allocate(gr(nhis)); gr = 0.d0; ngr = 0
+  allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0; ngr = 0
 	allocate(v(last_particle-first_particle+1,3))
 	allocate(F(last_particle-first_particle+1,3))
 
@@ -146,6 +146,9 @@ integer :: particle_range(2), interact_range(2)
 		ekin_paralel = kinetic(v,natoms,particle_range)
 		call MPI_REDUCE(ekin_paralel,ekin,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
                   									MPI_COMM_WORLD,ierror)
+
+		call MPI_REDUCE(gr,gr_main,nhis,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
+                  									MPI_COMM_WORLD,ierror)
 		if (taskid.eq.0) then
 			temperature = 2.d0*ekin/(3.d0*dble(natoms)-3.d0)
 			ngr = ngr+1
@@ -186,13 +189,13 @@ integer :: particle_range(2), interact_range(2)
 			! Volume between bin i+1 and i
 			nid = (4.d0*PI/3.d0)*vb*density
 			! Number of ideal gas part . in vb
-			gr(ii) = gr(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
-			write(15,*) rpos*sigma, gr(ii)
+			gr_main(ii) = gr_main(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
+			write(15,*) rpos*sigma, gr_main(ii)
 		enddo
 		close(15)
 	end if
 
-	deallocate(r,F,v,gr,sizes,displs)
+	deallocate(r,F,v,gr,sizes,displs,gr_main)
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
 	call MPI_FINALIZE(ierror) ! End parallel execution
