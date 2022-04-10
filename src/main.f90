@@ -19,9 +19,8 @@ double precision::epot, ekin, temperature, deltag
 double precision::rpos, vb, nid
 double precision, allocatable, dimension(:) ::  gr
 integer::nhis
-integer :: ii, jj, kk, M
-integer, allocatable :: seed(:)
-integer, allocatable :: interact_list(:,:)
+integer :: ii, jj, kk, M, count, seed(33)
+integer, allocatable :: interact_list(:,:), sizes(:), displs(:)
 integer :: particle_range(2), interact_range(2)
 
 
@@ -37,8 +36,7 @@ integer :: particle_range(2), interact_range(2)
 	! -------------------------------------------------------------------------- !
 
 				! Random seed initializtaion
-	allocate(seed(33))
-	seed(1:33) = rng_seed
+	seed(1:33) = rng_seed+taskid
 	call random_seed(put=seed)
 
 	!Initialization of the structure
@@ -74,6 +72,8 @@ integer :: particle_range(2), interact_range(2)
 	! -------------------------------------------------------------------------- !
 	blocksize = natoms/numproc
 	residu = mod(natoms,numproc)
+	allocate(sizes(numproc),displs(numproc))
+
 	if (taskid.lt.residu) then
 		first_particle = taskid*(blocksize+1) + 1
 		last_particle = blocksize + first_particle
@@ -81,6 +81,16 @@ integer :: particle_range(2), interact_range(2)
 		first_particle = taskid*blocksize + 1 + residu
 		last_particle = (blocksize-1) + first_particle
 	end if
+
+	count = 0
+	do ii = 1,numproc
+		if (ii-1.lt.residu) then
+			sizes(ii) = blocksize+1
+		else
+			sizes(ii) = blocksize
+		end if
+		displs(ii) =  count; count = count+sizes(ii)
+	end do
 	particle_range(1) = first_particle; particle_range(2) = last_particle;
 
 	! -------------------------------------------------------------------------- !
@@ -91,7 +101,7 @@ integer :: particle_range(2), interact_range(2)
 	kk = 1
 	do ii = 1,natoms-1
 		do jj = ii+1,natoms
-			interact_list(kk,:) = [ii,jj]; kk = kk+1
+			interact_list(kk,:) = (/ii,jj/); kk = kk+1
 		enddo
 	enddo
 
@@ -125,7 +135,7 @@ integer :: particle_range(2), interact_range(2)
 
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	call force(natoms,r,L,rc,F,epot,pressp,gr,deltag,interact_range,&
-						interact_list,taskid)
+						interact_list)
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	!call MPI_ALLGATHER(r, natoms*3, MPI_DOUBLE_PRECISION, r, natoms*3,&
   !      MPI_DOUBLE, MPI_COMM_WORLD, ierror)
@@ -152,10 +162,11 @@ integer :: particle_range(2), interact_range(2)
 
 		if (thermo.eq.0) then
 			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag,&
-											particle_range,interact_range,interact_list,taskid)
+											particle_range,interact_range,interact_list)
 		elseif (thermo.eq.1) then
 			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,temp,pressp,&
-		    gr,deltag,particle_range,interact_range,interact_list,taskid)
+		    gr,deltag,particle_range,interact_range,interact_list,&
+				sizes,displs)
 		else
 			write(*,*) "Error, no thermostat status found"
 			stop

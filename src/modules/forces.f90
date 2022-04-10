@@ -82,8 +82,7 @@ contains
 !
 !==============================================================================!
 	subroutine force(natoms,r,boxlength,rc,F,epot,press,gr,deltag,interact_range,&
-    interact_list,taskid)
-    include "../declaration_variables/parallel_variables.h"
+    interact_list)
 		integer,intent(in)::natoms, interact_range(2)
     integer, allocatable, intent(in) :: interact_list(:,:)
 		double precision, allocatable, intent(in) :: r(:,:)
@@ -96,11 +95,6 @@ contains
 		double precision :: cutoff_press, cutoff_pot, pot, piter
 		integer :: ig
     integer :: ii, is, js, kk, M
-
-    print*, "hi from forces"
-    print*, 'taskid = ', taskid, 'interaction range = ', interact_range
-    print*, 'taskid = ', taskid, ' size = ', size(interact_list,1), size(interact_list,2)
-    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
 		vol = boxlength**3.; rho = dble(natoms)/vol
 		facte = (8.d0/3.d0)*pi*dfloat(natoms)*rho
