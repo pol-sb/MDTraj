@@ -223,7 +223,6 @@ module integrators
                   									MPI_COMM_WORLD,ierror)
   	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
   	F = F_root
-	print*,"Forces:",F
     ! allgather should be applied into the the F array
 
 		do jj = particle_range(1),particle_range(2)

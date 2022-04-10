@@ -1,6 +1,8 @@
 SRC_DIR := ./modules
 BUILD_DIR := ./build
 
+
+
 FC := mpifort
 FFLAGS := -O1
 
@@ -9,9 +11,8 @@ SRC_FILES := $(SRC_DIR)/boundary.f90  $(SRC_DIR)/thermostats.f90   $(SRC_DIR)/in
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.f90,$(BUILD_DIR)/%.o,$(SRC_FILES))
 
 program.exe: build $(OBJ_FILES)
-	@echo "Compiling the program..."
 	@$(FC) $(FFLAGS) -o $@ main.f90 $(OBJ_FILES)
-	@echo "Program compiled sucessfully."
+	echo "Compiled"
 	@mv *.mod $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.f90 build
@@ -19,5 +20,4 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.f90 build
 
 
 build:
-	@echo "Creating build directory..."
-	@mkdir $(BUILD_DIR)
+	mkdir $(BUILD_DIR)

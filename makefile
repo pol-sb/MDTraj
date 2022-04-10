@@ -1,23 +1,21 @@
 PY_DIST = $(shell which python3)
 MAKEFLAGS += --no-print-directory
-MPI_NUMPROC = 4
 
-## The default target is 'all'. To run it, just use the 'make' command.
+## By default, it is all (just write make)
 
 ## 1. make all - to compile, execute and plot.
 all:
-	@$(MAKE) -C src/
+	$(MAKE) -C src/
 	@make run
 	@$(MAKE) plot
 
 ## 2. make compile - to compile.
 compile:
-	@$(MAKE) -C src/
+	$(MAKE) -C src/
 	
 ## 3. make run - to run.
 run:
-	@echo "Running the simulation with $(MPI_NUMPROC) processors."
-	mpirun -v -np $(MPI_NUMPROC) ./src/program.exe
+	 mpirun -np 4 ./src/program.exe
 
 ## 4. make plot - to plot the graphics
 plot:
