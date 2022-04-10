@@ -17,7 +17,7 @@ program main
     double precision::ngr,pressp
     double precision::epot,ekin,ekin_paralel,temperature,deltag
     double precision::rpos,vb,nid
-    double precision,allocatable,dimension(:) ::  gr
+    double precision,allocatable,dimension(:) ::  gr, gr_main
     integer::nhis
     integer :: ii,jj,kk,M,count,seed(33)
     integer,allocatable :: interact_list(:,:),sizes(:),displs(:)
@@ -117,7 +117,7 @@ program main
     ! -------------------------------------------------------------------------- !
 
     nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-    allocate(gr(nhis)); gr = 0.d0
+    allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0
     allocate(v(last_particle-first_particle+1,3),F(natoms,3),F_root(natoms,3))
 
     !initialization of velocity
@@ -173,31 +173,34 @@ program main
         call MPI_REDUCE(ekin_paralel,ekin,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
                         MPI_COMM_WORLD,ierror)
 
+        call MPI_REDUCE(gr,gr_main,nhis,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
+                        MPI_COMM_WORLD,ierror)
+
         if (taskid .eq. 0) then
-            temperature = 2.d0*ekin/(3.d0*dble(natoms) - 3.d0)
-			ngr = ngr + 1
+          temperature = 2.d0*ekin/(3.d0*dble(natoms) - 3.d0)
+		      ngr = ngr + 1
         end if
 
-        do si = 1,natoms
+        do si = particle_range(1),particle_range(2)
             do sj = 1,3
                 call pbc(r(si,sj),L,L/2.d0)
             end do
         end do
 
         if (taskid .eq. 0) then
-            if (mod(tt,everyt) .eq. 0) then
-                write (11,*) ti,temperature
-                write (12,*) ti,epot/dble(natoms),ekin/dble(natoms),&
-                    (epot + ekin)/dble(natoms)
-                write (13,*) ti,pressp/dble(natoms),density*temperature/dble(natoms),&
-                    (pressp + density*temperature)/dble(natoms)
-
-                write (14,*) natoms
-                write (14,*)
-                do si = 1,natoms
-                    write (14,*) 'He',(r(si,sj),sj=1,3)
-                end do
-            end if
+          if (mod(tt,everyt) .eq. 0) then
+            print*, ti
+            write(11,*) ti, temperature
+            write(12,*) ti, epot/dble(natoms),ekin/dble(natoms),&
+                (epot + ekin)/dble(natoms)
+            write(13,*) ti, pressp/dble(natoms),density*temperature/dble(natoms),&
+                (pressp + density*temperature)/dble(natoms)
+            write(14,*) natoms
+            write(14,*)
+            do si = 1,natoms
+                write(14,*) 'He',(r(si,sj),sj=1,3)
+            end do
+          end if
         end if
 
     end do
@@ -210,13 +213,13 @@ program main
             ! Volume between bin i+1 and i
             nid = (4.d0*PI/3.d0)*vb*density
             ! Number of ideal gas part . in vb
-            gr(ii) = gr(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
-            write (15,*) rpos*sigma,gr(ii)
+            gr_main(ii) = gr_main(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
+            write (15,*) rpos*sigma,gr_main(ii)
         end do
-        close (15)
+        close(11); close(12); close(13); close(14); close(15)
     end if
 
-    deallocate (r,v,F,F_root,gr,interact_list)
+    deallocate(r,v,F,F_root,gr,interact_list)
 	call MPI_FINALIZE(ierror) ! End parallel execution
 
 end program main
