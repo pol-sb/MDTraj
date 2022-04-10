@@ -216,7 +216,7 @@ program main
         close (15)
     end if
 	
-    !deallocate (r, v, F, F_root, gr, interact_list)
+    deallocate (r, v, F, F_root, gr, interact_list)
 	call MPI_FINALIZE(ierror) ! End parallel execution
 
 end program main
