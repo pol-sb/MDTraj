@@ -192,7 +192,7 @@ module integrators
     integer ii, jj
 
 		Upot = 0.d0; pressp = 0.d0
-    epot = 0.d0; r = 0.d0
+    epot = 0.d0; !r = 0.d0
     first_particle = particle_range(1); last_particle = particle_range(2)
 
     ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
