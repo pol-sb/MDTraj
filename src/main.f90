@@ -15,7 +15,7 @@ integer::tt,gg,si,sj
 double precision::ti
 double precision,allocatable::r(:,:),v(:,:),F(:,:), F_root(:,:)
 double precision::ngr, pressp
-double precision::epot, ekin, temperature, deltag
+double precision::epot, ekin, ekin_paralel, temperature, deltag
 double precision::rpos, vb, nid
 double precision, allocatable, dimension(:) ::  gr
 integer::nhis
@@ -120,7 +120,7 @@ integer :: particle_range(2), interact_range(2)
   ! -------------------------------------------------------------------------- !
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-  allocate(gr(nhis)); gr = 0.d0
+  allocate(gr(nhis)); gr = 0.d0; ngr = 0
 	allocate(v(last_particle-first_particle+1,3),F(natoms,3),F_root(natoms,3))
 
 	!initialization of velocity
@@ -143,6 +143,7 @@ integer :: particle_range(2), interact_range(2)
 									MPI_COMM_WORLD,ierror)
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	F = F_root
+	deallocate(F_root)
 
 	if (taskid.eq.0) then
 		open(11,file='output/temp.dat',status='unknown')
@@ -172,12 +173,16 @@ integer :: particle_range(2), interact_range(2)
 			stop
 		endif
 
-		ekin = kinetic(v,natoms)
-		temperature = 2.d0*ekin/(3.d0*dble(natoms)-3.d0)
+		ekin = kinetic(v,natoms,particle_range)
+		call MPI_REDUCE(ekin,ekin,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
+                  									MPI_COMM_WORLD,ierror)
+		if (taskid.eq.0) then
+			print*, "kinetic energy", ekin
+			temperature = 2.d0*ekin/(3.d0*dble(natoms)-3.d0)
+			ngr = ngr+1
+		end if
 
-    ngr = ngr+1
-
-		do si = 1,natoms
+		do si = first_particle,last_particle
 			do sj = 1,3
 				call pbc(r(si,sj),L,L/2.d0)
 			end do
@@ -185,6 +190,7 @@ integer :: particle_range(2), interact_range(2)
 
 		if (taskid.eq.0) then
 			if (mod(tt,everyt).eq.0) then
+				print*, tt, epot/dble(natoms)
 				write(11,*) ti, temperature
 				write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
 				(epot+ekin)/dble(natoms)
@@ -201,20 +207,36 @@ integer :: particle_range(2), interact_range(2)
 
   end do
 
+	if (taskid.eq.0) then
+		close(11); close(12); close(13); close(14)
+	end if
+	print*, "arrived after close", taskid
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+
+	deallocate(r)
+	print*, 'first deallocate passed', taskid
+
+	deallocate(F)
+	print*, 'second deallocate passed', taskid
+
+	if (taskid.eq.0) then
+		open(15,file='output/rdf.dat',status='unknown')
+		do ii= 1,nhis
+			rpos = deltag*(ii + 0.5) ! Distance r
+			vb = ((ii+1)**3 - ii**3)*(deltag**3)
+			! Volume between bin i+1 and i
+			nid = (4.d0*PI/3.d0)*vb*density
+			! Number of ideal gas part . in vb
+			gr(ii) = gr(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
+			write(15,*) rpos*sigma, gr(ii)
+		enddo
+		close(15)
+	end if
+
+	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+
+	deallocate(gr,interact_list,sizes,displs,v)
+	print*, "Now into finalize"
 	call MPI_FINALIZE(ierror) ! End parallel execution
-
-	open(15,file='output/rdf.dat',status='unknown')
-	do ii= 1,nhis
-		rpos = deltag*(ii + 0.5) ! Distance r
-		vb = ((ii+1)**3 - ii**3)*(deltag**3)
-		! Volume between bin i+1 and i
-		nid = (4.d0*PI/3.d0)*vb*density
-		! Number of ideal gas part . in vb
-		gr(ii) = gr(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
-		write(15,*) rpos*sigma, gr(ii)
-	enddo
-	close(15)
-
-	deallocate(r,v,F,F_root,gr,interact_list)
 
 endprogram main

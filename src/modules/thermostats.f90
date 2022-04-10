@@ -102,14 +102,14 @@ contains
 !      - natoms(number of atoms)(in) : integer scalar
 !
 !==============================================================================!
-   double precision function kinetic(vel,natoms) result(ekin)
-   	integer,intent(in)::natoms
+   double precision function kinetic(vel,natoms,particle_range) result(ekin)
+   	integer,intent(in)::natoms, particle_range(2)
    	double precision, allocatable, intent(in) :: vel(:,:)
    	integer::pp
 
 			ekin = 0.d0
 
-			do pp = 1,natoms
+			do pp = particle_range(1),particle_range(2)
 		   	ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
 		  enddo
 

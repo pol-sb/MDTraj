@@ -81,17 +81,41 @@ contains
 !		- lj() : Tool in thi module
 !
 !==============================================================================!
-	subroutine force(natoms,r,boxlength,rc,F,epot,press,gr,deltag,interact_range,&
-    interact_list)
-		integer,intent(in)::natoms, interact_range(2)
-    integer, allocatable, intent(in) :: interact_list(:,:)
+	subroutine force(natoms,r,boxlength,rc,F,particle_range)
+		integer,intent(in)::natoms, particle_range(2)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: F(:,:)
+		double precision, intent(in) :: boxlength, rc
+    integer :: ii, is, js, kk, M
+
+		F = 0.d0
+
+    do is = particle_range(1),particle_range(2)
+      do js = 1,is-1
+  			call lj(r,boxlength,rc,is,js,F,pot,piter,d)
+  			! calling function that computes the Lennard-Jones interaction between
+  			! pair of particles i and j
+      end do
+
+      do js = is+1,natoms
+        call lj(r,boxlength,rc,is,js,F,pot,piter,d)
+  			! calling function that computes the Lennard-Jones interaction between
+  			! pair of particles i and j
+      end do
+		enddo
+	endsubroutine force
+
+
+!==============================================================================!
+!                       				POTENTIAL SUBROUTINE
+!==============================================================================!
+  subroutine potential(natoms,r,boxlength,rc,epot,press,gr,deltag,particle_range,taskid)
+		integer,intent(in)::natoms, particle_range(2), taskid
+		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: gr(:)
-		double precision:: d
 		double precision, intent(in) :: boxlength, rc, deltag
 		double precision, intent(out) :: epot, press
-		double precision :: vol, rho, factp, facte
+		double precision :: vol, rho, factp, facte, d
 		double precision :: cutoff_press, cutoff_pot, pot, piter
 		integer :: ig
     integer :: ii, is, js, kk, M
@@ -105,28 +129,40 @@ contains
 		!cutoff_pot = facte*((1.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
 
 		press = 0.d0; epot = 0.d0
-		F = 0.d0
 
-    do ii = interact_range(1),interact_range(2)
-      is = interact_list(ii,1); js = interact_list(ii,2);
-			call lj(r,boxlength,rc,is,js,F,pot,piter,d)
-			! calling function that computes the Lennard-Jones interaction between
-			! pair of particles i and j
-			press = press + piter; epot = epot + pot
+    do is = particle_range(1),particle_range(2)
+      do js = 1,is-1
+        pot = 0.d0; piter = 0.d0
+    		dx = r(is,1)-r(js,1); dy = r(is,2)-r(js,2); dz = r(is,3)-r(js,3)
+    		! Apply the boundary conditions to the particles distance
+    		call pbc(dx,boxlength,0.d0)
+    		call pbc(dy,boxlength,0.d0)
+    		call pbc(dz,boxlength,0.d0)
+    		d = (dx**2. + dy**2. + dz**2.)**0.5 ! Distance between particles i and j
 
-			if (d.lt.rc) then ! computation of the radial distribution function
-				! adding the each pair of interaction into the corresponding bin
-				ig = int(d/deltag)
-				gr(ig) = gr(ig) + 2
-			endif
-		enddo
+    		if (d.lt.rc) then
+    			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
+    			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.))
+    			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
+        endif
+  			press = press + piter; epot = epot + pot
 
-		!pot = pot - cutoff_pot
-		press = (1.d0/(3.d0*vol))*press
-		!press = press + cutoff_press
-		!epot = epot + etail; 			pressp = pressp + ptail
+  			if (d.lt.rc) then ! computation of the radial distribution function
+  				! adding the each pair of interaction into the corresponding bin
+  				ig = int(d/deltag)
+  				gr(ig) = gr(ig) + 2
+  			endif
+      end do
+    end do
 
-	endsubroutine force
+    call MPI_REDUCE(epot,epot,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
+    call MPI_REDUCE(press,press,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
+    if (taskid.eq.0) then
+      epot = epot/2.d0; press = press/2
+      press = press/(3.d0*vol)
+    end if
+
+  end subroutine potential
 
 !==============================================================================!
 !                  LENNARD-JONES INTERACTION COMPUTATION
@@ -156,15 +192,13 @@ contains
 ! Depencency:
 !     -pbc(): Tool in boundary module
 !==============================================================================!
-	subroutine lj(r,boxlength,rc,ii,jj,F,pot,piter,d)
+	subroutine lj(r,boxlength,rc,ii,jj,F)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: F(:,:)
 		double precision, intent(in) :: boxlength, rc
 		integer, intent(in) :: ii, jj
-		double precision, intent(out) :: pot, piter
 		double precision :: dx, dy, dz, d, dU
 
-		pot = 0.d0; piter = 0.d0
 		dx = r(ii,1)-r(jj,1); dy = r(ii,2)-r(jj,2); dz = r(ii,3)-r(jj,3)
 		! Apply the boundary conditions to the particles distance
 		call pbc(dx,boxlength,0.d0)
@@ -174,17 +208,9 @@ contains
 
 		if (d.lt.rc) then
 			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
-
 			F(ii,1) = F(ii,1) + dU*dx
 			F(ii,2) = F(ii,2) + dU*dy
 			F(ii,3) = F(ii,3) + dU*dz
-
-			F(jj,1) = F(jj,1) - dU*dx
-			F(jj,2) = F(jj,2) - dU*dy
-			F(jj,3) = F(jj,3) - dU*dz
-
-			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.))
-			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
     endif
 	endsubroutine
 
