@@ -199,10 +199,10 @@ outer:do nx = 0,N-1
 
 	      inquire(file="./output/structure",exist=ext)
 	      if (.NOT.ext) then
-		   call execute_command_line("mkdir ./output/structure/structure")
+		   call execute_command_line("mkdir ./output/structure")
 	      endif
 
-	      inquire(file="./output/init_conf_fcc.xyz",exist=ext)
+	      inquire(file="./output/structure/init_conf_fcc.xyz",exist=ext)
 	      if (.NOT.ext) then
 		   open(newunit=out_ref,file="./output/structure/init_conf_fcc.xyz", status="new")
 	      else
@@ -211,7 +211,7 @@ outer:do nx = 0,N-1
 	      write(out_ref,*) natoms
 	      write(out_ref,*)
 
-	      do ii = 1,nn
+	      do nn = 1,natoms
 		  write(out_ref,*) "A", r(nn,1)*sigma, r(nn,2)*sigma, r(nn,3)*sigma
 	      enddo
 
