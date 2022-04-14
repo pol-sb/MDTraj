@@ -150,13 +150,15 @@ contains
         include "../declaration_variables/parallel_variables.h"
         integer, intent(in) :: N
         double precision, intent(in) :: boxlength,sigma
-        double precision, allocatable, intent(out) :: r(:, :)
+        double precision, allocatable, intent(inout) :: r(:, :)
         double precision, allocatable :: r0(:, :)
 
         logical :: ext
         integer :: nx, ny, nz, natoms
         integer :: out_ref, ii, jj
         double precision :: r_pert(size(r, 2))
+
+	
 
         a = boxlength/dfloat(N)
         natoms = N*N*N*4
@@ -168,21 +170,23 @@ contains
         r0(3, :) = [0.d0, a/2.d0, a/2.d0]
         r0(4, :) = [a/2.d0, 0.d0, a/2.d0]
 
-        nn = 0
         ii = 0
         do nx = 0, N - 1, 1
             do ny = 0, N - 1, 1
                 do nz = 0, N - 1, 1
                     do jj = 1, 4, 1
-                        !print*, 4*ii+jj
                         call random_number(r_pert)
                         r_pert = (r_pert - 0.5d0)*a/4.d0
                         r(4*ii + jj, :) = a*[nx, ny, nz] + r0(jj, :) + r_pert(:)
+                        
+
                     end do
                     ii = ii + 1
                 end do
             end do
         end do
+
+
 
             inquire (file="./output/", exist=ext)
             if (.NOT. ext) then
@@ -191,10 +195,10 @@ contains
 
             inquire (file="./output/structure", exist=ext)
             if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/structure/structure")
+                call execute_command_line("mkdir ./output/structure")
             end if
 
-            inquire (file="./output/init_conf_fcc.xyz", exist=ext)
+            inquire (file="./output/structure/init_conf_fcc.xyz", exist=ext)
             if (.NOT. ext) then
                 open (newunit=out_ref, file="./output/structure/init_conf_fcc.xyz", status="new")
             else
@@ -203,7 +207,7 @@ contains
             write (out_ref, *) natoms
             write (out_ref, *)
 
-            do ii = 1, nn
+            do nn = 1, natoms
                 write (out_ref, *) "A", r(nn, 1)*sigma, r(nn, 2)*sigma, r(nn, 3)*sigma
             end do
 
@@ -265,6 +269,7 @@ contains
                 end do
             end do
         end do outer
+      
 
         !Computing number of atoms.
         nn = nn - 1
@@ -288,7 +293,7 @@ contains
             write (out_ref, *) natoms
             write (out_ref, *) " "
 
-            do ii = 1, nn !
+            do ii = 1, natoms
                 write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
             end do
 
