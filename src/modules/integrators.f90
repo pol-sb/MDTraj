@@ -124,32 +124,51 @@ module integrators
 !  Depencency:
 !      - force() : In module forces (src/modules/forces.f90)
 !=====================================================================================!
-   subroutine vel_verlet(natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag,&
-     particle_range,taskid)
-		integer,intent(in)::natoms, particle_range(2), taskid
-   	double precision, allocatable,intent(inout) :: F(:,:)
-   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
-   	double precision, allocatable, intent(inout) :: gr(:)
-   	double precision, intent(in) :: dt, rc, boxlength, deltag
-   	double precision, intent(out) :: Upot, pressp
-    integer :: ii, jj
+   subroutine vel_verlet(natoms,r,vel,F,epot,dt,rc,boxlength,pressp,&
+			 gr,deltag,particle_range,sizes,displs,taskid)
+	include "../declaration_variables/parallel_variables.h"
+		integer,intent(in)::natoms, particle_range(2)
+    		integer, allocatable, intent(in):: sizes(:), displs(:)
+	   	double precision, allocatable,  intent(inout) :: F(:,:)
+	   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
+	   	double precision, allocatable,  intent(inout) :: gr(:)
+	   	double precision, intent(in) :: dt, rc, boxlength, deltag
+	   	double precision, intent(out) :: pressp, epot
+    		integer ii, jj, jv
 
-
-		do jj = particle_range(1),particle_range(2)
-		 	do ii = 1,3
-				r(jj,ii) = r(jj,ii) + vel(jj,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
-				vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
+	    	first_particle = particle_range(1); last_particle = particle_range(2)
+	    	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	    ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
+			do jj = particle_range(1),particle_range(2)
+	      			jv = jj - particle_range(1) + 1
+				do ii = 1,3
+					r(jj,ii) = r(jj,ii) + vel(jv,ii)*dt + 0.5d0*F(jv,ii)*dt*dt
+					vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
+				enddo
 			enddo
-		enddo
+	    	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
-		call force(natoms,r,boxlength,rc,F,particle_range)
-    call potential(natoms,r,boxlength,rc,Upot,pressp,gr,deltag,particle_range,taskid)
+		    do ii = 1,3
+		      call MPI_allgatherv(r(first_particle:last_particle,ii),(last_particle-first_particle+1),&
+				  MPI_DOUBLE_PRECISION,r(:,ii),sizes,displs,MPI_DOUBLE_PRECISION,&
+				  MPI_COMM_WORLD,ierror)
+		    end do
+		    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+		    ! allgather should be applied into the the r and vel array
+		    ! <------- aqui se necesita haber repartido todas las posiciones
+				call force(natoms,r,boxlength,rc,F,particle_range)
 
-		do jj = particle_range(1),particle_range(2)
-			do ii = 1,3
-				vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
-			enddo
-		enddo
+		    call potential(natoms,r,boxlength,rc,epot,pressp,gr,deltag,particle_range,taskid)
+
+		    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+
+				do jj = particle_range(1),particle_range(2)
+		      jv = jj - particle_range(1) + 1
+					do ii = 1,3
+			vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
+		      enddo
+		    enddo
+		    ! allgather should be applied into the the r and vel array
 
    endsubroutine vel_verlet
 
@@ -177,54 +196,54 @@ module integrators
 !      - andersen_thermo() : In module thermostat (src/modules/thermostats.f90)
 !=====================================================================================!
 	subroutine vel_verlet_with_thermo(natoms,r,vel,F,epot,dt,rc,boxlength,Temp,pressp,&
-    gr,deltag,particle_range,sizes,displs,taskid)
-    include "../declaration_variables/parallel_variables.h"
+					   gr,deltag,particle_range,sizes,displs,taskid)
+    		include "../declaration_variables/parallel_variables.h"
 		integer,intent(in)::natoms, particle_range(2)
-    integer, allocatable, intent(in):: sizes(:), displs(:)
-   	double precision, allocatable,  intent(inout) :: F(:,:)
-   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
-   	double precision, allocatable,  intent(inout) :: gr(:)
-   	double precision, intent(in) :: dt, rc, boxlength, Temp, deltag
-   	double precision, intent(out) :: pressp, epot
-    integer ii, jj, jv
+    		integer, allocatable, intent(in):: sizes(:), displs(:)
+	   	double precision, allocatable,  intent(inout) :: F(:,:)
+	   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
+	   	double precision, allocatable,  intent(inout) :: gr(:)
+	   	double precision, intent(in) :: dt, rc, boxlength, Temp, deltag
+	   	double precision, intent(out) :: pressp, epot
+    		integer ii, jj, jv
 
-    first_particle = particle_range(1); last_particle = particle_range(2)
-    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-    ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
-		do jj = particle_range(1),particle_range(2)
-      jv = jj - particle_range(1) + 1
-			do ii = 1,3
-        r(jj,ii) = r(jj,ii) + vel(jv,ii)*dt + 0.5d0*F(jv,ii)*dt*dt
-				vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
+	    	first_particle = particle_range(1); last_particle = particle_range(2)
+	    	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	    ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
+			do jj = particle_range(1),particle_range(2)
+	      			jv = jj - particle_range(1) + 1
+				do ii = 1,3
+					r(jj,ii) = r(jj,ii) + vel(jv,ii)*dt + 0.5d0*F(jv,ii)*dt*dt
+					vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
+				enddo
 			enddo
-		enddo
-    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	    	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
-    do ii = 1,3
-      call MPI_allgatherv(r(first_particle:last_particle,ii),(last_particle-first_particle+1),&
-                  MPI_DOUBLE_PRECISION,r(:,ii),sizes,displs,MPI_DOUBLE_PRECISION,&
-                  MPI_COMM_WORLD,ierror)
-    end do
-    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
-    ! allgather should be applied into the the r and vel array
-    ! <------- aqui se necesita haber repartido todas las posiciones
-		call force(natoms,r,boxlength,rc,F,particle_range)
+		    do ii = 1,3
+		      call MPI_allgatherv(r(first_particle:last_particle,ii),(last_particle-first_particle+1),&
+				  MPI_DOUBLE_PRECISION,r(:,ii),sizes,displs,MPI_DOUBLE_PRECISION,&
+				  MPI_COMM_WORLD,ierror)
+		    end do
+		    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+		    ! allgather should be applied into the the r and vel array
+		    ! <------- aqui se necesita haber repartido todas las posiciones
+				call force(natoms,r,boxlength,rc,F,particle_range)
 
-    call potential(natoms,r,boxlength,rc,epot,pressp,gr,deltag,particle_range,taskid)
+		    call potential(natoms,r,boxlength,rc,epot,pressp,gr,deltag,particle_range,taskid)
 
-    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+		    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
-		do jj = particle_range(1),particle_range(2)
-      jv = jj - particle_range(1) + 1
-			do ii = 1,3
-        vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
-      enddo
-    enddo
-    ! allgather should be applied into the the r and vel array
+				do jj = particle_range(1),particle_range(2)
+		      jv = jj - particle_range(1) + 1
+					do ii = 1,3
+			vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
+		      enddo
+		    enddo
+		    ! allgather should be applied into the the r and vel array
 
-    call andersen_thermo(Temp,vel,natoms,particle_range)
-    ! allgather should be applied into the the vel array
+		    call andersen_thermo(Temp,vel,natoms,particle_range)
+		    ! allgather should be applied into the the vel array
 
-   endsubroutine vel_verlet_with_thermo
+		   endsubroutine vel_verlet_with_thermo
 
 endmodule integrators
