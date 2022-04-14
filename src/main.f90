@@ -97,7 +97,7 @@ integer :: particle_range(2), interact_range(2)
   ! -------------------------------------------------------------------------- !
 
 	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
-  allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0; ngr = 0
+    allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0; ngr = 0
 	allocate(v(last_particle-first_particle+1,3))
 	allocate(F(last_particle-first_particle+1,3))
 
