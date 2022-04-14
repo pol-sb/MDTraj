@@ -84,7 +84,7 @@ contains
 	subroutine force(natoms,r,boxlength,rc,F,epot,press,gr,deltag,interact_range,&
     interact_list)
 		integer,intent(in)::natoms, interact_range(2)
-    integer, allocatable, intent(in) :: interact_list(:,:)
+    		integer, allocatable, intent(in) :: interact_list(:,:)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: F(:,:)
 		double precision, allocatable, intent(inout) :: gr(:)
@@ -94,7 +94,7 @@ contains
 		double precision :: vol, rho, factp, facte
 		double precision :: cutoff_press, cutoff_pot, pot, piter
 		integer :: ig
-    integer :: ii, is, js, kk, M
+		integer :: ii, is, js, kk, M
 
 		vol = boxlength**3.; rho = dble(natoms)/vol
 		facte = (8.d0/3.d0)*pi*dfloat(natoms)*rho
@@ -107,8 +107,8 @@ contains
 		press = 0.d0; epot = 0.d0
 		F = 0.d0
 
-    do ii = interact_range(1),interact_range(2)
-      is = interact_list(ii,1); js = interact_list(ii,2);
+    		do ii = interact_range(1),interact_range(2)
+      			is = interact_list(ii,1); js = interact_list(ii,2);
 			call lj(r,boxlength,rc,is,js,F,pot,piter,d)
 			! calling function that computes the Lennard-Jones interaction between
 			! pair of particles i and j

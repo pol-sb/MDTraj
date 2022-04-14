@@ -79,10 +79,10 @@ contains
 ! Output:
 !         - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
-    subroutine initial_configuration_SC(N, boxlength, r, rank)
+    subroutine initial_configuration_SC(N, boxlength, r, sigma)
         double precision, intent(out)::r(:, :)
-        integer, intent(in) :: N, rank
-        double precision, intent(in) :: boxlength
+        integer, intent(in) :: N
+        double precision, intent(in) :: boxlength,sigma
         logical :: ext
         integer :: nx, ny, nz
         integer :: out_ref
@@ -110,7 +110,6 @@ contains
             end do
         end do outer
 
-        if (rank .eq. 0) then
             inquire (file="./output/", exist=ext)
             if (.NOT. ext) then
                 call execute_command_line("mkdir ./output/")
@@ -130,11 +129,10 @@ contains
             write (out_ref, *) natoms
             write (out_ref, *) " "
             do ii = 1, natoms
-                write (out_ref, *) "A", r(ii, 1), r(ii, 2), r(ii, 3)
+                write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
             end do
 
             close (out_ref)
-        end if
 
     end subroutine initial_configuration_SC
 
@@ -148,10 +146,10 @@ contains
 ! Output:
 !         - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
-    subroutine initial_configuration_fcc(N, boxlength, r, rank)
+    subroutine initial_configuration_fcc(N, boxlength, r, sigma)
         include "../declaration_variables/parallel_variables.h"
-        integer, intent(in) :: N, rank
-        double precision, intent(in) :: boxlength
+        integer, intent(in) :: N
+        double precision, intent(in) :: boxlength,sigma
         double precision, allocatable, intent(out) :: r(:, :)
         double precision, allocatable :: r0(:, :)
 
@@ -186,7 +184,6 @@ contains
             end do
         end do
 
-        if (rank .eq. 0) then
             inquire (file="./output/", exist=ext)
             if (.NOT. ext) then
                 call execute_command_line("mkdir ./output/")
@@ -207,11 +204,10 @@ contains
             write (out_ref, *)
 
             do ii = 1, nn
-                write (out_ref, *) "A", r(nn, 1), r(nn, 2), r(nn, 3)
+                write (out_ref, *) "A", r(nn, 1)*sigma, r(nn, 2)*sigma, r(nn, 3)*sigma
             end do
 
             close (out_ref)
-        end if
 
         deallocate (r0)
 
@@ -227,9 +223,9 @@ contains
 ! Output:
 !         - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
-    subroutine initial_configuration_diamond(N, boxlength, r, rank)
-        integer, intent(in) :: N, rank
-        double precision, intent(in) :: boxlength
+    subroutine initial_configuration_diamond(N, boxlength, r, sigma)
+        integer, intent(in) :: N
+        double precision, intent(in) :: boxlength,sigma
         double precision, intent(out) :: r(:, :)
         double precision, allocatable :: r0(:, :)
         logical :: ext
@@ -272,8 +268,6 @@ contains
 
         !Computing number of atoms.
         nn = nn - 1
-
-        if (rank .eq. 0) then
             ! Creating the .xyz file with the diamond structure
 
             inquire (file="./output/", exist=ext)
@@ -295,11 +289,11 @@ contains
             write (out_ref, *) " "
 
             do ii = 1, nn !
-                write (out_ref, *) "A", r(ii, 1), r(ii, 2), r(ii, 3)
+                write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
             end do
 
             close (out_ref)
-        end if
+
         deallocate (r0)
 
     end subroutine initial_configuration_diamond

@@ -124,32 +124,63 @@ contains
 !  Depencency:
 !      - force() : In module forces (src/modules/forces.f90)
 !=====================================================================================!
-    subroutine vel_verlet(natoms,r,vel,F,Upot,dt,rc,boxlength,pressp,gr,deltag,&
-                          particle_range,interact_range,interact_list)
+    subroutine vel_verlet(natoms,r,vel,F,epot,dt,rc,boxlength,pressp,&
+                                      gr,deltag,particle_range,interact_range,interact_list,&
+                                      sizes,displs)
+        include "../declaration_variables/parallel_variables.h"
         integer,intent(in)::natoms,particle_range(2),interact_range(2)
-        integer,allocatable,intent(in):: interact_list(:,:)
+        integer,allocatable,intent(in):: interact_list(:,:),sizes(:),displs(:)
         double precision,allocatable,intent(inout) :: F(:,:)
         double precision,allocatable,intent(inout) :: r(:,:),vel(:,:)
         double precision,allocatable,intent(inout) :: gr(:)
         double precision,intent(in) :: dt,rc,boxlength,deltag
-        double precision,intent(out) :: Upot,pressp
-        integer :: ii,jj
+        double precision,intent(out) :: pressp,epot
+        double precision :: Upot
+        double precision :: F_root(size(F,1),size(F,2))
+        integer ii,jj,jv
 
+        Upot = 0.d0; pressp = 0.d0
+        epot = 0.d0; !r = 0.d0
+        first_particle = particle_range(1); last_particle = particle_range(2)
+
+        ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
         do jj = particle_range(1),particle_range(2)
-            do ii = 1,3
-                r(jj,ii) = r(jj,ii) + vel(jj,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
-                vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
-            end do
+		      jv = jj - particle_range(1) + 1
+          do ii = 1,3
+            r(jj,ii) = r(jj,ii) + vel(jv,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
+            vel(jv,ii) = vel(jv,ii) + F(jj,ii)*0.5d0*dt
+          end do
         end do
+        call MPI_BARRIER(MPI_COMM_WORLD,ierror)
 
+        do ii = 1,3
+          call MPI_allgatherv(r(first_particle:last_particle,ii),(last_particle-first_particle+1),&
+                            MPI_DOUBLE_PRECISION,r(:,ii),sizes,displs,MPI_DOUBLE_PRECISION,&
+                            MPI_COMM_WORLD,ierror)
+        end do
+        call MPI_BARRIER(MPI_COMM_WORLD,ierror)
+        ! allgather should be applied into the the r and vel array
+        ! <------- aqui se necesita haber repartido todas las posiciones
         call force(natoms,r,boxlength,rc,F,Upot,pressp,gr,deltag,interact_range,&
                    interact_list)
+        call MPI_BARRIER(MPI_COMM_WORLD,ierror)
+
+        ! reduce should be applied into Upot,pressp,and gr
+        call MPI_ALLREDUCE(F,F_root,natoms*3,MPI_DOUBLE_PRECISION,MPI_SUM,&
+                           MPI_COMM_WORLD,ierror)
+        call MPI_REDUCE(Upot,epot,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,&
+                        MPI_COMM_WORLD,ierror)
+        call MPI_BARRIER(MPI_COMM_WORLD,ierror)
+        F = F_root
+        ! allgather should be applied into the the F array
 
         do jj = particle_range(1),particle_range(2)
-            do ii = 1,3
-                vel(jj,ii) = vel(jj,ii) + F(jj,ii)*0.5d0*dt
-            end do
+          jv = jj - particle_range(1) + 1
+          do ii = 1,3
+              vel(jv,ii) = vel(jv,ii) + F(jj,ii)*0.5d0*dt
+          end do
         end do
+        ! allgather should be applied into the the r and vel array
 
     end subroutine vel_verlet
 
