@@ -1,59 +1,22 @@
+SRC_DIR := ./modules
+BUILD_DIR := ./build
 
+FC := mpifort
+FFLAGS := -O1
 
-SRCDIR = modules
-BUILDDIR = build
+SRC_FILES := $(SRC_DIR)/boundary.f90  $(SRC_DIR)/thermostats.f90   $(SRC_DIR)/initialization.f90   $(SRC_DIR)/forces.f90   $(SRC_DIR)/integrators.f90
 
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.f90,$(BUILD_DIR)/%.o,$(SRC_FILES))
 
-fc = gfortran
-OPT= -O1
+program.exe: build $(OBJ_FILES)
+	@echo "Starting compilation..."
+	@$(FC) $(FFLAGS) -o $@ main.f90 $(OBJ_FILES)
+	@echo "Program compiled successfully!"
+	@mv *.mod $(BUILD_DIR)
 
-program.exe: build main.o boundary.o forces.o initialization.o integrators.o thermostats.o
-	$(fc) -o program.exe $(OPT) $(BUILDDIR)/boundary.o $(BUILDDIR)/forces.o $(BUILDDIR)/initialization.o  $(BUILDDIR)/integrators.o $(BUILDDIR)/thermostats.o  $(BUILDDIR)/main.o -J$(BUILDDIR)
-
-#Boundary module
-boundary.mod: boundary.o $(SRCDIR)/boundary.f90
-	$(fc) -o $(BUILDDIR)/boundary.o -c $(OPT) $(SRCDIR)/boundary.f90 -J$(BUILDDIR)
-
-boundary.o: $(SRCDIR)/boundary.f90
-	$(fc) -o $(BUILDDIR)/boundary.o -c $(OPT) $(SRCDIR)/boundary.f90 -J$(BUILDDIR)
-
-#Forces module
-forces.mod: forces.o $(SRCDIR)/forces.f90
-	$(fc) -o $(BUILDDIR)/forces.o -c $(OPT) $(SRCDIR)/forces.f90 -J$(BUILDDIR)
-
-forces.o: $(SRCDIR)/forces.f90
-	$(fc) -o $(BUILDDIR)/forces.o -c $(OPT) $(SRCDIR)/forces.f90 -J$(BUILDDIR)
-
-#Initialization module
-initialization.mod: initialization.o $(SRCDIR)/initialization.f90
-	$(fc) -o $(BUILDDIR)/initialization.o -c $(OPT) $(SRCDIR)/initialization.f90 -J$(BUILDDIR)
-
-initialization.o: $(SRCDIR)/initialization.f90
-	$(fc) -o $(BUILDDIR)/initialization.o -c $(OPT) $(SRCDIR)/initialization.f90 -J$(BUILDDIR)
-
-#Integrators module
-integrators.mod: integrators.o $(SRCDIR)/integrators.f90
-	$(fc) -o $(BUILDDIR)/integrators.o -c $(OPT) $(SRCDIR)/integrators.f90 -J$(BUILDDIR)
-
-integrators.o: $(SRCDIR)/integrators.f90
-	$(fc) -o $(BUILDDIR)/integrators.o -c $(OPT) $(SRCDIR)/integrators.f90 -J$(BUILDDIR)
-
-#Thermostat module
-thermostats.mod: thermostats.o $(SRCDIR)/thermostats.f90
-	$(fc) -o $(BUILDDIR)/thermostats.o -c $(OPT) $(SRCDIR)/thermostats.f90 -J$(BUILDDIR)
-
-thermostats.o: $(SRCDIR)/thermostats.f90
-	$(fc) -o $(BUILDDIR)/thermostats.o -c $(OPT) $(SRCDIR)/thermostats.f90 -J$(BUILDDIR)
-
-
-
-#Main file
-main.o: initialization.mod boundary.mod thermostats.mod forces.mod integrators.mod main.f90
-	$(fc) -o $(BUILDDIR)/main.o -c $(OPT) main.f90 -J$(BUILDDIR)
-
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.f90 build
+	@$(FC) $(FFLAGS) -c -o 	$@ $<
 
 build:
-	mkdir $(BUILDDIR)
-
-run:
-	./program.exe
+	@mkdir $(BUILD_DIR)
+	@echo "'$(BUILD_DIR)' directory created."

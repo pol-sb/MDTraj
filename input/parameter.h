@@ -2,7 +2,7 @@
 	!	Initialization parameters
 	!---------------------------
 	integer::nc=5 !Number of particles per side
-	double precision::density=0.005d0 !Lomgitude of the size box
+	double precision::density=0.05d0 !Lomgitude of the size box
 
 	integer::structure=1 !For SC:1, for fcc:2, for diamond 3.
 
@@ -11,7 +11,7 @@
 
 	!Simulation set up
 	!-----------------
-	integer::ntimes=100000 !Steps of the simulation
+	integer::ntimes=200000 !Steps of the simulation
 	integer::everyt=100 ! Multiple of steps at which the thermodynamic properties
 	! are saved
 	integer::tmelt=1000 ! Time step at which melting is from initial structure is done
