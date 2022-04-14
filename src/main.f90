@@ -22,7 +22,9 @@ integer::nhis
 integer :: ii, jj, kk, M, count, seed(33)
 integer, allocatable :: interact_list(:,:), sizes(:), displs(:)
 integer :: particle_range(2), interact_range(2)
-
+!Change units
+double precision::density_au,time
+!double precision::mass
 
 	call MPI_INIT(ierror) ! Begin parallel execution code
 
@@ -38,6 +40,13 @@ integer :: particle_range(2), interact_range(2)
 				! Random seed initializtaion
 	seed(1:33) = rng_seed+taskid
 	call random_seed(put=seed)
+	
+	!Change units
+	!temp=temp/epsilon
+    	!epsilon=epsilon*kb
+    	!sigma=sigma*10.0d0**(-10.0d0)
+    	!mass=molar_mass/Na/10.0d0/10.0d0/10.0d0
+    	!density = density/mass*sigma*sigma*sigma
 
 	!Initialization of the structure
 	if (structure .eq. 1) then
@@ -46,26 +55,30 @@ integer :: particle_range(2), interact_range(2)
 		!write(*,*) L
 		allocate(r(natoms,3))
 		if (taskid.eq.0) then
-			call initial_configuration_SC(Nc,L,r,taskid)
+			call initial_configuration_SC(Nc,L,r,sigma)
 		end if
 	elseif (structure .eq. 2) then
 		natoms=Nc*Nc*Nc*4
 		L= (float(natoms)/density)**(1.0/3.0)
 		allocate(r(natoms,3))
 		if (taskid.eq.0) then
-			call initial_configuration_fcc(Nc,L,r,taskid)
+			call initial_configuration_fcc(Nc,L,r,sigma)
 		end if
 	elseif (structure .eq. 3) then
 		natoms=Nc*Nc*Nc*8
 		L= (float(natoms)/density)**(1.0/3.0)
 		allocate(r(natoms,3))
 		if (taskid.eq.0) then
-			call initial_configuration_diamond(Nc,L,r,taskid)
+			call initial_configuration_diamond(Nc,L,r,sigma)
 		end if
 	else
 		write(*,*)"Error, no structure found"
 		stop
 	endif
+
+	!Change units
+	!mass = mass*natoms
+	!dt = dt*10.0d0**(-12.0d0)/(sigma*dsqrt(mass/epsilon))
 
 	! -------------------------------------------------------------------------- !
 	! 							Select range of particles for each processor
@@ -133,8 +146,8 @@ integer :: particle_range(2), interact_range(2)
 		end if
 
 		if (thermo.eq.0) then
-			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,gr,deltag,&
-	      particle_range,taskid)
+			call vel_verlet(natoms,r,v,F,epot,dt,rc,L,pressp,&
+		    gr,deltag,particle_range,sizes,displs,taskid)
 		elseif (thermo.eq.1) then
 			call vel_verlet_with_thermo(natoms,r,v,F,epot,dt,rc,L,Temp,pressp,&
 		    gr,deltag,particle_range,sizes,displs,taskid)
@@ -162,11 +175,19 @@ integer :: particle_range(2), interact_range(2)
 
 		if (taskid.eq.0) then
 			if (mod(tt,everyt).eq.0) then
-				write(11,*) ti, temperature
-				write(12,*) ti, epot/dble(natoms), ekin/dble(natoms), &
+				    !Change units
+				    time=ti!*(sigma*dsqrt(mass/epsilon))
+				    !temperature=temperature*epsilon/kb
+				    !ekin=ekin*epsilon
+				    !epot=epot*epsilon
+				    density_au=density!*mass/sigma/sigma/sigma
+				    !pressp=pressp*epsilon/sigma/sigma/sigma
+				    
+				write(11,*) time, temperature
+				write(12,*) time, epot/dble(natoms), ekin/dble(natoms), &
 				(epot+ekin)/dble(natoms)
-				write(13,*) ti, pressp/dble(natoms), density*temperature/dble(natoms), &
-			  	(pressp+density*temperature)/dble(natoms)
+				write(13,*) time, pressp/dble(natoms), density_au*temperature/dble(natoms), &
+			  	(pressp+density_au*temperature)/dble(natoms)
 				write(14,*) natoms
 				write(14,*)
 				do si = 1,natoms
