@@ -8,6 +8,7 @@ use mpi
 implicit none
 include "declaration_variables/parallel_variables.h"
 include "../input/parameter.h"
+include "/modules/constants.h"
 
 integer::natoms
 double precision::L, rc
@@ -40,13 +41,12 @@ double precision::density_au,time
 				! Random seed initializtaion
 	seed(1:33) = rng_seed+taskid
 	call random_seed(put=seed)
-	
+
 	!Change units
-	!temp=temp/epsilon
-    	!epsilon=epsilon*kb
-    	!sigma=sigma*10.0d0**(-10.0d0)
-    	!mass=molar_mass/Na/10.0d0/10.0d0/10.0d0
-    	!density = density/mass*sigma*sigma*sigma
+		temp=temp/epsilon
+    density = density*(1e3*avogadro_number)/(4.d0*(1e10**3.d0))
+		! converting density from kg/m^3 to particles/angstrom^3
+		density = density*(sigma**3.)
 
 	!Initialization of the structure
 	if (structure .eq. 1) then
@@ -75,10 +75,6 @@ double precision::density_au,time
 		write(*,*)"Error, no structure found"
 		stop
 	endif
-
-	!Change units
-	!mass = mass*natoms
-	!dt = dt*10.0d0**(-12.0d0)/(sigma*dsqrt(mass/epsilon))
 
 	! -------------------------------------------------------------------------- !
 	! 							Select range of particles for each processor
@@ -109,7 +105,7 @@ double precision::density_au,time
   ! -------------------------------------------------------------------------- !
   ! -------------------------------------------------------------------------- !
 
-	nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
+	nhis = 250; deltag = L/(4.d0*dble(nhis)); rc = L/2.d0
     allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0; ngr = 0
 	allocate(v(last_particle-first_particle+1,3))
 	allocate(F(last_particle-first_particle+1,3))
@@ -173,22 +169,25 @@ double precision::density_au,time
 			end do
 		end do
 
-		if (taskid.eq.0) then
-			if (mod(tt,everyt).eq.0) then
-				    !Change units
-				    time=ti!*(sigma*dsqrt(mass/epsilon))
-				    !temperature=temperature*epsilon/kb
-				    !ekin=ekin*epsilon
-				    !epot=epot*epsilon
-				    density_au=density!*mass/sigma/sigma/sigma
-				    !pressp=pressp*epsilon/sigma/sigma/sigma
-				    
-				write(11,*) time, temperature
-				write(12,*) time, epot/dble(natoms), ekin/dble(natoms), &
-				(epot+ekin)/dble(natoms)
-				write(13,*) time, pressp/dble(natoms), density_au*temperature/dble(natoms), &
-			  	(pressp+density_au*temperature)/dble(natoms)
-				write(14,*) natoms
+    if (taskid .eq. 0) then
+      if (mod(tt,everyt) .eq. 0) then
+        !Change units
+        epsilon=epsilon*boltzmann_constant
+        mass = mass*natoms/avogadro_number
+        !dt = dt*10.0d0**(-12.0d0)/(sigma*dsqrt(mass/epsilon))
+        time=ti*1e-12*(sigma*1e-10*dsqrt(mass/epsilon))
+        ekin=ekin*epsilon
+        epot=epot*epsilon
+        density_au=density*mass/((sigma*1e-10)**3)
+        pressp=pressp*epsilon/((sigma*1e-10)**3)
+
+        write(11,*) time, temperature*epsilon/boltzmann_constant
+        write(12,*) time, epot/dble(natoms),ekin/dble(natoms),&
+            (epot + ekin)/dble(natoms)
+        write(13,*) time, pressp/dble(natoms),&
+            density_au*temperature*epsilon/boltzmann_constant/dble(natoms),&
+            (pressp + density_au*temperature*epsilon/boltzmann_constant)/dble(natoms)
+        write(14,*) natoms
 				write(14,*)
 				do si = 1,natoms
 					write(14,*) 'He', (r(si,sj), sj=1,3)

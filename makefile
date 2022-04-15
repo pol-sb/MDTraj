@@ -12,7 +12,7 @@ all:
 ## 2. make compile - to compile.
 compile:
 	$(MAKE) -C src/
-	
+
 ## 3. make run - to run.
 run:
 	 mpirun -np 4 ./src/program.exe
@@ -28,7 +28,7 @@ clean:
 	rm -r src/program.exe
 
 
-## [!] WARNING: If you change the parameters, you need to recompile. 
+## [!] WARNING: If you change the parameters, you need to recompile.
 
 .PHONY : help
 help:

@@ -197,21 +197,21 @@ module integrators
 !=====================================================================================!
 	subroutine vel_verlet_with_thermo(natoms,r,vel,F,epot,dt,rc,boxlength,Temp,pressp,&
 					   gr,deltag,particle_range,sizes,displs,taskid)
-    		include "../declaration_variables/parallel_variables.h"
-		integer,intent(in)::natoms, particle_range(2)
-    		integer, allocatable, intent(in):: sizes(:), displs(:)
+    	include "../declaration_variables/parallel_variables.h"
+		  integer,intent(in)::natoms, particle_range(2)
+    	integer, allocatable, intent(in):: sizes(:), displs(:)
 	   	double precision, allocatable,  intent(inout) :: F(:,:)
 	   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
 	   	double precision, allocatable,  intent(inout) :: gr(:)
 	   	double precision, intent(in) :: dt, rc, boxlength, Temp, deltag
 	   	double precision, intent(out) :: pressp, epot
-    		integer ii, jj, jv
+    	integer ii, jj, jv
 
-	    	first_particle = particle_range(1); last_particle = particle_range(2)
-	    	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+	    first_particle = particle_range(1); last_particle = particle_range(2)
+	    call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 	    ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
 			do jj = particle_range(1),particle_range(2)
-	      			jv = jj - particle_range(1) + 1
+	      jv = jj - particle_range(1) + 1
 				do ii = 1,3
 					r(jj,ii) = r(jj,ii) + vel(jv,ii)*dt + 0.5d0*F(jv,ii)*dt*dt
 					vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
@@ -236,13 +236,11 @@ module integrators
 				do jj = particle_range(1),particle_range(2)
 		      jv = jj - particle_range(1) + 1
 					do ii = 1,3
-			vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
+			         vel(jv,ii) = vel(jv,ii) + F(jv,ii)*0.5d0*dt
 		      enddo
 		    enddo
-		    ! allgather should be applied into the the r and vel array
 
 		    call andersen_thermo(Temp,vel,natoms,particle_range)
-		    ! allgather should be applied into the the vel array
 
 		   endsubroutine vel_verlet_with_thermo
 

@@ -95,10 +95,7 @@ contains
       a = boxlength/dfloat(N)
       natoms = N*N*N
 
-      ! Creating the .xyz file with the FCC structure
-
       nn = 1
-
 outer:do nx = 0,N-1
          do ny = 0,N-1
             do nz = 0,N-1
@@ -281,7 +278,7 @@ outer:do nz = 0, N - 1,1
       !Computing number of atoms.
       nn = nn - 1
 
-    
+
 	    ! Creating the .xyz file with the diamond structure
 
 	      inquire(file="./output/",exist=ext)

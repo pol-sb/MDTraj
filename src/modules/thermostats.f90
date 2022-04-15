@@ -49,7 +49,7 @@ contains
    	double precision :: x_rand(size(vel,2))
 		double precision :: vel_normalrand(4)
 		integer :: pp, qq
-   	nu = 1e-3
+   	nu = 0.1d0
    	sigma = dsqrt(Temp)
    	call random_number(x_rand)
 
@@ -82,10 +82,10 @@ contains
 !
 !==============================================================================!
    subroutine normal_rand(sigma, xout1, xout2)
+		 include "constants.h"
      double precision :: sigma
      double precision xout1, xout2
      double precision :: x(2)
-     double precision, parameter :: PI = 4.d0*datan(1.d0)
 
      call random_number(x)
 

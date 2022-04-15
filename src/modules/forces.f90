@@ -46,8 +46,6 @@ module forces
    use mpi
    implicit none
 
-   include "constants.h"
-
 contains
 !==============================================================================!
 !                       				FORCES SUBROUTINE
@@ -105,24 +103,22 @@ contains
 !==============================================================================!
   subroutine potential(natoms,r,boxlength,rc,Upot,pressp,gr,deltag,particle_range,taskid)
     include "../declaration_variables/parallel_variables.h"
+    include "constants.h"
 		integer,intent(in)::natoms, particle_range(2)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: gr(:)
 		double precision, intent(in) :: boxlength, rc, deltag
 		double precision, intent(out) :: Upot, pressp
-		double precision :: vol, rho, factp, facte
+		double precision :: vol, rho, factp, cutoff_press, cutoff_pot
     double precision :: dx, dy, dz, d, dU
-		double precision :: cutoff_press, cutoff_pot, pot, piter, epot, press
+		double precision :: pot, piter, epot, press
 		integer :: ig
     integer :: is, js, kk, M
 
 		vol = boxlength**3.; rho = dble(natoms)/vol
-		facte = (8.d0/3.d0)*pi*dfloat(natoms)*rho
-		factp = (16.d0/3.d0)*pi*(rho**2)
+		factp = (16.d0/3.d0)*PI*(rho**2)
 
 		cutoff_pot = 4.d0*(1.d0/(rc**12) - 1.d0/(rc**6))
-		cutoff_press = factp*((2.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
-		!cutoff_pot = facte*((1.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
 
 		press = 0.d0; epot = 0.d0; Upot = 0.d0; pressp = 0.d0
 
@@ -138,15 +134,16 @@ contains
 
     		if (d.lt.rc) then
     			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
-    			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.))
+    			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.)) - cutoff_pot
     			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
         endif
   			press = press + piter; epot = epot + pot
 
-  			if (d.lt.rc) then ! computation of the radial distribution function
+  			if (d.lt.rc/2.d0) then ! computation of the radial distribution function
   				! adding the each pair of interaction into the corresponding bin
   				ig = int(d/deltag)
-  				gr(ig) = gr(ig) + 2
+  				gr(ig) = gr(ig) + 1 ! in this case the addition to the histogram is 1
+          ! since the loop is for all particles instead of interactions.
   			endif
       end do
     end do
@@ -155,7 +152,8 @@ contains
     call MPI_REDUCE(press,pressp,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
     if (taskid.eq.0) then
       Upot = Upot/2.d0; pressp = pressp/2
-      pressp = pressp/(3.d0*vol)
+      cutoff_press = factp*((2.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
+      pressp = pressp/(3.d0*vol) + cutoff_press
     end if
 
   end subroutine potential
@@ -206,7 +204,7 @@ contains
 		d = (dx**2. + dy**2. + dz**2.)**0.5 ! Distance between particles i and j
 
 		if (d.lt.rc) then
-			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
+			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))-(48.d0/(rc**14.0) - 24.d0/(rc**8.0))
 			F(iv,1) = F(iv,1) + dU*dx
 			F(iv,2) = F(iv,2) + dU*dy
 			F(iv,3) = F(iv,3) + dU*dz
