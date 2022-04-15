@@ -92,11 +92,8 @@ contains
 
         a = boxlength/dfloat(N)
         natoms = N*N*N
-
-        ! Creating the .xyz file with the FCC structure
-
+				
         nn = 1
-
         outer: do nx = 0, N - 1
             do ny = 0, N - 1
                 do nz = 0, N - 1
@@ -158,7 +155,7 @@ contains
         integer :: out_ref, ii, jj
         double precision :: r_pert(size(r, 2))
 
-	
+
 
         a = boxlength/dfloat(N)
         natoms = N*N*N*4
@@ -178,7 +175,7 @@ contains
                         call random_number(r_pert)
                         r_pert = (r_pert - 0.5d0)*a/4.d0
                         r(4*ii + jj, :) = a*[nx, ny, nz] + r0(jj, :) + r_pert(:)
-                        
+
 
                     end do
                     ii = ii + 1
@@ -269,7 +266,7 @@ contains
                 end do
             end do
         end do outer
-      
+
 
         !Computing number of atoms.
         nn = nn - 1

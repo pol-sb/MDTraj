@@ -139,8 +139,7 @@ contains
         double precision :: F_root(size(F,1),size(F,2))
         integer ii,jj,jv
 
-        Upot = 0.d0; pressp = 0.d0
-        epot = 0.d0; !r = 0.d0
+        Upot = 0.d0; pressp = 0.d0; epot = 0.d0
         first_particle = particle_range(1); last_particle = particle_range(2)
 
         ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
@@ -172,7 +171,6 @@ contains
                         MPI_COMM_WORLD,ierror)
         call MPI_BARRIER(MPI_COMM_WORLD,ierror)
         F = F_root
-        ! allgather should be applied into the the F array
 
         do jj = particle_range(1),particle_range(2)
           jv = jj - particle_range(1) + 1
@@ -180,7 +178,6 @@ contains
               vel(jv,ii) = vel(jv,ii) + F(jj,ii)*0.5d0*dt
           end do
         end do
-        ! allgather should be applied into the the r and vel array
 
     end subroutine vel_verlet
 
@@ -222,8 +219,7 @@ contains
         double precision :: F_root(size(F,1),size(F,2))
         integer ii,jj,jv
 
-        Upot = 0.d0; pressp = 0.d0
-        epot = 0.d0; !r = 0.d0
+        Upot = 0.d0; pressp = 0.d0; epot = 0.d0
         first_particle = particle_range(1); last_particle = particle_range(2)
 
         ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
@@ -255,7 +251,6 @@ contains
                         MPI_COMM_WORLD,ierror)
         call MPI_BARRIER(MPI_COMM_WORLD,ierror)
         F = F_root
-        ! allgather should be applied into the the F array
 
         do jj = particle_range(1),particle_range(2)
           jv = jj - particle_range(1) + 1
@@ -263,10 +258,8 @@ contains
               vel(jv,ii) = vel(jv,ii) + F(jj,ii)*0.5d0*dt
           end do
         end do
-        ! allgather should be applied into the the r and vel array
 
         call andersen_thermo(Temp,vel,natoms,particle_range)
-        ! allgather should be applied into the the vel array
 
     end subroutine vel_verlet_with_thermo
 

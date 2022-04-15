@@ -2,9 +2,17 @@ import os
 import sys
 import time
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 try:
     import matplotlib.pyplot as plt
     import numpy as np
+
+    plt.rcParams.update({"text.usetex": True})
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+    plt.rcParams.update({'font.size': 12})
 except ModuleNotFoundError:
     print(
         "\n[!] ERROR: One or more python module(s) have not been found. Please,"
@@ -140,8 +148,8 @@ class MDSimulation:
         plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1])
         plt.xlim(self.rdf_results[0, 0], self.rdf_results[-2, 0])
         plt.title("Radial Distribution Function")
-        plt.xlabel("r [Å]")
-        plt.ylabel("g(r)")
+        plt.xlabel(r"$r$ $(\AA)$")
+        plt.ylabel(r"$g(r)$")
         plt.grid()
 
         # Preparing a filename for the RSD plot image.
@@ -150,7 +158,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight')
+        plt.savefig(filename, bbox_inches='tight',dpi = 500)
         plt.clf()
 
     def _plot_temperature(self):
@@ -165,8 +173,8 @@ class MDSimulation:
         plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
         plt.xlim(self.temp_results[0, 0], self.temp_results[-1, 0])
         plt.title("Temperature")
-        plt.xlabel("Time [r.u.]")
-        plt.ylabel("T [K]")
+        plt.xlabel("Time (r.u.)")
+        plt.ylabel("$T$ ($K$)")
 
         # Preparing a path for the T plot image.
         filename = (
@@ -174,7 +182,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight')
+        plt.savefig(filename, bbox_inches='tight',dpi = 500)
         plt.clf()
 
     def _plot_pressure(self):
@@ -188,9 +196,9 @@ class MDSimulation:
         # Plotting the pressure
         plt.plot(self.press_results[:, 0], self.press_results[:, 1])
         plt.xlim(self.press_results[0, 0], self.press_results[-1, 0])
-        plt.title("Pressure")
-        plt.xlabel("Time [r.u.]")
-        plt.ylabel("Pressure [r.u.]")
+        plt.title(r"Pressure")
+        plt.xlabel(r"Time (r.u.)")
+        plt.ylabel(r"Pressure $P$ (r.u.)")
         plt.grid()
 
         # Preparing a path for the P plot image.
@@ -199,7 +207,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight')
+        plt.savefig(filename, bbox_inches='tight',dpi = 500)
         plt.clf()
 
     def _plot_msd(self):
@@ -214,8 +222,8 @@ class MDSimulation:
         plt.plot(self.msd_results[:, 0], self.msd_results[:, 1])
         plt.xlim(self.msd_results[0, 0], self.msd_results[-1, 0])
         plt.title("Mean Square Displacement")
-        plt.xlabel("r [Å]")
-        plt.ylabel("g(r)")
+        plt.xlabel(r"$r$ $(\AA)$")
+        plt.ylabel(r"$g(r)$")
         plt.grid()
 
         # Preparing a filename for the MSD plot image.
@@ -224,7 +232,7 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight')
+        plt.savefig(filename, bbox_inches='tight',dpi = 500)
         plt.clf()
 
     def _plot_energies(self):
@@ -248,64 +256,64 @@ class MDSimulation:
         n_all = self.OUT_PATH + self.fold_name + "/ene-all" + "plot.png"
 
         # Names for the x and y axis
-        x_lab = "Time [r.u.]"
-        y_lab = r"$\frac{Energy}{Num. Part.}\ \ [r.u.]$"
+        x_lab = r"Time (r.u.)"
+        y_lab = r"$E/N$ (r.u.)"
 
         # Preparing the plot for the potential energy
         plt.tight_layout()
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
-        plt.title(f"Potential energy")
+        plt.title(r"Potential energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_pot, bbox_inches='tight')
+        plt.savefig(n_pot, bbox_inches='tight',dpi = 500)
         plt.clf()
 
         # Preparing the plot for the kinetic energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 2])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
-        plt.title(f"Kinetic energy")
+        plt.title(r"Kinetic energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_kin, bbox_inches='tight')
+        plt.savefig(n_kin, bbox_inches='tight',dpi = 500)
         plt.clf()
 
         # Preparing the plot for the total energy
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 3])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
-        plt.title(f"Total energy")
+        plt.title(r"Total energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_tot, bbox_inches='tight')
+        plt.savefig(n_tot, bbox_inches='tight',dpi = 500)
         plt.clf()
 
         # Plotting all of the energies at once
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 1],
-            label="Potential Energy",
+            label=r"Potential Energy",
         )
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 2],
-            label="Kinetic Energy",
+            label=r"Kinetic Energy",
         )
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 3],
-            label="Total Energy",
+            label=r"Total Energy",
         )
 
-        plt.title(f"All energies")
+        plt.title(r"All energies")
         plt.legend()
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
@@ -313,7 +321,7 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_all, bbox_inches='tight')
+        plt.savefig(n_all, bbox_inches='tight',dpi = 500)
         plt.clf()
 
 

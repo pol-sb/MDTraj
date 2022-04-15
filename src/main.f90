@@ -8,6 +8,7 @@ program main
     implicit none
     include "declaration_variables/parallel_variables.h"
     include "../input/parameter.h"
+		include "/modules/constants.h"
 
     integer::natoms
     double precision::L,rc
@@ -42,14 +43,11 @@ program main
     call random_seed(put=seed)
 
 	!Change units
-	!temp=temp/epsilon
-    	!epsilon=epsilon*kb
-    	!sigma=sigma*10.0d0**(-10.0d0)
-    	!mass=molar_mass/Na/10.0d0/10.0d0/10.0d0
-    	!density = density/mass*sigma*sigma*sigma
-    
-    
-    
+		temp=temp/epsilon
+    density = density*(1e3*avogadro_number)/(4.d0*(1e10**3.d0))
+		! converting density from kg/m^3 to particles/angstrom^3
+		density = density*(sigma**3.)
+
     !Initialization of the structure
     if (structure .eq. 1) then
         natoms = Nc*Nc*Nc
@@ -77,13 +75,9 @@ program main
         write (*,*) "Error,no structure found"
         stop
     end if
-    
-    !Change units
-    !mass = mass*natoms
-    !dt = dt*10.0d0**(-12.0d0)/(sigma*dsqrt(mass/epsilon))
 
     ! -------------------------------------------------------------------------- !
-    !                                                         Select range of particles for each processor
+    !  Select range of particles for each processor
     ! -------------------------------------------------------------------------- !
     blocksize = natoms/numproc
     residu = mod(natoms,numproc)
@@ -108,7 +102,7 @@ program main
     end do
     particle_range(1) = first_particle; particle_range(2) = last_particle;
     ! -------------------------------------------------------------------------- !
-    !                                                         Select range of interactions for each processor
+    !    Select range of interactions for each processor
     ! -------------------------------------------------------------------------- !
     num_interacts = natoms*(natoms - 1)/2
     allocate (interact_list(num_interacts,2))
@@ -132,7 +126,7 @@ program main
     ! -------------------------------------------------------------------------- !
     ! -------------------------------------------------------------------------- !
 
-    nhis = 250; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
+    nhis = 250; deltag = L/(4.d0*dble(nhis)); rc = L/2.d0
     allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0
     allocate(v(last_particle-first_particle+1,3),F(natoms,3),F_root(natoms,3))
 
@@ -150,8 +144,7 @@ program main
     call force(natoms,r,L,rc,F,epot,pressp,gr,deltag,interact_range,&
                interact_list)
     call MPI_BARRIER(MPI_COMM_WORLD,ierror)
-    !call MPI_ALLGATHER(r,natoms*3,MPI_DOUBLE_PRECISION,r,natoms*3,&
-    !      MPI_DOUBLE,MPI_COMM_WORLD,ierror)
+
     call MPI_ALLREDUCE(F,F_root,natoms*3,MPI_DOUBLE_PRECISION,MPI_SUM,&
                        MPI_COMM_WORLD,ierror)
     call MPI_BARRIER(MPI_COMM_WORLD,ierror)
@@ -166,7 +159,6 @@ program main
 
     do tt = 1,ntimes,1
         ti = ti + dt ! Actualizing the instant time
-
         ! set g(r) = 0.d0 while the initial structure is melting (equilibrating)
         ! in order to obtain a clean plot of the rdf
         if (tt .lt. tmelt) then
@@ -207,18 +199,21 @@ program main
         if (taskid .eq. 0) then
           if (mod(tt,everyt) .eq. 0) then
             !Change units
-            time=ti!*(sigma*dsqrt(mass/epsilon))
-            !temperature=temperature*epsilon/kb
-            !ekin=ekin*epsilon
-            !epot=epot*epsilon
-            density_au=density!*mass/sigma/sigma/sigma
-            !pressp=pressp*epsilon/sigma/sigma/sigma
-            
-            write(11,*) time, temperature
+            epsilon=epsilon*boltzmann_constant
+            mass = mass*natoms/avogadro_number
+            !dt = dt*10.0d0**(-12.0d0)/(sigma*dsqrt(mass/epsilon))
+            time=ti*1e-12*(sigma*1e-10*dsqrt(mass/epsilon))
+            ekin=ekin*epsilon
+            epot=epot*epsilon
+            density_au=density*mass/((sigma*1e-10)**3)
+            pressp=pressp*epsilon/((sigma*1e-10)**3)
+
+            write(11,*) time, temperature*epsilon/boltzmann_constant
             write(12,*) time, epot/dble(natoms),ekin/dble(natoms),&
                 (epot + ekin)/dble(natoms)
-            write(13,*) time, pressp/dble(natoms),density_au*temperature/dble(natoms),&
-                (pressp + density_au*temperature)/dble(natoms)
+            write(13,*) time, pressp/dble(natoms),&
+                density_au*temperature*epsilon/boltzmann_constant/dble(natoms),&
+                (pressp + density_au*temperature*epsilon/boltzmann_constant)/dble(natoms)
             write(14,*) natoms
             write(14,*)
             do si = 1,natoms
@@ -237,7 +232,7 @@ program main
             vb = ((ii + 1)**3 - ii**3)*(deltag**3)
             ! Volume between bin i+1 and i
             nid = (4.d0*PI/3.d0)*vb*density
-            ! Number of ideal gas part . in vb
+            ! Number of ideal gas part in vb
             gr_main(ii) = gr_main(ii)/(dble(ngr)*dble(natoms)*nid) ! Normalize g(r)
             write (15,*) rpos*sigma,gr_main(ii)
         end do
@@ -245,6 +240,6 @@ program main
     end if
 
     deallocate(r,v,F,F_root,gr,interact_list)
-	call MPI_FINALIZE(ierror) ! End parallel execution
+	  call MPI_FINALIZE(ierror) ! End parallel execution
 
 end program main

@@ -46,8 +46,6 @@ module forces
    use mpi
    implicit none
 
-   include "constants.h"
-
 contains
 !==============================================================================!
 !                       				FORCES SUBROUTINE
@@ -83,8 +81,9 @@ contains
 !==============================================================================!
 	subroutine force(natoms,r,boxlength,rc,F,epot,press,gr,deltag,interact_range,&
     interact_list)
+    include "constants.h"
 		integer,intent(in)::natoms, interact_range(2)
-    		integer, allocatable, intent(in) :: interact_list(:,:)
+    integer, allocatable, intent(in) :: interact_list(:,:)
 		double precision, allocatable, intent(in) :: r(:,:)
 		double precision, allocatable, intent(inout) :: F(:,:)
 		double precision, allocatable, intent(inout) :: gr(:)
@@ -97,34 +96,26 @@ contains
 		integer :: ii, is, js, kk, M
 
 		vol = boxlength**3.; rho = dble(natoms)/vol
-		facte = (8.d0/3.d0)*pi*dfloat(natoms)*rho
-		factp = (16.d0/3.d0)*pi*(rho**2)
-
-		cutoff_pot = 4.d0*(1.d0/(rc**12) - 1.d0/(rc**6))
+		factp = (16.d0/3.d0)*PI*(rho**2)
 		cutoff_press = factp*((2.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
-		!cutoff_pot = facte*((1.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
 
 		press = 0.d0; epot = 0.d0
 		F = 0.d0
 
-    		do ii = interact_range(1),interact_range(2)
-      			is = interact_list(ii,1); js = interact_list(ii,2);
+    do ii = interact_range(1),interact_range(2)
+      is = interact_list(ii,1); js = interact_list(ii,2);
 			call lj(r,boxlength,rc,is,js,F,pot,piter,d)
 			! calling function that computes the Lennard-Jones interaction between
 			! pair of particles i and j
 			press = press + piter; epot = epot + pot
-
-			if (d.lt.rc) then ! computation of the radial distribution function
+			if (d.lt.rc/2.d0) then ! computation of the radial distribution function
 				! adding the each pair of interaction into the corresponding bin
 				ig = int(d/deltag)
 				gr(ig) = gr(ig) + 2
 			endif
 		enddo
-
-		!pot = pot - cutoff_pot
 		press = (1.d0/(3.d0*vol))*press
-		!press = press + cutoff_press
-		!epot = epot + etail; 			pressp = pressp + ptail
+		press = press + cutoff_press
 
 	endsubroutine force
 
@@ -162,9 +153,10 @@ contains
 		double precision, intent(in) :: boxlength, rc
 		integer, intent(in) :: ii, jj
 		double precision, intent(out) :: pot, piter
-		double precision :: dx, dy, dz, d, dU
+		double precision :: dx, dy, dz, d, dU, cutoff_pot
 
 		pot = 0.d0; piter = 0.d0
+    cutoff_pot = 4.d0*(1.d0/(rc**12) - 1.d0/(rc**6))
 		dx = r(ii,1)-r(jj,1); dy = r(ii,2)-r(jj,2); dz = r(ii,3)-r(jj,3)
 		! Apply the boundary conditions to the particles distance
 		call pbc(dx,boxlength,0.d0)
@@ -173,7 +165,7 @@ contains
 		d = (dx**2. + dy**2. + dz**2.)**0.5 ! Distance between particles i and j
 
 		if (d.lt.rc) then
-			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
+			dU=(48.d0/(d**14.0) - 24.d0/(d**8.0))-(48.d0/(rc**14.0) - 24.d0/(rc**8.0))
 
 			F(ii,1) = F(ii,1) + dU*dx
 			F(ii,2) = F(ii,2) + dU*dy
@@ -183,7 +175,7 @@ contains
 			F(jj,2) = F(jj,2) - dU*dy
 			F(jj,3) = F(jj,3) - dU*dz
 
-			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.))
+			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.)) - cutoff_pot
 			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
     endif
 	endsubroutine
