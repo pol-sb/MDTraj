@@ -1,5 +1,9 @@
 PY_DIST = $(shell which python3)
 MAKEFLAGS += --no-print-directory
+MPI_NPROC = 4
+MPI_minP=4
+MPI_maxP=8
+MPI_stepP=2
 
 ## By default, it is all (just write make)
 
@@ -15,7 +19,7 @@ compile:
 	
 ## 3. make run - to run.
 run:
-	 mpirun -np 4 ./src/program.exe
+	 mpirun -np $(MPI_NPROC)  ./src/program.exe
 
 ## 4. make plot - to plot the graphics
 plot:
@@ -27,7 +31,10 @@ clean:
 	rm -r src/build
 	rm -r src/program.exe
 
-
+## 6. check paralel#!/usr/bin/bash
+## send as nohup make check_paralel &
+check_paralel:
+	./src/modules/check_paralel.sh -m $($MPI_maxP) -d $($MPI_minP) -s $($MPI_stepP)
 ## [!] WARNING: If you change the parameters, you need to recompile. 
 
 .PHONY : help
