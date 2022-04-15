@@ -13,7 +13,7 @@ all:
 ## 2. make compile - to compile.
 compile:
 	@$(MAKE) -C src/
-	
+
 ## 3. make run - to run.
 run:
 	@echo "Running the simulation with $(MPI_NPROC) processors."
@@ -30,7 +30,7 @@ clean:
 	rm -r src/program.exe
 
 
-## [!] WARNING: If you change the parameters, you need to recompile. 
+## [!] WARNING: If you change the parameters, you need to recompile.
 
 .PHONY : help
 help:
