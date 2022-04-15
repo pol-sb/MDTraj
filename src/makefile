@@ -8,13 +8,13 @@ SRC_FILES := $(SRC_DIR)/boundary.f90  $(SRC_DIR)/thermostats.f90   $(SRC_DIR)/in
 
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.f90,$(BUILD_DIR)/%.o,$(SRC_FILES))
 
-program.exe: build $(OBJ_FILES)
+program.exe: build $(OBJ_FILES) main.f90
 	@echo "Starting compilation..."
 	@$(FC) $(FFLAGS) -o $@ main.f90 $(OBJ_FILES)
 	@echo "Program compiled successfully!"
 	@mv *.mod $(BUILD_DIR)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.f90 build
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.f90 build main.f90
 	@$(FC) $(FFLAGS) -c -o 	$@ $<
 
 build:
