@@ -6,9 +6,9 @@
 ! It includes a simple cubic (sc), an face centered ccubic (FCC) and diamond
 ! cristalline initializarion of the structure.
 !
-! It is included as well a subroutine to read an structure from a file.
+! It includes as well a subroutine to read a structure from a file.
 !
-! It also contain a bimodal velocity distribution.
+! It also contains a bimodal velocity distribution.
 !=====================================================================================!
 ! Contains
 !
