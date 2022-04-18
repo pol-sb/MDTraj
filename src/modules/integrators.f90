@@ -75,35 +75,6 @@ module integrators
   contains
 
 !=====================================================================================!
-!                   		  EULER INTEGRATION
-!=====================================================================================!
-!  Input:
-!      - natoms (número de átomos)(in) : integer scalar
-!	   - r (positions)(inout) : double precision array
-!      - F (force)(inout) : double precision array
-! 	   -dt (time step)(in) : double precision scalar
-!	   -boxlength (longitude of one side)(in) double precision scalar
-!  Output:
-! 	   - r (positions)(inout) : double precision array
-!      - vel (velocity)(inout) : double precision array
-!=====================================================================================!
-   subroutine euler(natoms,r,vel,F,dt,boxlength)
-		integer,intent(in)::natoms
-   	double precision, allocatable, intent(in) :: F(:,:)
-   	double precision, allocatable, intent(inout) :: r(:,:), vel(:,:)
-   	double precision, intent(in) :: dt, boxlength
-    integer :: ii, jj
-
-  		do jj = 1,natoms
-     		do ii = 1,3
-       		r(jj,ii) = r(jj,ii) + vel(jj,ii)*dt + 0.5d0*F(jj,ii)*dt*dt
-       		vel(jj,ii) = vel(jj,ii) + F(jj,ii)*dt
-     		enddo
-   	enddo
-
-   endsubroutine euler
-
-!=====================================================================================!
 !                     VELOCITY VERLET INTEGRATION (Without temperature)
 !=====================================================================================!
 !  Input:

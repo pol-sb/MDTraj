@@ -49,7 +49,7 @@ contains
    	double precision :: x_rand(size(vel,2))
 		double precision :: vel_normalrand(4)
 		integer :: pp, qq
-   	nu = 0.1d0
+   	nu = 0.5d0
    	sigma = dsqrt(Temp)
    	call random_number(x_rand)
 

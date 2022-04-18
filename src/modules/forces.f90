@@ -118,33 +118,35 @@ contains
 		vol = boxlength**3.; rho = dble(natoms)/vol
 		factp = (16.d0/3.d0)*PI*(rho**2)
 
-		cutoff_pot = 4.d0*(1.d0/(rc**12) - 1.d0/(rc**6))
+		cutoff_pot = 4.d0*(1.d0/(rc**12.d0) - 1.d0/(rc**6.d0))
 
 		press = 0.d0; epot = 0.d0; Upot = 0.d0; pressp = 0.d0
 
     do is = particle_range(1),particle_range(2)
-      do js = 1,is-1
-        pot = 0.d0; piter = 0.d0
-    		dx = r(is,1)-r(js,1); dy = r(is,2)-r(js,2); dz = r(is,3)-r(js,3)
-    		! Apply the boundary conditions to the particles distance
-    		call pbc(dx,boxlength,0.d0)
-    		call pbc(dy,boxlength,0.d0)
-    		call pbc(dz,boxlength,0.d0)
-    		d = (dx**2. + dy**2. + dz**2.)**0.5 ! Distance between particles i and j
+      do js = 1,natoms
+        if (js.ne.is) then
+          pot = 0.d0; piter = 0.d0
+      		dx = r(is,1)-r(js,1); dy = r(is,2)-r(js,2); dz = r(is,3)-r(js,3)
+      		! Apply the boundary conditions to the particles distance
+      		call pbc(dx,boxlength,0.d0)
+      		call pbc(dy,boxlength,0.d0)
+      		call pbc(dz,boxlength,0.d0)
+      		d = (dx**2. + dy**2. + dz**2.)**0.5 ! Distance between particles i and j
 
-    		if (d.lt.rc) then
-    			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
-    			pot = pot + 4.d0*(1.d0/(d**12.) - 1.d0/(d**6.)) - cutoff_pot
-    			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
+      		if (d.lt.rc) then
+      			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
+      			pot = pot + 4.d0*(1.d0/(d**12.d0) - 1.d0/(d**6.d0)) - cutoff_pot
+      			piter = piter + dU*dx; piter = piter + dU*dy; piter = piter + dU*dz
+          endif
+    			press = press + piter; epot = epot + pot
+
+    			if (d.lt.rc) then ! computation of the radial distribution function
+    				! adding the each pair of interaction into the corresponding bin
+    				ig = int(d/deltag)
+    				gr(ig) = gr(ig) + 1 ! in this case the addition to the histogram is 1
+            ! since the loop is for all particles instead of interactions.
+    			endif
         endif
-  			press = press + piter; epot = epot + pot
-
-  			if (d.lt.rc/2.d0) then ! computation of the radial distribution function
-  				! adding the each pair of interaction into the corresponding bin
-  				ig = int(d/deltag)
-  				gr(ig) = gr(ig) + 1 ! in this case the addition to the histogram is 1
-          ! since the loop is for all particles instead of interactions.
-  			endif
       end do
     end do
 
@@ -152,6 +154,7 @@ contains
     call MPI_REDUCE(press,pressp,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ierror)
     if (taskid.eq.0) then
       Upot = Upot/2.d0; pressp = pressp/2
+      !print*, 'forces', Upot
       cutoff_press = factp*((2.d0/3.d0)/(rc**9.) - 1.d0/(rc**3.))
       pressp = pressp/(3.d0*vol) + cutoff_press
     end if
@@ -204,7 +207,7 @@ contains
 		d = (dx**2. + dy**2. + dz**2.)**0.5 ! Distance between particles i and j
 
 		if (d.lt.rc) then
-			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))-(48.d0/(rc**14.0) - 24.d0/(rc**8.0))
+			dU = (48.d0/(d**14.0) - 24.d0/(d**8.0))
 			F(iv,1) = F(iv,1) + dU*dx
 			F(iv,2) = F(iv,2) + dU*dy
 			F(iv,3) = F(iv,3) + dU*dz

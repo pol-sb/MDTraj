@@ -24,8 +24,7 @@ integer :: ii, jj, kk, M, count, seed(33)
 integer, allocatable :: interact_list(:,:), sizes(:), displs(:)
 integer :: particle_range(2), interact_range(2)
 !Change units
-double precision::density_au,time
-!double precision::mass
+double precision::density_au,time, time_fact, epsLJ, temp_fact, press_fact
 
 	call MPI_INIT(ierror) ! Begin parallel execution code
 
@@ -42,15 +41,43 @@ double precision::density_au,time
 	seed(1:33) = rng_seed+taskid
 	call random_seed(put=seed)
 
-	!Change units
-		temp=temp/epsilon
-    density = density*(1e3*avogadro_number)/(4.d0*(1e10**3.d0))
-		! converting density from kg/m^3 to particles/angstrom^3
-		density = density*(sigma**3.)
-
 	!Initialization of the structure
 	if (structure .eq. 1) then
 		natoms=Nc*Nc*Nc
+		if (taskid.eq.0) then
+			print*, '*****************************************************************'
+			print*, '                Molecular Dynamics Simulation										'
+			print*, '     System of Partciles with Lennard-Jones Interaction 					'
+			print*, '*****************************************************************'
+			print*, 'Number of particles: ', natoms
+			print*, 'Density (kg/m^3): ', density
+			print*, 'Well depth (K): ', epsilon
+			print*, 'Characteristic length (A): ', sigma
+			print*, 'Thermostat temperature (K): ', temp
+			print*, 'Initial temperature (K): ', temp
+			if (thermo.eq.0) then
+				print*, 'Integrator:              ', 'Verlet'
+			elseif (thermo.eq.1) then
+				print*, 'Integrator:              ', 'Verlet with thermostat'
+			end if
+			print*, 'Time step (ps): ', dt
+			print*, 'Steps: ', ntimes
+		end if
+	! -------------------------------------------------------------------------- !
+		!Change units
+			temp_fact = epsilon ! r.u. -> K
+			epsLJ = epsilon*boltzmann_constant*avogadro_number*1.d-3 ! K -> kJ/mol
+			temp=temp/temp_fact
+	    density = density*avogadro_number/(atomic_mass*1.d4)
+			! converting density from kg/m^3 to particles/angstrom^3
+			density = density*(sigma**3.d0) ! particles/angstrom -> r.u.
+			time_fact = (1.d2)*(sigma*dsqrt(atomic_mass*dble(natoms)*1.d-3/(avogadro_number*&
+									epsilon*boltzmann_constant))) ! r.u. -> ps
+			dt = dt/time_fact
+			!print*, 'time parameters', time_fact, dt, dble(ntimes)*dt
+			!print*, 'density r.u.', density, (float(natoms)/density)**(1.0/3.0)
+			press_fact = epsLJ/(avogadro_number*(sigma**3)*1.d-4) ! r.u. -> MPa
+	! -------------------------------------------------------------------------- !
 		L= (float(natoms)/density)**(1.0/3.0)
 		!write(*,*) L
 		allocate(r(natoms,3))
@@ -105,7 +132,7 @@ double precision::density_au,time
   ! -------------------------------------------------------------------------- !
   ! -------------------------------------------------------------------------- !
 
-	nhis = 250; deltag = L/(4.d0*dble(nhis)); rc = L/2.d0
+	nhis = 200; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
     allocate(gr(nhis),gr_main(nhis)); gr = 0.d0; gr_main = 0.d0; ngr = 0
 	allocate(v(last_particle-first_particle+1,3))
 	allocate(F(last_particle-first_particle+1,3))
@@ -130,8 +157,12 @@ double precision::density_au,time
 		open(12,file='output/energy.dat',status='unknown')
 		open(13,file='output/pressure.dat',status='unknown')
 		open(14,file='output/trajectory.xyz',status='unknown')
+		print*, 'The simulation starts:'
+		print*, ''
+		print*, 'Melting the system from the initial configuration...'
 	end if
 
+	ti = 0.d0
 	do tt = 1,ntimes,1
 		ti = ti+dt ! Actualizing the instant time
 
@@ -139,6 +170,10 @@ double precision::density_au,time
 		! in order to obtain a clean plot of the rdf
 		if (tt.lt.tmelt) then
 			gr = 0.d0; ngr = 0
+		elseif (tt.eq.tmelt) then
+			if (taskid.eq.0) then
+				print*, 'Computing the dynamics...'
+		 	end if
 		end if
 
 		if (thermo.eq.0) then
@@ -172,21 +207,18 @@ double precision::density_au,time
     if (taskid .eq. 0) then
       if (mod(tt,everyt) .eq. 0) then
         !Change units
-        epsilon=epsilon*boltzmann_constant
-        mass = mass*natoms/avogadro_number
-        !dt = dt*10.0d0**(-12.0d0)/(sigma*dsqrt(mass/epsilon))
-        time=ti*1e-12*(sigma*1e-10*dsqrt(mass/epsilon))
-        ekin=ekin*epsilon
-        epot=epot*epsilon
-        density_au=density*mass/((sigma*1e-10)**3)
-        pressp=pressp*epsilon/((sigma*1e-10)**3)
+        time=ti*time_fact ! ps
+        ekin=ekin*epsilon*boltzmann_constant*avogadro_number/1e3 ! (to get kJ/mol)
+        epot=epot*epsilon*boltzmann_constant*avogadro_number/1e3 ! (to get kJ/mol)
+        density_au=density*atomic_mass*dble(natoms)/(avogadro_number*1e-4*(sigma**3.d0)) ! kg/m^3
+        pressp=pressp*press_fact ! MPa
+				!press_conversion = 1e-6*boltzmann_constant*avogadro_number/(atomic_mass*dble(natoms)) ! Mpa
 
-        write(11,*) time, temperature*epsilon/boltzmann_constant
+        write(11,*) time, temperature*temp_fact
         write(12,*) time, epot/dble(natoms),ekin/dble(natoms),&
             (epot + ekin)/dble(natoms)
-        write(13,*) time, pressp/dble(natoms),&
-            density_au*temperature*epsilon/boltzmann_constant/dble(natoms),&
-            (pressp + density_au*temperature*epsilon/boltzmann_constant)/dble(natoms)
+        write(13,*) time, pressp/dble(natoms),density*temperature*press_fact/dble(natoms),&
+            (pressp + density*temperature*press_fact)/dble(natoms)
         write(14,*) natoms
 				write(14,*)
 				do si = 1,natoms
