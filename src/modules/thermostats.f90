@@ -52,9 +52,9 @@ contains
         sigma = dsqrt(Temp)
         call random_number(x_rand)
 
-        do pp = particle_range(1)-particle_range(1)+1,particle_range(2)-particle_range(1)+1
+        do pp = particle_range(1) - particle_range(1) + 1, particle_range(2) - particle_range(1) + 1
             ! choosing if the velocity of particle i gets changed
-            if (x_rand(pp).lt.nu) then
+            if (x_rand(pp) .lt. nu) then
                 call normal_rand(sigma, vel_normalrand(1), vel_normalrand(2))
                 call normal_rand(sigma, vel_normalrand(3), vel_normalrand(4))
 
@@ -82,7 +82,7 @@ contains
 !
 !==============================================================================!
     subroutine normal_rand(sigma, xout1, xout2)
-			include "constants.h"
+        include "constants.h"
         double precision :: sigma
         double precision xout1, xout2
         double precision :: x(2)
@@ -108,8 +108,8 @@ contains
         integer::pp
 
         ekin = 0.d0
-        do pp = particle_range(1)-particle_range(1)+1,particle_range(2)-particle_range(1)+1
-            ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
+        do pp = particle_range(1) - particle_range(1) + 1, particle_range(2) - particle_range(1) + 1
+            ekin = ekin + 0.5d0*(vel(pp, 1)**2 + vel(pp, 2)**2 + vel(pp, 3)**2)
         end do
 
     end function kinetic

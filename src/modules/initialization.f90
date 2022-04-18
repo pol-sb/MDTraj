@@ -12,53 +12,53 @@
 !=====================================================================================!
 ! Contains
 !
-!           -> initial_configuration_SC (N, boxlength, r):
-!                   This subroutine creates a SC cristalline structure.
-!                                Input:
-!                                        - N (number particles of one side)(in): inegter scalar
-!                                        - Boxlength (longitude of one side)(in): double precision scalar
-!                                Output:
-!                                        - r (positions of the atoms)(out): double precision array
+! -> initial_configuration_SC (N, boxlength, r):
+!     This subroutine creates a SC cristalline structure.
+!          Input:
+!              - N (number particles of one side)(in): inegter scalar
+!              - Boxlength (longitude of one side)(in): double precision scalar
+!          Output:
+!              - r (positions of the atoms)(out): double precision array
 !
 !
-!     -> initial_configuration_fcc (N, boxlength, r):
-!                   This subroutine creates a FCC cristalline structure.
-!                                Input:
-!                                        - N (number particles of one side)(in): inegter scalar
-!                                        - Boxlength (longitude of one side)(in): double precision scalar
-!                                Output:
-!                                        - r (positions of the atoms)(out): double precision array
+! -> initial_configuration_fcc (N, boxlength, r):
+!     This subroutine creates a FCC cristalline structure.
+!          Input:
+!              - N (number particles of one side)(in): inegter scalar
+!              - Boxlength (longitude of one side)(in): double precision scalar
+!          Output:
+!              - r (positions of the atoms)(out): double precision array
 !
 !
-!      -> initial_configuration_diamond (N, boxlength, r):
-!                   This subroutine creates a SC cristalline structure.
-!                                Input:
-!                                        - N (number particles of one side)(in): inegter scalar
-!                                        - Boxlength (longitude of one side)(in): double precision scalar
-!                                Output:
-!                                        - r (positions of the atoms)(out): double precision array
+! -> initial_configuration_diamond (N, boxlength, r):
+!     This subroutine creates a SC cristalline structure.
+!          Input:
+!              - N (number particles of one side)(in): inegter scalar
+!              - Boxlength (longitude of one side)(in): double precision scalar
+!          Output:
+!              - r (positions of the atoms)(out): double precision array
 !
 !
-!      -> initial_reading (N, coord_path, initial_position, initial_velocities, vel_path):
-!                   This subroutine creates a SC cristalline structure.
-!                                Input:
-!                                   - N (number of sides of the execute_command_line)(in): integer scalar
-!                               - coord_path (path to the xyz fle containing the structure)(in): character
-!                                    - vel_path (path to velocities file)(inout): OPTIONAL, empty array
-!                                     - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
-!                                   - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
-!                                Output:
-!                                        - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
-!                                     - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+! -> initial_reading (N, coord_path, initial_position, initial_velocities, vel_path):
+!     This subroutine creates a SC cristalline structure.
+!          Input:
+!              - N (number of sides)(in): integer scalar
+!              - coord_path (path to .xyz structure file)(in): character
+!              - vel_path (path to vel. file) (inout): OPTIONAL, empty array
+!              - initial_velocities (inout): OPTIONAL, empty array
+!              - initial_position (inout): OPTIONAL, empty array
+!          Output:
+!              - initial_velocities (inout): OPTIONAL, empty array
+!              - initial_position (inout): OPTIONAL, empty array
 !
 !
-!      -> bimodal (Temp,vel):
-!                   This subroutine generates the velocities of the atoms following a bimodal
-!                   distribution of a temperature.
-!                                Input:
-!                                        - Temp (temperature)(in): double precision scalar
-!                                Output:
-!                                        - vel (velocities of the atoms)(inout): double precision array
+! -> bimodal (Temp,vel):
+!     This subroutine generates the velocities of the atoms following a bimodal
+!              distribution of a temperature.
+!          Input:
+!              - Temp (temperature)(in): double precision scalar
+!          Output:
+!              - vel (velocities of the atoms)(inout): double precision array
 !=====================================================================================!
 
 module initialization
@@ -82,7 +82,7 @@ contains
     subroutine initial_configuration_SC(N, boxlength, r, sigma)
         double precision, intent(out)::r(:, :)
         integer, intent(in) :: N
-        double precision, intent(in) :: boxlength,sigma
+        double precision, intent(in) :: boxlength, sigma
         logical :: ext
         integer :: nx, ny, nz
         integer :: out_ref
@@ -92,7 +92,7 @@ contains
 
         a = boxlength/dfloat(N)
         natoms = N*N*N
-				
+
         nn = 1
         outer: do nx = 0, N - 1
             do ny = 0, N - 1
@@ -107,29 +107,29 @@ contains
             end do
         end do outer
 
-            inquire (file="./output/", exist=ext)
-            if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/")
-            end if
+        inquire (file="./output/", exist=ext)
+        if (.NOT. ext) then
+            call execute_command_line("mkdir ./output/")
+        end if
 
-            inquire (file="./output/structure", exist=ext)
-            if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/structure")
-            end if
+        inquire (file="./output/structure", exist=ext)
+        if (.NOT. ext) then
+            call execute_command_line("mkdir ./output/structure")
+        end if
 
-            inquire (file="./output/structure/init_conf_sc.xyz", exist=ext)
-            if (.NOT. ext) then
-                open (newunit=out_ref, file="./output/structure/init_conf_sc.xyz", status="new")
-            else
-                open (newunit=out_ref, file="./output/structure/init_conf_sc.xyz", status="replace")
-            end if
-            write (out_ref, *) natoms
-            write (out_ref, *) " "
-            do ii = 1, natoms
-                write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
-            end do
+        inquire (file="./output/structure/init_conf_sc.xyz", exist=ext)
+        if (.NOT. ext) then
+            open (newunit=out_ref, file="./output/structure/init_conf_sc.xyz", status="new")
+        else
+            open (newunit=out_ref, file="./output/structure/init_conf_sc.xyz", status="replace")
+        end if
+        write (out_ref, *) natoms
+        write (out_ref, *) " "
+        do ii = 1, natoms
+            write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
+        end do
 
-            close (out_ref)
+        close (out_ref)
 
     end subroutine initial_configuration_SC
 
@@ -146,7 +146,7 @@ contains
     subroutine initial_configuration_fcc(N, boxlength, r, sigma)
         include "../declaration_variables/parallel_variables.h"
         integer, intent(in) :: N
-        double precision, intent(in) :: boxlength,sigma
+        double precision, intent(in) :: boxlength, sigma
         double precision, allocatable, intent(inout) :: r(:, :)
         double precision, allocatable :: r0(:, :)
 
@@ -154,8 +154,6 @@ contains
         integer :: nx, ny, nz, natoms
         integer :: out_ref, ii, jj
         double precision :: r_pert(size(r, 2))
-
-
 
         a = boxlength/dfloat(N)
         natoms = N*N*N*4
@@ -176,39 +174,36 @@ contains
                         r_pert = (r_pert - 0.5d0)*a/4.d0
                         r(4*ii + jj, :) = a*[nx, ny, nz] + r0(jj, :) + r_pert(:)
 
-
                     end do
                     ii = ii + 1
                 end do
             end do
         end do
 
+        inquire (file="./output/", exist=ext)
+        if (.NOT. ext) then
+            call execute_command_line("mkdir ./output/")
+        end if
 
+        inquire (file="./output/structure", exist=ext)
+        if (.NOT. ext) then
+            call execute_command_line("mkdir ./output/structure")
+        end if
 
-            inquire (file="./output/", exist=ext)
-            if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/")
-            end if
+        inquire (file="./output/structure/init_conf_fcc.xyz", exist=ext)
+        if (.NOT. ext) then
+            open (newunit=out_ref, file="./output/structure/init_conf_fcc.xyz", status="new")
+        else
+            open (newunit=out_ref, file="./output/structure/init_conf_fcc.xyz", status="replace")
+        end if
+        write (out_ref, *) natoms
+        write (out_ref, *)
 
-            inquire (file="./output/structure", exist=ext)
-            if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/structure")
-            end if
+        do nn = 1, natoms
+            write (out_ref, *) "A", r(nn, 1)*sigma, r(nn, 2)*sigma, r(nn, 3)*sigma
+        end do
 
-            inquire (file="./output/structure/init_conf_fcc.xyz", exist=ext)
-            if (.NOT. ext) then
-                open (newunit=out_ref, file="./output/structure/init_conf_fcc.xyz", status="new")
-            else
-                open (newunit=out_ref, file="./output/structure/init_conf_fcc.xyz", status="replace")
-            end if
-            write (out_ref, *) natoms
-            write (out_ref, *)
-
-            do nn = 1, natoms
-                write (out_ref, *) "A", r(nn, 1)*sigma, r(nn, 2)*sigma, r(nn, 3)*sigma
-            end do
-
-            close (out_ref)
+        close (out_ref)
 
         deallocate (r0)
 
@@ -226,7 +221,7 @@ contains
 !=====================================================================================!
     subroutine initial_configuration_diamond(N, boxlength, r, sigma)
         integer, intent(in) :: N
-        double precision, intent(in) :: boxlength,sigma
+        double precision, intent(in) :: boxlength, sigma
         double precision, intent(out) :: r(:, :)
         double precision, allocatable :: r0(:, :)
         logical :: ext
@@ -267,34 +262,33 @@ contains
             end do
         end do outer
 
-
         !Computing number of atoms.
         nn = nn - 1
-            ! Creating the .xyz file with the diamond structure
+        ! Creating the .xyz file with the diamond structure
 
-            inquire (file="./output/", exist=ext)
-            if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/")
-            end if
-            inquire (file="./output/structure", exist=ext)
-            if (.NOT. ext) then
-                call execute_command_line("mkdir ./output/structure")
-            end if
-            inquire (file="./output/structure/init_conf_diamond.xyz", exist=ext)
-            if (.NOT. ext) then
-                open (newunit=out_ref, file="./output/structure/init_conf_diamond.xyz", status="new")
-            else
-                open (newunit=out_ref, file="./output/structure/init_conf_diamond.xyz", status="replace")
-            end if
+        inquire (file="./output/", exist=ext)
+        if (.NOT. ext) then
+            call execute_command_line("mkdir ./output/")
+        end if
+        inquire (file="./output/structure", exist=ext)
+        if (.NOT. ext) then
+            call execute_command_line("mkdir ./output/structure")
+        end if
+        inquire (file="./output/structure/init_conf_diamond.xyz", exist=ext)
+        if (.NOT. ext) then
+            open (newunit=out_ref, file="./output/structure/init_conf_diamond.xyz", status="new")
+        else
+            open (newunit=out_ref, file="./output/structure/init_conf_diamond.xyz", status="replace")
+        end if
 
-            write (out_ref, *) natoms
-            write (out_ref, *) " "
+        write (out_ref, *) natoms
+        write (out_ref, *) " "
 
-            do ii = 1, natoms
-                write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
-            end do
+        do ii = 1, natoms
+            write (out_ref, *) "A", r(ii, 1)*sigma, r(ii, 2)*sigma, r(ii, 3)*sigma
+        end do
 
-            close (out_ref)
+        close (out_ref)
 
         deallocate (r0)
 
@@ -308,12 +302,12 @@ contains
 !         - N (number of sides of the execute_command_line)(in): integer scalar
 !    - coord_path (path to the xyz fle containing the structure)(in): character
 !         - vel_path (path to velocities file)(inout): OPTIONAL, empty array
-!          - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
-!          - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+!          - initial_velocities (inout): OPTIONAL, empty array
+!          - initial_position (inout): OPTIONAL, empty array
 !
 ! Output:
-!         - initial_velocities (velocidades iniciales)(inout): OPTIONAL, empty array
-!          - initial_position (posiciones iniciales)(inout): OPTIONAL, empty array
+!         - initial_velocities (inout): OPTIONAL, empty array
+!          - initial_position (inout): OPTIONAL, empty array
 !=====================================================================================!
 
     subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)
@@ -332,7 +326,7 @@ contains
         integer :: file_id
         integer :: i
 
-        !////////////// Read the old coordinates
+        ! Read the old coordinates
         open (unit=101, file=coord_path)
         read (file_id, *)
         read (file_id, *)
@@ -350,7 +344,7 @@ contains
 
         close (file_id)
 
-        !////////////// Read the old velocities
+        !Read the old velocities
         if (present(vel_path)) then
             open (unit=102, file=vel_path)
             read (file_id, *)
@@ -397,17 +391,17 @@ contains
             if ((vel_decider(ii) .lt. 0.5) .and. (ind_pos .lt. int(natoms/2))) then
                 ind_pos = ind_pos + 1
                 do jj = 1, dims, 1
-                    vel(ii, jj) = dsqrt(Temp)!/dsqrt(3.d0)
+                    vel(ii, jj) = dsqrt(Temp)
                 end do
             elseif (ind_neg .lt. int(natoms/2)) then
                 ind_neg = ind_neg + 1
                 do jj = 1, dims, 1
-                    vel(ii, jj) = -dsqrt(Temp)!/dsqrt(3.d0)
+                    vel(ii, jj) = -dsqrt(Temp)
                 end do
             else
                 ind_pos = ind_pos + 1
                 do jj = 1, dims, 1
-                    vel(ii, jj) = dsqrt(Temp)!/dsqrt(3.d0)
+                    vel(ii, jj) = dsqrt(Temp)
                 end do
             end if
         end do

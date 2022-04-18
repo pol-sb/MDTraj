@@ -53,42 +53,43 @@ program main
 
         ! Initial parameters printing
         if (taskid .eq. 0) then
-            print *, '┌', repeat("─", 64), '┐'
-            print *, '│                Molecular Dynamics Simulation                   │ '
-            print *, '│     System of Partciles with Lennard-Jones Interaction         │ '
-            print *, '└', repeat("─", 64), '┘'
+            print *, ''
+            print *,'┌', repeat("─", 64), '┐'
+            print *,'│                Molecular Dynamics Simulation                   │ '
+            print *,'│     System of Partciles with Lennard-Jones Interaction         │ '
+            print *,'└', repeat("─", 64), '┘'
 
-            print 100, natoms
-            100 format (' Number of particles:', 9x, i3)
+            print 300, natoms
+            300 format (' Number of particles:', 9x, i3)
 
-            print 101, density
-            101 format (' Density (kg/m^3):', 9x, f8.3)
+            print 301, density
+            301 format (' Density (kg/m^3):', 9x, f8.3)
 
-            print 102, epsilon
-            102 format (' L-J Well depth (K):', 8x, f8.3)
+            print 302, epsilon
+            302 format (' L-J Well depth (K):', 8x, f8.3)
 
-            print 103, sigma
-            103 format (' Characteristic length (A):', f8.3)
+            print 303, sigma
+            303 format (' Characteristic length (A):', f8.3)
 
-            print 104, temp
-            104 format (' Thermostat temperature (K):', 1x, f8.3)
+            print 304, temp
+            304 format (' Thermostat temperature (K):', f8.2)
 
-            print 105, temp
-            105 format (' Initial temperature (K):', 4x, f8.3)
+            print 305, temp
+            305 format (' Initial temperature (K):', 3x, f8.2)
 
             if (thermo .eq. 0) then
-                print 106
-                106 format (' Integrator:', 18x, 'Verlet')
+                print 306
+                306 format (' Integrator:', 18x, 'Verlet')
             elseif (thermo .eq. 1) then
-                print 107
-                107 format (' Integrator:', 18x, 'Verlet with thermostat')
+                print 307
+                307 format (' Integrator:', 18x, 'Verlet with thermostat')
             end if
 
-            print 108, dt
-            108 format (' Time step (ps):', 11x, f8.3)
+            print 308, dt
+            308 format (' Time step (ps):', 11x, f8.3)
 
-            print 109, ntimes
-            109 format (' Steps:', 20x, i9)
+            print 309, ntimes
+            309 format (' Steps:', 20x, i9)
 
         end if
 
@@ -228,9 +229,9 @@ program main
         open (14, file='output/trajectory.xyz', status='unknown')
 
         print *, ''
-        print *, 'Starting simulation.'
+        print *, '[!] Starting simulation.'
         print *, ''
-        print *, 'Melting the system from the initial configuration...'
+        print *, '· Melting the system from the initial configuration...'
     end if
 
     do tt = 1, ntimes, 1
@@ -243,7 +244,7 @@ program main
             gr = 0.d0; ngr = 0
         elseif (tt .eq. tmelt) then
             if (taskid .eq. 0) then
-                print *, 'Computing the dynamics...'
+                print *, '· Computing the dynamics...'
             end if
         end if
 
@@ -332,7 +333,9 @@ program main
         ! Closing files
         close (11); close (12); close (13); close (14); close (15)
 
-        print *, 'Ending...'
+        print *, ''
+        print *, '[!] Simulation Done!'
+        print *, ''
 
     end if
 
@@ -341,7 +344,7 @@ program main
     ! Saving computation time results
     if (taskid .eq. 0) then
         finish_time = MPI_Wtime()
-        open (16, file='output/performance.dat', access="append", status='old')
+        open (16, file='output/performance.dat', access="append", status='unknown')
         write (16, *) natoms, numproc, finish_time - start_time
         close (16)
     end if

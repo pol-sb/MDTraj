@@ -3,4 +3,4 @@
 *.mod
 src/build/
 src/program.exe
-
+output/plot*
