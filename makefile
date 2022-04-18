@@ -15,7 +15,7 @@ compile:
 
 ## 3. make run - to run.
 run:
-	 mpirun -np 4 ./src/program.exe
+	 mpirun -np 8 ./src/program.exe
 
 ## 4. make plot - to plot the graphics
 plot:
