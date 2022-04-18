@@ -23,6 +23,7 @@ integer::nhis
 integer :: ii, jj, kk, M, count, seed(33)
 integer, allocatable :: interact_list(:,:), sizes(:), displs(:)
 integer :: particle_range(2), interact_range(2)
+double precision :: start, finish
 !Change units
 double precision::density_au,time, time_fact, epsLJ, temp_fact, press_fact
 
@@ -34,6 +35,9 @@ double precision::density_au,time, time_fact, epsLJ, temp_fact, press_fact
 	! rank variable.
 
 	call MPI_COMM_SIZE(MPI_COMM_WORLD,numproc,ierror)
+        if (taskid.eq.0) then
+                start_time = MPI_Wtime()
+        end if
 
 	! -------------------------------------------------------------------------- !
 
@@ -249,6 +253,12 @@ double precision::density_au,time, time_fact, epsLJ, temp_fact, press_fact
 
 	deallocate(r,F,v,gr,sizes,displs,gr_main)
 	call MPI_BARRIER(MPI_COMM_WORLD, ierror)
+        if (taskid.eq.0) then
+                finish_time = MPI_Wtime()
+                open(16,file='output/performance.dat',access="append",status='old')
+                write(16,*) natoms, numproc , finish_time-start_time
+                close(16)
+        end if
 
 	call MPI_FINALIZE(ierror) ! End parallel execution
 
