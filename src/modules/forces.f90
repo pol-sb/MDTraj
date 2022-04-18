@@ -108,7 +108,7 @@ contains
 			! calling function that computes the Lennard-Jones interaction between
 			! pair of particles i and j
 			press = press + piter; epot = epot + pot
-			if (d.lt.rc/2.d0) then ! computation of the radial distribution function
+			if (d.lt.rc) then ! computation of the radial distribution function
 				! adding the each pair of interaction into the corresponding bin
 				ig = int(d/deltag)
 				gr(ig) = gr(ig) + 2

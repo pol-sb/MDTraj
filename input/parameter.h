@@ -1,8 +1,8 @@
 
 	!	Initialization parameters
 	!---------------------------
-	integer::nc=5 !Number of particles per side
-	double precision::density=0.2 ! density of particles in the system (kg/m^3)
+	integer::nc=6 !Number of particles per side
+	double precision::density=1.d0 ! density of particles in the system (kg/m^3)
 
 	integer::structure=1 !For SC:1, for fcc:2, for diamond 3.
 
@@ -11,12 +11,12 @@
 
 	!Simulation set up
 	!-----------------
-	integer::ntimes=1000000 !Steps of the simulation
+	integer::ntimes=100000 !Steps of the simulation
 	integer::everyt=100 ! Multiple of steps at which the thermodynamic properties
 	! are saved
 	integer::tmelt=1000 ! Time step at which melting is from initial structure is done
 	! and rdf can be computed
-	double precision:: dt= 0.01 !Time step (ps)
+	double precision:: dt= 0.1d0 !Time step (ps)
 
 	integer::thermo=1 !For no thermostat:0, for active thermostat:1
 
