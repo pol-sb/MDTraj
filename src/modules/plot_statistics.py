@@ -237,8 +237,8 @@ class MDSimulation:
         n_all = self.OUT_PATH + self.fold_name + "/ene-all" + "plot.png"
 
         # Names for the x and y axis
-        x_lab = r"time (ps)"
-        y_lab = r"energy $E/N$ ($\frac{kcal}{mol}$)"
+        x_lab = "time (ps)"
+        y_lab = "energy E/N (kcal/mol)"
 
         # Preparing the plot for the potential energy
         # plt.title(r"Potential energy")
@@ -313,6 +313,7 @@ class MDSimulation:
 
         # Gathering all result files
         fl = [f for f in os.listdir(self.OUT_PATH) if f.endswith(self.F_EXTENS)]
+        fl.append(f"{self.OUT_PATH}/trajectory.xyz")
 
         # Moving the files
         for f in fl:
