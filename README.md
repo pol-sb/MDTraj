@@ -43,6 +43,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites  <a name = "prerequisites"></a>
 
+#### Fortran and MPI - Prerequisites
 This program is built in Fortran90, so a Fortran compiler must be installed before trying to build the code. As this version of the code works in parallel, the program uses the OpenMPI message passing interface to send messages between processors.
 In order to be able to compile and run this software, the OpenMPI library is needed, [OpenMPI](https://www.open-mpi.org/).
 
@@ -50,7 +51,7 @@ Additionally a Fortran compiler able to compile and link MPI programs is needed.
 ```
 sudo apt update && sudo apt install gcc gfortran openmpi-bin openmpi-common libopenmpi-dev -y
 ```
-
+#### Python - Prerequisites
 Furthermore, python is used for the results plotting and representation. A python version higher or equal than `python 3.6` is needed, and additionally the following libraries are needed:
 
 - [numpy](https://numpy.org/)
@@ -64,21 +65,21 @@ python -m pip install -r requirements.txt
 `pip` can normally be installed from your distribution package manager.
 
 
-### Installing <a name = "installing"></a>
+### Running a Simulation <a name = "installing"></a>
 
-Donwload the zip file and uncompress in your working directory, you can use:
+Donwload the zip file and uncompress it in your working directory, to do this, you can use:
 
 ```
 unzip Project-I-master.zip 
 ```
-
+Before proceeding, make sure that the [python prerequisites](#python---prerequisites) are installed in your main python distribution, or that you have activated a python virtual environment with all the requires installed
 Change to the main directory and run:
 
 ```
 make MPI_NPROC=n
 ```
 Where 'n' is the number of processors that you want to use. The default is 4 processors.
-To change any simulation settings you must modify the [parameter.h](input/parameter.h) file, in the input directory. (Please, see the [Input parameters section](#parameters)). It is necessary to recompile after any changes are made to the input parameters. After any change we recommend to use the command
+In order to change any simulation settings you must modify the [parameter.h](input/parameter.h) file, in the input directory. (Please, see the [Input parameters section](#parameters)). It is necessary to recompile after any changes are made to the input parameters. After any change it is recommended to use the command:
 
 ```
 make
@@ -87,7 +88,7 @@ or
 ```
 make all
 ``` 
-Nonetheless, it can be done in three steps by the following terminal commands:
+Alternatively, the same procedure can be done in three steps by the following terminal commands:
 ```
 make compile
 make run
@@ -111,11 +112,11 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 - The **dimension** parameters can't be changed in the current version.
 
 - Three types of lattice can be generated for the **initial structure**:
-  - Simple cubic (=1),
-  - Face centered cubic (=2)
-  - Diamond (=3).
+  - Simple cubic (structure=1),
+  - Face centered cubic (structure=2)
+  - Diamond (structure=3).
   - Aditionally, a read from file subroutine will be implemented in the next version.
-  
+
   This has to be set by using the `structure` parameter.
 
 - **Temperature** is set with the `temp` parameter and is in kelvin units.
@@ -157,7 +158,8 @@ Containing the thermodynamics parameters:
   * `temp.dat`: It contains the temperatures of the temperature for some time-steps.
   * `energy.dat`: It contains the energy of the temperature for some time-steps
   * `pressure.dat`: It contains the pressure of the temperature for some time-steps
-  * `rdf.dat`: It contains the data of the radial distribution function.
+  * `rdf.dat`: It contains results for the radial distribution function.
+  * `performance.dat`: It contains the total particle number, the number of processors and the total time of the simulation.
 
 Containing the temporal evolution:
 
