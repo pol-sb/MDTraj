@@ -148,7 +148,7 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 
 - The **number of steps** that will be computed is selected in the `ntimes` parameter. 
 
-- The **output** information frequency is controlled by the `everyt` parameter. AVOID HIGH RATES OF PRINTIN. Printing is a limiting stage in this software.
+- The **output** information frequency is controlled by the `everyt` parameter. Printing is a limiting stage in this software, avoid slowdowns by using a sufficiently large writing interval.
 
 - The `rc` parameter represents the **cut-off** used during the forces calculation, at higher cut-off values better precision but higher times of calculation.
 
