@@ -2,7 +2,7 @@
 	!	Initialization parameters
 	!---------------------------
 	integer::nc=6 !Number of particles per side
-	double precision::density=1.d0 ! density of particles in the system (kg/m^3)
+	double precision::density=200.d0 ! density of particles in the system (kg/m^3)
 
 	integer::structure=1 !For SC:1, for fcc:2, for diamond 3.
 
