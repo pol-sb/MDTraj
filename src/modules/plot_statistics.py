@@ -179,7 +179,7 @@ class MDSimulation:
         """
 
         # Plotting the pressure
-        plt.plot(self.press_results[:, 0], self.press_results[:, 1])
+        plt.plot(self.press_results[:, 0], self.press_results[:, 3])
         plt.xlim(self.press_results[0, 0], self.press_results[-1, 0])
         # plt.title(r"Pressure")
         plt.xlabel(r"time (ps)")
