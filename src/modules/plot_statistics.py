@@ -2,17 +2,11 @@ import os
 import sys
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
-
 try:
     import matplotlib.pyplot as plt
     import numpy as np
 
-    plt.rcParams.update({"text.usetex": True})
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
-    plt.rcParams.update({'font.size': 12})
+
 except ModuleNotFoundError:
     print(
         "\n[!] ERROR: One or more python module(s) have not been found. Please,"
@@ -153,12 +147,10 @@ class MDSimulation:
         plt.grid()
 
         # Preparing a filename for the RSD plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.RDF_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.RDF_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight',dpi = 500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_temperature(self):
@@ -177,12 +169,10 @@ class MDSimulation:
         plt.ylabel("$T$ ($K$)")
 
         # Preparing a path for the T plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.TMP_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.TMP_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight',dpi = 500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_pressure(self):
@@ -202,12 +192,10 @@ class MDSimulation:
         plt.grid()
 
         # Preparing a path for the P plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.PRE_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.PRE_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight',dpi = 500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_msd(self):
@@ -227,12 +215,10 @@ class MDSimulation:
         plt.grid()
 
         # Preparing a filename for the MSD plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.MSD_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.MSD_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight',dpi = 500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_energies(self):
@@ -269,7 +255,7 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_pot, bbox_inches='tight',dpi = 500)
+        plt.savefig(n_pot, bbox_inches="tight", dpi=500)
         plt.clf()
 
         # Preparing the plot for the kinetic energy
@@ -281,7 +267,7 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_kin, bbox_inches='tight',dpi = 500)
+        plt.savefig(n_kin, bbox_inches="tight", dpi=500)
         plt.clf()
 
         # Preparing the plot for the total energy
@@ -293,7 +279,7 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_tot, bbox_inches='tight',dpi = 500)
+        plt.savefig(n_tot, bbox_inches="tight", dpi=500)
         plt.clf()
 
         # Plotting all of the energies at once
@@ -321,7 +307,7 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_all, bbox_inches='tight',dpi = 500)
+        plt.savefig(n_all, bbox_inches="tight", dpi=500)
         plt.clf()
 
 
@@ -375,6 +361,10 @@ class MDSimulation:
 
 
 if __name__ == "__main__":
+
+    plt.rc("font", family="serif")
+    plt.rcParams.update({"font.size": 12})
+
     sim = MDSimulation()
     sim.generate_plots()
 
