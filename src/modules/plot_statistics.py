@@ -47,6 +47,10 @@ class MDSimulation:
         # Making the plot line thinner.
         plt.rc("lines", linewidth=1)
 
+        # Changing text settings.
+        plt.rc("font", family="serif")
+        plt.rcParams.update({"font.size": 12})
+
         self._gather_results()
 
     def generate_plots(self):
@@ -93,14 +97,6 @@ class MDSimulation:
 
         """
 
-        # TODO: Remove this later.
-        # Filename treatment to be able to insert the density into the
-        # filename, so results can be worked with iteratively.
-        # den_str = str(self.dens).replace(".", "")
-        # rdf = self.RDF_NAME + f"-{den_str}" + self.F_EXTENS
-        # ene = self.ENE_NAME + f"-{den_str}" + self.F_EXTENS
-        # msd = self.MSD_NAME + f"-{den_str}" + self.F_EXTENS
-
         temp = self.OUT_PATH + self.TMP_NAME + self.F_EXTENS
         ene = self.OUT_PATH + self.ENE_NAME + self.F_EXTENS
         press = self.OUT_PATH + self.PRE_NAME + self.F_EXTENS
@@ -112,7 +108,6 @@ class MDSimulation:
         self.energ_results = np.loadtxt(ene)
         self.press_results = np.loadtxt(press)
         self.rdf_results = np.loadtxt(rdf)
-        # self.msd_results = np.loadtxt(msd)
 
     def _result_folder(self):
 
@@ -311,65 +306,7 @@ class MDSimulation:
         plt.clf()
 
 
-# def get_densities() -> set:
-
-#     """
-#     Gathers values for densities used in MD calculations from the filenames
-#     of '.dat' MD result files.
-
-#     Returns
-#     -------
-#     set
-#         A set containing all of the unique densities found in the CWD.
-#     """
-
-#     # Gathering all of the possible result files
-#     dat_files = [fil for fil in os.listdir() if fil.endswith(".dat")]
-#     dens_list = []
-
-#     for fil in dat_files:
-
-#         # This try block is to filter non-compatible files, as incompatible
-#         # files will raise a ValueError and they can just be ignored.
-#         try:
-#             # Getting the index of the hyphen in the filename
-#             ini = fil.index("-")
-
-#             # Getting the index of the dot in the filename
-#             dot = fil.index(".")
-
-#             # Slicing the filename to get the density as a string
-#             dens = fil[ini + 1 : dot]
-
-#             # Getting the middle part of the density string to be able to
-#             # add a dot
-#             mid = round(len(dens) / 2)
-#             dens = float(dens[:mid] + "." + dens[mid:])
-
-#             # Saving the formatted density in a list
-#             dens_list.append(dens)
-
-#         # The index method raises an error if the string is not found. We want
-#         # to ignore files that don't have the desired string.
-#         except ValueError:
-#             pass
-
-#     # Converting the list into a set to remove repeated densities.
-#     dens_list = set(dens_list)
-
-#     return dens_list
-
-
 if __name__ == "__main__":
-
-    plt.rc("font", family="serif")
-    plt.rcParams.update({"font.size": 12})
 
     sim = MDSimulation()
     sim.generate_plots()
-
-    # TODO: Previous iteration of the code. Delete this later.
-    # dens_list = get_densities()
-    # for dens in dens_list:
-    #    sim = MDSimulation(dens)
-    #    sim.generate_plots()

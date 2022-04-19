@@ -50,29 +50,39 @@ program main
     ! Initialization of the system structure
     if (structure .eq. 1) then
         natoms = Nc*Nc*Nc
-				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
-		 		 									epsLJ,time_fact,press_fact,temp_fact)
+
+        call reduced(taskid, epsilon, sigma, temp, density, natoms, dt, &
+                     ntimes, thermo, epsLJ, time_fact, press_fact, temp_fact)
+
         L = (float(natoms)/density)**(1.0/3.0)
         allocate (r(natoms, 3))
+
         if (taskid .eq. 0) then
             call initial_configuration_SC(Nc, L, r, sigma)
         end if
 
     elseif (structure .eq. 2) then
         natoms = Nc*Nc*Nc*4
-				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
-		 		 									epsLJ,time_fact,press_fact,temp_fact)
+
+        call reduced(taskid, epsilon, sigma, temp, density, natoms, dt, &
+                     ntimes, thermo, epsLJ, time_fact, press_fact, temp_fact)
+
         L = (float(natoms)/density)**(1.0/3.0)
         allocate (r(natoms, 3))
+
         if (taskid .eq. 0) then
             call initial_configuration_fcc(Nc, L, r, sigma)
         end if
+
     elseif (structure .eq. 3) then
         natoms = Nc*Nc*Nc*8
-				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
-		 		 									epsLJ,time_fact,press_fact,temp_fact)
+
+        call reduced(taskid, epsilon, sigma, temp, density, natoms, dt, &
+                     ntimes, thermo, epsLJ, time_fact, press_fact, temp_fact)
+
         L = (float(natoms)/density)**(1.0/3.0)
         allocate (r(natoms, 3))
+
         if (taskid .eq. 0) then
             call initial_configuration_diamond(Nc, L, r, sigma)
         end if
@@ -81,9 +91,9 @@ program main
         stop
     end if
 
-    ! -------------------------------------------------------------------------- !
-    !  Selecting range of particles for each processor
-    ! -------------------------------------------------------------------------- !
+    ! --------------------------------------------------------------------------!
+    !  Selecting range of particles for each processor                          !
+    ! --------------------------------------------------------------------------!
     blocksize = natoms/numproc
     residu = mod(natoms, numproc)
     allocate (sizes(numproc), displs(numproc))
@@ -107,9 +117,9 @@ program main
     end do
     particle_range(1) = first_particle; particle_range(2) = last_particle;
 
-    ! -------------------------------------------------------------------------- !
-    !    Selecting range of interactions for each processor                      !
-    ! -------------------------------------------------------------------------- !
+    ! --------------------------------------------------------------------------!
+    !    Selecting range of interactions for each processor                     !
+    ! --------------------------------------------------------------------------!
     num_interacts = natoms*(natoms - 1)/2
     allocate (interact_list(num_interacts, 2))
     kk = 1
@@ -187,6 +197,7 @@ program main
             end if
         end if
 
+        ! Choosing which integrator to use
         if (thermo .eq. 0) then
             call vel_verlet(natoms, r, v, F, epot, dt, rc, L, pressp, &
                             gr, deltag, particle_range, interact_range, interact_list, &
@@ -223,6 +234,7 @@ program main
             end do
         end do
 
+        ! Using a single processor to write the results
         if (taskid .eq. 0) then
             if (mod(tt, everyt) .eq. 0) then
 
