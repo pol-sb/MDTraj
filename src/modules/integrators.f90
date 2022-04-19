@@ -38,8 +38,8 @@
 !                     - vel (velocity)(inout) : double precision array
 !                     - Upot (potential energy) (out) : double precision scalar
 !                     - Pressp (pressure) (out) : double precision scalar
-! Dependencies:
-!      - force() : In module forces (src/modules/forces.f90)
+!            Dependencies:
+!                      - force() : In module forces (src/modules/forces.f90)
 !
 !
 !       -> vel_verlet_with_thermo (natoms,r,vel,F,Upot,dt,rc,boxlength,Temp,pressp,gr,deltag):
@@ -61,9 +61,9 @@
 !                     - Upot (potential energy)(out) : double precision scalar
 !                     - temp (temperature)(in) : double precision scalar
 !                     - Pressp (pressure) (out) : double precision scalar
-! Dependencies:
-!      - force() : In module forces (src/modules/forces.f90)
-!      - andersen_thermo() : In module thermostat (src/modules/thermostats.f90)
+!              Dependencies:
+!                     - force() : In module forces (src/modules/forces.f90)
+!                     - andersen_thermo() : In module thermostat (src/modules/thermostats.f90)
 !=====================================================================================!
 
 module integrators
@@ -226,7 +226,6 @@ contains
         Upot = 0.d0; pressp = 0.d0; epot = 0.d0
         first_particle = particle_range(1); last_particle = particle_range(2)
 
-        ! <------ aqui se necesitan las fuerzas repartidas entre todos los workers
         do jj = particle_range(1), particle_range(2)
             jv = jj - particle_range(1) + 1
             do ii = 1, 3
