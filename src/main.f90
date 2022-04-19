@@ -29,12 +29,12 @@ program main
     double precision :: density_au, time, time_fact, epsLJ, temp_fact, press_fact
 
     ! Begin parallel execution code
-    call MPI_INIT(ierror) 
+    call MPI_INIT(ierror)
 
     ! Find out which is the current process from the set of processes defined by
     ! the communicator MPI_COMM_WORLD (MPI shorthand for all the processors
     ! running this program). Value stored in 'rank' variable.
-    call MPI_COMM_RANK(MPI_COMM_WORLD, taskid, ierror) 
+    call MPI_COMM_RANK(MPI_COMM_WORLD, taskid, ierror)
 
     call MPI_COMM_SIZE(MPI_COMM_WORLD, numproc, ierror)
 
@@ -50,72 +50,9 @@ program main
     ! Initialization of the system structure
     if (structure .eq. 1) then
         natoms = Nc*Nc*Nc
-
-        ! Initial parameters printing
-        if (taskid .eq. 0) then
-            print *, ''
-            print *,'┌', repeat("─", 64), '┐'
-            print *,'│                Molecular Dynamics Simulation                   │ '
-            print *,'│     System of Partciles with Lennard-Jones Interaction         │ '
-            print *,'└', repeat("─", 64), '┘'
-
-            print 300, natoms
-            300 format (' Number of particles:', 9x, i3)
-
-            print 301, density
-            301 format (' Density (kg/m^3):', 9x, f8.3)
-
-            print 302, epsilon
-            302 format (' L-J Well depth (K):', 8x, f8.3)
-
-            print 303, sigma
-            303 format (' Characteristic length (A):', f8.3)
-
-            print 304, temp
-            304 format (' Thermostat temperature (K):', f8.2)
-
-            print 305, temp
-            305 format (' Initial temperature (K):', 3x, f8.2)
-
-            if (thermo .eq. 0) then
-                print 306
-                306 format (' Integrator:', 18x, 'Verlet')
-            elseif (thermo .eq. 1) then
-                print 307
-                307 format (' Integrator:', 18x, 'Verlet with thermostat')
-            end if
-
-            print 308, dt
-            308 format (' Time step (ps):', 11x, f8.3)
-
-            print 309, ntimes
-            309 format (' Steps:', 20x, i9)
-
-        end if
-
-        ! Unit conversion
-        ! Factor to convert the temp from r.u. to K
-        temp_fact = epsilon
-        temp = temp/temp_fact
-
-        ! Converting the LJ epsilon from K to kJ/mol
-        epsLJ = epsilon*boltzmann_constant*avogadro_number*1.d-3
-
-        ! converting density from kg/m^3 to particles/angstrom^3
-        density = density*avogadro_number/(atomic_mass*1.d4)
-        ! particles/angstrom -> r.u.
-        density = density*(sigma**3.d0)
-
-        ! Factor for converting the time from r.u. to ps
-        time_fact = (1.d2)*(sigma*dsqrt(atomic_mass*dble(natoms)&
-        *1.d-3/(avogadro_number*epsilon*boltzmann_constant)))
-        dt = dt/time_fact
-
-        ! Converting from r.u. to MPa
-        press_fact = epsLJ/(avogadro_number*(sigma**3)*1.d-4)
-
+				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
+		 		 									epsLJ,time_fact,press_fact,temp_fact)
         L = (float(natoms)/density)**(1.0/3.0)
-
         allocate (r(natoms, 3))
         if (taskid .eq. 0) then
             call initial_configuration_SC(Nc, L, r, sigma)
@@ -123,20 +60,22 @@ program main
 
     elseif (structure .eq. 2) then
         natoms = Nc*Nc*Nc*4
+				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
+		 		 									epsLJ,time_fact,press_fact,temp_fact)
         L = (float(natoms)/density)**(1.0/3.0)
         allocate (r(natoms, 3))
         if (taskid .eq. 0) then
             call initial_configuration_fcc(Nc, L, r, sigma)
         end if
-
     elseif (structure .eq. 3) then
         natoms = Nc*Nc*Nc*8
+				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
+		 		 									epsLJ,time_fact,press_fact,temp_fact)
         L = (float(natoms)/density)**(1.0/3.0)
         allocate (r(natoms, 3))
         if (taskid .eq. 0) then
             call initial_configuration_diamond(Nc, L, r, sigma)
         end if
-
     else
         write (*, *) "Input Error: no structure found. Please input a valid structure."
         stop
@@ -189,7 +128,7 @@ program main
         first_inter = taskid*inter_blocksize + 1 + inter_residu
         last_inter = (inter_blocksize - 1) + first_inter
     end if
-    interact_range(1) = first_inter; interact_range(2) = last_inter; 
+    interact_range(1) = first_inter; interact_range(2) = last_inter;
     ! -------------------------------------------------------------------------!
 
     nhis = 200; deltag = L/(2.d0*dble(nhis)); rc = L/2.d0
@@ -202,7 +141,7 @@ program main
     else
         v(:, :) = 0.0d0
     end if
- 
+
     call MPI_BARRIER(MPI_COMM_WORLD, ierror)
 
     ! Sending positions to all other processors
@@ -236,7 +175,7 @@ program main
 
     do tt = 1, ntimes, 1
         ! Updating the instant time
-        ti = ti + dt 
+        ti = ti + dt
 
         ! set g(r) = 0.d0 while the initial structure is melting (equilibrating)
         ! in order to obtain a clean plot of the rdf
@@ -289,7 +228,7 @@ program main
 
                 ! Unit conversion
                 ! Converting time from reduced units to ps
-                time = ti*time_fact 
+                time = ti*time_fact
 
                 ! Conversion factors to get kJ/mol
                 ekin = ekin*epsilon*boltzmann_constant*avogadro_number/1e3
