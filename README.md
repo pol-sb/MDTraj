@@ -105,9 +105,9 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 
 **If not specified, all the units are in reduced units**
 
-- The **number of unit cells** that are simulated is chosen by the `nc` parameter 
+- The **number of unit particles** per side that are simulated is chosen by the `n` parameter 
 
-- The **density**, set by the `density` parameter, has units of (particles / reduced units of distances), take **special care in avoiding densities greater than 0.6**.
+- The **density**, set by the `density` parameter. Units in kg/m^3.
 
 - The **dimension** parameters can't be changed in the current version.
 
@@ -150,11 +150,9 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 
 - The **output** information frequency is controlled by the `everyt` parameter. AVOID HIGH RATES OF PRINTIN. Printing is a limiting stage in this software.
 
-- The `rc` parameter represents the **cut-off** used during the forces calculation, at higher cut-off values better precision but higher times of calculation.
-
 - At last, you must choose the **parameters for the force-field** ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type):
-  - `sigma`: (σ) is the distance to the zero potential point in the potential
-  - `epsilon`: (ε) is the depth of the potential well.
+  - `sigma`: (σ) is the distance to the zero potential point in the potential. Units in angstroms.
+  - `epsilon`: (ε) is the depth of the potential well. Units in kelvin.
 
 
 ## Output files and plots <a name = "output"></a>
