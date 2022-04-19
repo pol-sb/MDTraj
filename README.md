@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="./imgs/vmdscene_fcc.png" alt="Project logo"></a>
+ <img width=300px height=300px src="./imgs/md_anim.gif" alt="Project logo"></a>
 </p>
 
 <h3 align="center">Molecular Dynamics Simulation of a Van der Waals Gas</h3>
