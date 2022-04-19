@@ -52,6 +52,7 @@ program main
         natoms = Nc*Nc*Nc
 				call reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
 		 		 									epsLJ,time_fact,press_fact,temp_fact)
+
         L = (float(natoms)/density)**(1.0/3.0)
         allocate (r(natoms, 3))
         if (taskid .eq. 0) then
@@ -201,7 +202,6 @@ program main
         end if
 
         ekin_paralel = kinetic(v, natoms, particle_range)
-
         ! Adding the kinetic energies
         call MPI_REDUCE(ekin_paralel, ekin, 1, MPI_DOUBLE_PRECISION, MPI_SUM, 0, &
                         MPI_COMM_WORLD, ierror)
@@ -229,15 +229,14 @@ program main
                 ! Unit conversion
                 ! Converting time from reduced units to ps
                 time = ti*time_fact
-
-                ! Conversion factors to get kJ/mol
+                ! Conversion factors to get kcal/mol
                 ekin = ekin*epsilon*boltzmann_constant*avogadro_number/1e3
                 epot = epot*epsilon*boltzmann_constant*avogadro_number/1e3
-
                 ! Conversion factors to get kg/m^3
                 density_au = density*atomic_mass*dble(natoms)/(avogadro_number*1e-4*(sigma**3.d0))
-
                 ! Conversion to MPa
+								!print*, 'press_fact', press_fact
+								!print*, density*temperature, pressp
                 pressp = pressp*press_fact
 
                 ! Saving the results in the files.
