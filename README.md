@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="./imgs/vmdscene_fcc.png" alt="Project logo"></a>
+ <img width=350px height=350px src="./imgs/md_anim.gif" alt="Project logo"></a>
 </p>
 
 <h3 align="center">Molecular Dynamics Simulation of a Van der Waals Gas</h3>
@@ -112,13 +112,26 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 
 - The **dimension** parameters can't be changed in the current version.
 
-- Three types of lattice can be generated for the **initial structure**:
-  - Simple cubic (structure=1),
-  - Face centered cubic (structure=2)
-  - Diamond (structure=3).
+- Three types of lattice can be generated for the **initial structure**.:
+  - Simple cubic (structure=1), <p align="left">
+  <a href="" rel="noopener">
+  <img width=200px height=200px src="./imgs/cs_latt.png" alt="CS lattice with perturbation"></a>
+  </p>
+
+  - Face centered cubic (structure=2) <p align="left">
+  <a href="" rel="noopener">
+  <img width=200px height=200px src="./imgs/vmdscene_fcc.png" alt="FCC lattice with perturbation"></a>
+  </p>
+
+  - Diamond (structure=3) <p align="left">
+  <a href="" rel="noopener">
+   <img width=200px height=200px src="./imgs/vmdscene_fcc.png" alt="Diamond lattice with perturbation"></a>
+   </p>
+
   - Aditionally, a read from file subroutine will be implemented in the next version.
 
   This has to be set by using the `structure` parameter.
+  A perturbation will be applied to the positions before starting the simulation, which can be seen in the figures above.
 
 - **Temperature** is set with the `temp` parameter and is in kelvin units.
 
