@@ -48,11 +48,11 @@ contains
         double precision :: x_rand(size(vel, 2))
         double precision :: vel_normalrand(4)
         integer :: pp, qq
-        nu = 1e-3
+        nu = 0.1d0
         sigma = dsqrt(Temp)
         call random_number(x_rand)
 
-        do pp = particle_range(1)-particle_range(1)+1,particle_range(2)-particle_range(1)+1
+        do pp = particle_range(1) - particle_range(1) + 1, particle_range(2) - particle_range(1) + 1
             ! choosing if the velocity of particle i gets changed
             if (x_rand(pp) .lt. nu) then
                 call normal_rand(sigma, vel_normalrand(1), vel_normalrand(2))
@@ -82,10 +82,10 @@ contains
 !
 !==============================================================================!
     subroutine normal_rand(sigma, xout1, xout2)
+        include "constants.h"
         double precision :: sigma
         double precision xout1, xout2
         double precision :: x(2)
-        double precision, parameter :: PI = 4.d0*datan(1.d0)
 
         call random_number(x)
 
@@ -98,7 +98,7 @@ contains
 !                        kinetic function
 !==============================================================================!
 !  Input:
-!                 - vel(velocity of the atoms)(in) : double precision array
+!      - vel(velocity of the atoms)(in) : double precision array
 !      - natoms(number of atoms)(in) : integer scalar
 !
 !==============================================================================!
@@ -108,8 +108,8 @@ contains
         integer::pp
 
         ekin = 0.d0
-        do pp = particle_range(1)-particle_range(1)+1,particle_range(2)-particle_range(1)+1
-            ekin = ekin + 0.5d0*(vel(pp,1)**2 + vel(pp,2)**2 + vel(pp,3)**2)
+        do pp = particle_range(1) - particle_range(1) + 1, particle_range(2) - particle_range(1) + 1
+            ekin = ekin + 0.5d0*(vel(pp, 1)**2 + vel(pp, 2)**2 + vel(pp, 3)**2)
         end do
 
     end function kinetic

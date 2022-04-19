@@ -1,6 +1,6 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=200px height=200px src="./imgs/cs_latt.png" alt="Project logo"></a>
+ <img width=350px height=350px src="./imgs/md_anim.gif" alt="Project logo"></a>
 </p>
 
 <h3 align="center">Molecular Dynamics Simulation of a Van der Waals Gas</h3>
@@ -16,7 +16,7 @@
 
 ---
 
-<p align="center"> The main of this project is to create a simple parallel Molecular Dynamics simulation code. It is the final project of Advanced computation tools course of the Atomistic and Multiscale Computational Modelling in Physics, Chemistry and Biochemistry Master at the Universitat de Barcelona.
+<p align="center"> The main goal of this project is to create a simple parallel Molecular Dynamics simulation code. This task constitutes the final project of the Advanced Computation Tools course of the Atomistic and Multiscale Computational Modelling in Physics, Chemistry and Biochemistry Master at the Universitat de Barcelona.
     <br> 
 </p>
 
@@ -29,26 +29,30 @@
 - [Input parameters](#parameters)
 - [Output files and plots](#output)
 - [Tests](#tests)
+- [Benchmark](#benchmark)
 - [Built Using](#built_using)
-- [TODO](#todo)
 - [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
 
 ## About <a name = "about"></a>
-In this project we aim to develop a simple parallel Molecular Dynamics simulation code. We implement three possible initial structures (sc, fcc, diamond) and two initial configurations (bimodal distribution or velocities starting at 0). Additionally, we implement two different integration algorithms (the velocity verlet with and without thermostat andersen). The Lennard-Jones potential is used.
+In this project we aim to develop a simple parallel Molecular Dynamics simulation code. We implement three possible initial structures (sc, fcc, diamond) and two initial configurations (bimodal distribution or velocities starting at 0). Additionally, we implement two different integration algorithms (the velocity verlet with and without andersen thermostat). The Lennard-Jones potential is used as the pair interaction potential.
 
 ## Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites  <a name = "prerequisites"></a>
 
-The core of this program works in FORTRAN 90, so a FORTRAN compiler must be installed before trying to build the code. We higly reccoment to install [gfortran](https://gcc.gnu.org/wiki/GFortran). The following commands demonstrate how to install it in Ubuntu Linux:
-```
-sudo apt update && sudo apt install gfortran -y
-```
+#### Fortran and MPI - Prerequisites
+This program is built in Fortran90, so a Fortran compiler must be installed before trying to build the code. As this version of the code works in parallel, the program uses the OpenMPI message passing interface to send messages between processors.
+In order to be able to compile and run this software, the OpenMPI library is needed, [OpenMPI](https://www.open-mpi.org/).
 
-Python is used for the results plotting and representation. A python version higher or equal than `python 3.6` is needed, and additionally the following libraries are needed:
+Additionally a Fortran compiler able to compile and link MPI programs is needed. We recommend the [mpifort](https://www.open-mpi.org/doc/v4.0/man1/mpifort.1.php) compiler, which is included in some OpenMPI distributions. The following command shows how to install OpenMPI in Ubuntu Linux:
+```
+sudo apt update && sudo apt install gcc gfortran openmpi-bin openmpi-common libopenmpi-dev -y
+```
+#### Python - Prerequisites
+Furthermore, python is used for the results plotting and representation. A python version higher or equal than `python 3.6` is needed, and additionally the following libraries are needed:
 
 - [numpy](https://numpy.org/)
 - [matplotlib](https://matplotlib.org/)
@@ -61,22 +65,21 @@ python -m pip install -r requirements.txt
 `pip` can normally be installed from your distribution package manager.
 
 
-### Installing <a name = "installing"></a>
+### Running a Simulation <a name = "installing"></a>
 
-Donwload the zip file and uncompress in your working directory, you can use:
-
+Donwload the zip file and uncompress it in your working directory, to do this, you can use:
 
 ```
 unzip Project-I-master.zip 
 ```
-
-Move to main directory and run:
+Before proceeding, make sure that the [python prerequisites](#python---prerequisites) are installed in your main python distribution, or that you have activated a python virtual environment with all the requires installed
+Change to the main directory and run:
 
 ```
-make
+make MPI_NPROC=n
 ```
-
-To run a simulation you must modify the parameter.h file, in the input directory, se the input parameter section. Since it is necessary to recompile if you want to add the changes on the input parameters, we recommend to use the command
+Where 'n' is the number of processors that you want to use. The default is 4 processors.
+In order to change any simulation settings you must modify the [parameter.h](input/parameter.h) file, in the input directory. (Please, see the [Input parameters section](#parameters)). It is necessary to recompile after any changes are made to the input parameters. After any change it is recommended to use the command:
 
 ```
 make
@@ -85,11 +88,16 @@ or
 ```
 make all
 ``` 
-Nonetheless, it can be done in three steps by the following terminal commands:
+Alternatively, the same procedure can be done in three steps by the following terminal commands:
 ```
 make compile
 make run
 make plot
+```
+For single processor testing, the mpirun flag `--use-hwthread-cpus` can be added when executing the makefile in order to use the hardware threads of the main cpu. For example:
+
+```
+make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 ```
 
 
@@ -97,19 +105,32 @@ make plot
 
 **If not specified, all the units are in reduced units**
 
-- The **number of unit cells** that are simulated is chosen by the `nc` parameter 
+- The **number of unit particles** per side that are simulated is chosen by the `n` parameter 
 
-- The **density**, set by the `density` parameter, has units of (particles / reduced units of distances), take **special care in avoiding densities greater than 0.6**.
+- The **density**, set by the `density` parameter. Units in kg/m^3.
 
 - The **dimension** parameters can't be changed in the current version.
 
-- Three types of lattice can be generated for the **initial structure**:
-  - Simple cubic (=1),
-  - Face centered cubic (=2)
-  - Diamond (=3).
+- Three types of lattice can be generated for the **initial structure**.:
+  - Simple cubic (structure=1), <p align="left">
+  <a href="" rel="noopener">
+  <img width=200px height=200px src="./imgs/cs_latt.png" alt="CS lattice with perturbation"></a>
+  </p>
+
+  - Face centered cubic (structure=2) <p align="left">
+  <a href="" rel="noopener">
+  <img width=200px height=200px src="./imgs/vmdscene_fcc.png" alt="FCC lattice with perturbation"></a>
+  </p>
+
+  - Diamond (structure=3) <p align="left">
+  <a href="" rel="noopener">
+   <img width=200px height=200px src="./imgs/vmdscene_fcc.png" alt="Diamond lattice with perturbation"></a>
+   </p>
+
   - Aditionally, a read from file subroutine will be implemented in the next version.
-  
+
   This has to be set by using the `structure` parameter.
+  A perturbation will be applied to the positions before starting the simulation, which can be seen in the figures above.
 
 - **Temperature** is set with the `temp` parameter and is in kelvin units.
 
@@ -129,11 +150,9 @@ make plot
 
 - The **output** information frequency is controlled by the `everyt` parameter. AVOID HIGH RATES OF PRINTIN. Printing is a limiting stage in this software.
 
-- The `rc` parameter represents the **cut-off** used during the forces calculation, at higher cut-off values better precision but higher times of calculation.
-
 - At last, you must choose the **parameters for the force-field** ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type):
-  - `sigma`: (σ) is the distance to the zero potential point in the potential
-  - `epsilon`: (ε) is the depth of the potential well.
+  - `sigma`: (σ) is the distance to the zero potential point in the potential. Units in angstroms.
+  - `epsilon`: (ε) is the depth of the potential well. Units in kelvin.
 
 
 ## Output files and plots <a name = "output"></a>
@@ -150,7 +169,8 @@ Containing the thermodynamics parameters:
   * `temp.dat`: It contains the temperatures of the temperature for some time-steps.
   * `energy.dat`: It contains the energy of the temperature for some time-steps
   * `pressure.dat`: It contains the pressure of the temperature for some time-steps
-  * `rdf.dat`: It contains the data of the radial distribution function.
+  * `rdf.dat`: It contains results for the radial distribution function.
+  * `performance.dat`: It contains the total particle number, the number of processors and the total time of the simulation.
 
 Containing the temporal evolution:
 
@@ -171,32 +191,25 @@ This directory also contains a [folder](./output/Helium@300K_example/) with the 
 
 Tests will be implemented in the next version.
 
+
+### Benchmark  <a name = "benchmark"></a>
+
+For the purpose, of maken easier to the user to decide the best parameters of a simulation, we have inglude the tool checck_parallel. This tool permits to run thorugh a selected range of processors and 125, 1000 and 10648 particles sets. The simulation always is runned for 1000 steps over all the range, but, you can choose the rest of parameters in the input file as the like any other simulation. To use the benchmark tool run the following commands, designed to run process from **MPI_minP=2** to **MPI_maxP=8** every  **MPI_stepP=2**.
+```
+make stats MPI_minP=2 MPI_maxP=8 MPI_stepP=2
+```
+Also this can be fixed modifying the top makefile of the program.
+Al the information relevant to this process can be accessed in the *bench.log file*, while the data is saved the *performance.dat* file, in the results directory. In the performance file the data ara arrange in three columns, particles, processors and seconds of CPU time, respectively.
+
+**NOTICE TO USERS**: The benchmark tool is very sensitive to the installation, check always the installation and that it runs correctly before run large simulations.
+
 ## Built Using <a name = "built_using"></a>
 
-- [Fortran](https://fortran-lang.org/) - Fortran
-- [Python](https://www.python.org/) - Python
-- [Numpy](https://numpy.org/) - numpy module
-- [Matplotlib](https://matplotlib.org/) - matplotlib module
-
-
-## TODO <a name = "todo"></a>
-**Parallelization:**
-- Initialization:
-  - sc: Raul
-  - fcc: Raul
-  - diamond: Marc
-  - bimodal: Marc
-- Thermostat:
-  - kinetic: Lucas
-  - andersen thermostat: Raul
-- Integration:
-  - euler: Pol
-  - velocity verlet: Pol
-  - velocity verlet with thermostat: Marc
-- Forces:
-  - Force + Lj: Lucas
-- Statistic:
-  - g(r): Pol     
+- [Fortran](https://fortran-lang.org/) - Fortran programming language
+- [OpenMPI](https://www.open-mpi.org/) - Open Source MPI Library
+- [Python](https://www.python.org/) - Python programming language
+- [Numpy](https://numpy.org/) - Numerical computation module for paython
+- [Matplotlib](https://matplotlib.org/) - Graphical plotting module for python
 
 ## Authors <a name = "authors"></a>
 - [@LucasFernandezStolpa](https://github.com/LucasFernandezStolpa) - Coordinator
@@ -204,5 +217,5 @@ Tests will be implemented in the next version.
 - [@pol-sb](https://github.com/pol-sb)
 - [@Mtunica](https://github.com/Mtunica)
 
-See also the list of [contributors](https://github.com/Eines-Informatiques-Avancades/Project-I/contributors) who participated in this project.
+See also statistics about the [contributors](https://github.com/Eines-Informatiques-Avancades/Project-I/contributors) who participated in this project.
 
