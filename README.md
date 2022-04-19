@@ -77,7 +77,7 @@ Change to the main directory and run:
 ```
 make MPI_NPROC=n
 ```
-Where 'n' is the number of processors that you want to use.
+Where 'n' is the number of processors that you want to use. The default is 4 processors.
 To change any simulation settings you must modify the [parameter.h](input/parameter.h) file, in the input directory. (Please, see the [Input parameters section](#parameters)). It is necessary to recompile after any changes are made to the input parameters. After any change we recommend to use the command
 
 ```
@@ -92,6 +92,11 @@ Nonetheless, it can be done in three steps by the following terminal commands:
 make compile
 make run
 make plot
+```
+For single processor testing, the mpirun flag `--use-hwthread-cpus` can be added when executing the makefile in order to use the hardware threads of the main cpu. For example:
+
+```
+make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 ```
 
 

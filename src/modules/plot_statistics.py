@@ -79,8 +79,8 @@ class MDSimulation:
         self._plot_pressure()
         self._plot_energies()
         self._plot_rdf()
+        self._move_results()
         print(f"Done - Result plots saved in ./output/{self.fold_name}")
-        # self._plot_msd()
 
     def _gather_results(self):
 
@@ -119,7 +119,7 @@ class MDSimulation:
         current_time = time.strftime("%d-%m_%H-%M")
 
         # Timestamped folder name
-        self.fold_name = f"plots_{current_time}"
+        self.fold_name = f"results_{current_time}"
 
         # Creating the folder if the folder does not already exist
         if self.fold_name not in os.listdir(self.OUT_PATH):
@@ -136,7 +136,7 @@ class MDSimulation:
         # Plotting the RDF
         plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1])
         plt.xlim(self.rdf_results[0, 0], self.rdf_results[-2, 0])
-        plt.title("Radial Distribution Function")
+        # plt.title("Radial Distribution Function")
         plt.xlabel(r"$r$ $(\AA)$")
         plt.ylabel(r"$g(r)$")
         plt.grid()
@@ -159,8 +159,8 @@ class MDSimulation:
         # Plotting the Temperature
         plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
         plt.xlim(self.temp_results[0, 0], self.temp_results[-1, 0])
-        plt.title("Temperature")
-        plt.xlabel("Time (r.u.)")
+        # plt.title("Temperature")
+        plt.xlabel("time (ps)")
         plt.ylabel("$T$ ($K$)")
 
         # Preparing a path for the T plot image.
@@ -181,9 +181,9 @@ class MDSimulation:
         # Plotting the pressure
         plt.plot(self.press_results[:, 0], self.press_results[:, 1])
         plt.xlim(self.press_results[0, 0], self.press_results[-1, 0])
-        plt.title(r"Pressure")
-        plt.xlabel(r"Time (r.u.)")
-        plt.ylabel(r"Pressure $P$ (r.u.)")
+        # plt.title(r"Pressure")
+        plt.xlabel(r"time (ps)")
+        plt.ylabel(r"Pressure (MPa)")
         plt.grid()
 
         # Preparing a path for the P plot image.
@@ -202,9 +202,9 @@ class MDSimulation:
         """
 
         # Plotting the MSD
+        # ##plt.title("Mean Square Displacement")
         plt.plot(self.msd_results[:, 0], self.msd_results[:, 1])
         plt.xlim(self.msd_results[0, 0], self.msd_results[-1, 0])
-        plt.title("Mean Square Displacement")
         plt.xlabel(r"$r$ $(\AA)$")
         plt.ylabel(r"$g(r)$")
         plt.grid()
@@ -237,14 +237,14 @@ class MDSimulation:
         n_all = self.OUT_PATH + self.fold_name + "/ene-all" + "plot.png"
 
         # Names for the x and y axis
-        x_lab = r"Time (r.u.)"
-        y_lab = r"$E/N$ (r.u.)"
+        x_lab = r"time (ps)"
+        y_lab = r"energy $E/N$ ($\frac{kcal}{mol}$)"
 
         # Preparing the plot for the potential energy
+        # plt.title(r"Potential energy")
         plt.tight_layout()
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
-        plt.title(r"Potential energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
         plt.grid()
@@ -254,9 +254,9 @@ class MDSimulation:
         plt.clf()
 
         # Preparing the plot for the kinetic energy
+        # plt.title(r"Kinetic energy")
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 2])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
-        plt.title(r"Kinetic energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
         plt.grid()
@@ -266,9 +266,9 @@ class MDSimulation:
         plt.clf()
 
         # Preparing the plot for the total energy
+        # plt.title(r"Total energy")
         plt.plot(self.energ_results[:, 0], self.energ_results[:, 3])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
-        plt.title(r"Total energy")
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
         plt.grid()
@@ -278,6 +278,7 @@ class MDSimulation:
         plt.clf()
 
         # Plotting all of the energies at once
+        # plt.title(r"All energies")
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 1],
@@ -294,7 +295,6 @@ class MDSimulation:
             label=r"Total Energy",
         )
 
-        plt.title(r"All energies")
         plt.legend()
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
@@ -304,6 +304,22 @@ class MDSimulation:
         # Saving the image and clearing the current plot.
         plt.savefig(n_all, bbox_inches="tight", dpi=500)
         plt.clf()
+
+    def _move_results(self):
+        """
+        Moves the result files from the ./output directory to
+        the ./output/results_%d-%m_%H-%M directory.
+        """
+
+        # Gathering all result files
+        fl = [f for f in os.listdir(self.OUT_PATH) if f.endswith(self.F_EXTENS)]
+
+        # Moving the files
+        for f in fl:
+            os.replace(
+                f"{self.OUT_PATH}/{f}",
+                f"{self.OUT_PATH}/{self.fold_name}/{f}",
+            )
 
 
 if __name__ == "__main__":
