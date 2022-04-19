@@ -424,4 +424,49 @@ outer:do nz = 0, N - 1,1
 
    endsubroutine bimodal
 
+	 subroutine reduced(taskid,epsilon,sigma,temp,density,natoms,dt,ntimes,thermo,&
+		 									epsLJ,time_fact,press_fact,temp_fact)
+		 include "constants.h"
+		 integer, intent(in) :: taskid, natoms, ntimes, thermo
+		 double precision, intent(in) :: epsilon, sigma
+		 double precision, intent(inout) :: density, dt, temp
+		 double precision, intent(out) :: epsLJ, temp_fact, time_fact, press_fact
+
+		 if (taskid.eq.0) then
+ 			print*, '*****************************************************************'
+ 			print*, '                Molecular Dynamics Simulation										'
+ 			print*, '     System of Partciles with Lennard-Jones Interaction 					'
+ 			print*, '*****************************************************************'
+ 			print*, 'Number of particles: ', natoms
+ 			print*, 'Density (kg/m^3): ', density
+ 			print*, 'Well depth (K): ', epsilon
+ 			print*, 'Characteristic length (A): ', sigma
+ 			print*, 'Thermostat temperature (K): ', temp
+ 			print*, 'Initial temperature (K): ', temp
+ 			if (thermo.eq.0) then
+ 				print*, 'Integrator:              ', 'Verlet'
+ 			elseif (thermo.eq.1) then
+ 				print*, 'Integrator:              ', 'Verlet with thermostat'
+ 			end if
+ 			print*, 'Time step (ps): ', dt
+ 			print*, 'Steps: ', ntimes
+ 		end if
+ 	! -------------------------------------------------------------------------- !
+ 		!Change units
+ 			temp_fact = epsilon ! r.u. -> K
+ 			epsLJ = epsilon*boltzmann_constant*avogadro_number*1.d-3 ! K -> kJ/mol
+ 			temp=temp/temp_fact
+ 	    density = density*avogadro_number/(atomic_mass*1.d4)
+ 			! converting density from kg/m^3 to particles/angstrom^3
+ 			density = density*(sigma**3.d0) ! particles/angstrom -> r.u.
+ 			time_fact = (1.d2)*(sigma*dsqrt(atomic_mass*dble(natoms)*1.d-3/(avogadro_number*&
+ 									epsilon*boltzmann_constant))) ! r.u. -> ps
+ 			dt = dt/time_fact
+ 			!print*, 'time parameters', time_fact, dt, dble(ntimes)*dt
+ 			!print*, 'density r.u.', density, (float(natoms)/density)**(1.0/3.0)
+ 			press_fact = epsLJ/(avogadro_number*(sigma**3)*1.d-4) ! r.u. -> MPa
+
+			return
+	 end subroutine reduced
+
 endmodule initialization
