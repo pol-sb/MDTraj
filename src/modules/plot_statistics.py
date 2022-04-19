@@ -5,10 +5,7 @@ import time
 try:
     import matplotlib.pyplot as plt
     import numpy as np
-    #plt.rcParams.update({"text.usetex": True})
-    #plt.rc('text', usetex=True)
-    #plt.rc('font', family='serif')
-    plt.rcParams.update({'font.size': 14})
+
 except ModuleNotFoundError:
     print(
         "\n[!] ERROR: One or more python module(s) have not been found. Please,"
@@ -141,23 +138,18 @@ class MDSimulation:
         """
 
         # Plotting the RDF
-        plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1],'-k',linewidth=1.5)
+        plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1])
         plt.xlim(self.rdf_results[0, 0], self.rdf_results[-2, 0])
-        plt.axvline(x=2.8,color='k',linestyle='--')
-        plt.text(2.8, -.05, r'$\sigma$', color='k',ha='center', va='top')
-        #plt.title(r"Radial Distribution Function")
-        plt.tick_params(labelsize=14)
-        plt.xlabel(r"$r$ ($\AA$)")
+        plt.title("Radial Distribution Function")
+        plt.xlabel(r"$r$ $(\AA)$")
         plt.ylabel(r"$g(r)$")
         plt.grid()
 
         # Preparing a filename for the RSD plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.RDF_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.RDF_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, figsize=(8, 4),bbox_inches='tight',dpi = 500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_temperature(self):
@@ -169,22 +161,17 @@ class MDSimulation:
         """
 
         # Plotting the Temperature
-        plt.plot(self.temp_results[:, 0], self.temp_results[:, 1],linewidth=0.75)
+        plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
         plt.xlim(self.temp_results[0, 0], self.temp_results[-1, 0])
-        plt.tick_params(labelsize=14)
-        #plt.title(r"Temperature")
-        plt.xlabel(r"Time (ps)")
-        plt.ylabel(r"Temperature ($K$)")
-        plt.axhline(y=np.mean(self.temp_results[:,1]),color='k',linestyle='--')
-        plt.grid()
+        plt.title("Temperature")
+        plt.xlabel("Time (r.u.)")
+        plt.ylabel("$T$ ($K$)")
 
         # Preparing a path for the T plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.TMP_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.TMP_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, figsize=(8, 4),bbox_inches='tight',dpi=500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_pressure(self):
@@ -196,21 +183,18 @@ class MDSimulation:
         """
 
         # Plotting the pressure
-        plt.plot(self.press_results[:, 0], self.press_results[:, 3],linewidth=0.75)
+        plt.plot(self.press_results[:, 0], self.press_results[:, 1])
         plt.xlim(self.press_results[0, 0], self.press_results[-1, 0])
-        plt.tick_params(labelsize=14)
-        #plt.title(r"Pressure")
-        plt.xlabel(r"Time (ps)")
-        plt.ylabel(r"Pressure (MPa)")
+        plt.title(r"Pressure")
+        plt.xlabel(r"Time (r.u.)")
+        plt.ylabel(r"Pressure $P$ (r.u.)")
         plt.grid()
 
         # Preparing a path for the P plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.PRE_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.PRE_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename,figsize=(8, 4), bbox_inches='tight',dpi=500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_msd(self):
@@ -224,18 +208,16 @@ class MDSimulation:
         # Plotting the MSD
         plt.plot(self.msd_results[:, 0], self.msd_results[:, 1])
         plt.xlim(self.msd_results[0, 0], self.msd_results[-1, 0])
-        #plt.title(r"Mean Square Displacement")
-        plt.xlabel(r"time ($ps$)")
-        plt.ylabel(r"$r^2(t)$")
+        plt.title("Mean Square Displacement")
+        plt.xlabel(r"$r$ $(\AA)$")
+        plt.ylabel(r"$g(r)$")
         plt.grid()
 
         # Preparing a filename for the MSD plot image.
-        filename = (
-            self.OUT_PATH + self.fold_name + "/" + self.MSD_NAME + "plot.png"
-        )
+        filename = self.OUT_PATH + self.fold_name + "/" + self.MSD_NAME + "plot.png"
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight',dpi=500)
+        plt.savefig(filename, bbox_inches="tight", dpi=500)
         plt.clf()
 
     def _plot_energies(self):
@@ -259,12 +241,12 @@ class MDSimulation:
         n_all = self.OUT_PATH + self.fold_name + "/ene-all" + "plot.png"
 
         # Names for the x and y axis
-        x_lab = r"Time (ps)"
-        y_lab = r"Energy (kcal/mol)"
+        x_lab = r"Time (r.u.)"
+        y_lab = r"$E/N$ (r.u.)"
 
         # Preparing the plot for the potential energy
         plt.tight_layout()
-        plt.plot(self.energ_results[:, 0], self.energ_results[:, 1],linewidth=0.75)
+        plt.plot(self.energ_results[:, 0], self.energ_results[:, 1])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.title(r"Potential energy")
         plt.xlabel(x_lab)
@@ -272,11 +254,11 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_pot, figsize=(8, 6),bbox_inches='tight',dpi=500)
+        plt.savefig(n_pot, bbox_inches="tight", dpi=500)
         plt.clf()
 
         # Preparing the plot for the kinetic energy
-        plt.plot(self.energ_results[:, 0], self.energ_results[:, 2],linewidth=0.75)
+        plt.plot(self.energ_results[:, 0], self.energ_results[:, 2])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.title(r"Kinetic energy")
         plt.xlabel(x_lab)
@@ -284,11 +266,11 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_kin, figsize=(8, 6),bbox_inches='tight',dpi=500)
+        plt.savefig(n_kin, bbox_inches="tight", dpi=500)
         plt.clf()
 
         # Preparing the plot for the total energy
-        plt.plot(self.energ_results[:, 0], self.energ_results[:, 3],linewidth=0.75)
+        plt.plot(self.energ_results[:, 0], self.energ_results[:, 3])
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.title(r"Total energy")
         plt.xlabel(x_lab)
@@ -296,36 +278,35 @@ class MDSimulation:
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_tot, figsize=(8, 6),bbox_inches='tight',dpi=500)
+        plt.savefig(n_tot, bbox_inches="tight", dpi=500)
         plt.clf()
 
         # Plotting all of the energies at once
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 1],
-            label=r"Potential Energy",linewidth=0.75,
+            label=r"Potential Energy",
         )
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 2],
-            label=r"Kinetic Energy",linewidth=0.75,
+            label=r"Kinetic Energy",
         )
         plt.plot(
             self.energ_results[:, 0],
             self.energ_results[:, 3],
-            label=r"Total Energy",linewidth=0.75,
+            label=r"Total Energy",
         )
 
-        #plt.title(r"All energies")
-        plt.legend(loc='best',fontsize=14)
+        plt.title(r"All energies")
+        plt.legend()
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
-        plt.tick_params(labelsize=14)
         plt.xlim(self.energ_results[0, 0], self.energ_results[-1, 0])
         plt.grid()
 
         # Saving the image and clearing the current plot.
-        plt.savefig(n_all, figsize=(8, 4),bbox_inches='tight',dpi=500)
+        plt.savefig(n_all, bbox_inches="tight", dpi=500)
         plt.clf()
 
 
@@ -379,6 +360,10 @@ class MDSimulation:
 
 
 if __name__ == "__main__":
+
+    plt.rc("font", family="serif")
+    plt.rcParams.update({"font.size": 12})
+
     sim = MDSimulation()
     sim.generate_plots()
 
