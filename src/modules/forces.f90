@@ -133,7 +133,7 @@ contains
 !                              Array which contains the positions of the atoms in the lattice
 !                -boxlength (in) : double precision scalar
 !                                        Length of the box of simulation
-!     -rc(cutoff radius)(in):  double precision scalar
+!                -rc(cutoff radius)(in):  double precision scalar
 !                                        Cutoff radius from which interactions are neglected
 !                -ii (in): integer scalar
 !                                        Index of the first particle which is looped around
@@ -147,11 +147,11 @@ contains
 !                                        Potential energy interaction between i and j elements
 !                 -piter (potential pressure) (out):
 !                                        Potential pressure term from interaction between particles i and j
-!     -d  (distance) (in)
+!                 -d  (distance) (in)
 !                                        Distance between particles i and j
 !
 ! Depencency:
-!     -pbc(): Tool in boundary module
+!                 -pbc(): Tool in boundary module
 !==============================================================================!
     subroutine lj(r, boxlength, rc, ii, jj, F, pot, piter, d)
         double precision, allocatable, intent(in) :: r(:, :)

@@ -98,7 +98,7 @@ contains
 !                        kinetic function
 !==============================================================================!
 !  Input:
-!                 - vel(velocity of the atoms)(in) : double precision array
+!      - vel(velocity of the atoms)(in) : double precision array
 !      - natoms(number of atoms)(in) : integer scalar
 !
 !==============================================================================!

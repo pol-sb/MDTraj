@@ -75,7 +75,7 @@ contains
 ! Input:
 !         - N (number particles of one side)(in): inegter scalar
 !         - Boxlength (longitude of one side)(in): double precision scalar
-!
+!         - sigma (reduced units for longitude)(in): integer scalar
 ! Output:
 !         - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
@@ -139,7 +139,7 @@ contains
 ! Input:
 !         - N (number particles of one side)(in): inegter scalar
 !         - Boxlength (longitude of one side)(in): double precision scalar
-!
+!         - sigma (reduced units for longitude)(in): integer scalar
 ! Output:
 !         - r (positions of the atoms)(out): double precision array
 !=====================================================================================!
@@ -215,6 +215,7 @@ contains
 ! Input:
 !         - N (number particles of one side)(in): inegter scalar
 !         - Boxlength (longitude of one side)(in): double precision scalar
+!         - sigma (reduced units for longitude)(in): integer scalar
 !
 ! Output:
 !         - r (positions of the atoms)(out): double precision array
@@ -295,19 +296,19 @@ contains
     end subroutine initial_configuration_diamond
 
 !=====================================================================================!
-!                       READ FROM FILE
+!                       READ FROM FILE (NOT IMPLEMENTED YET)
 !=====================================================================================!
 !=====================================================================================!
 ! Input:
 !         - N (number of sides of the execute_command_line)(in): integer scalar
-!    - coord_path (path to the xyz fle containing the structure)(in): character
+!         - coord_path (path to the xyz fle containing the structure)(in): character
 !         - vel_path (path to velocities file)(inout): OPTIONAL, empty array
-!          - initial_velocities (inout): OPTIONAL, empty array
-!          - initial_position (inout): OPTIONAL, empty array
+!         - initial_velocities (inout): OPTIONAL, empty array
+!         - initial_position (inout): OPTIONAL, empty array
 !
 ! Output:
 !         - initial_velocities (inout): OPTIONAL, empty array
-!          - initial_position (inout): OPTIONAL, empty array
+!         - initial_position (inout): OPTIONAL, empty array
 !=====================================================================================!
 
     subroutine initial_reading(N, coord_path, initial_position, initial_velocities, vel_path)

@@ -29,8 +29,8 @@
 - [Input parameters](#parameters)
 - [Output files and plots](#output)
 - [Tests](#tests)
+- [Benchmark](#benchmark)
 - [Built Using](#built_using)
-- [TODO](#todo)
 - [Contributing](../CONTRIBUTING.md)
 - [Authors](#authors)
 
@@ -105,9 +105,9 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 
 **If not specified, all the units are in reduced units**
 
-- The **number of unit cells** that are simulated is chosen by the `nc` parameter 
+- The **number of unit particles** per side that are simulated is chosen by the `n` parameter 
 
-- The **density**, set by the `density` parameter, has units of (particles / reduced units of distances), take **special care in avoiding densities greater than 0.6**.
+- The **density**, set by the `density` parameter. Units in kg/m^3.
 
 - The **dimension** parameters can't be changed in the current version.
 
@@ -150,11 +150,9 @@ make MPI_NPROC=8 MPI_FLAGS=--use-hwthread-cpus
 
 - The **output** information frequency is controlled by the `everyt` parameter. Printing is a limiting stage in this software, avoid slowdowns by using a sufficiently large writing interval.
 
-- The `rc` parameter represents the **cut-off** used during the forces calculation, at higher cut-off values better precision but higher times of calculation.
-
 - At last, you must choose the **parameters for the force-field** ([Lennard-Jones](https://es.wikipedia.org/wiki/Potencial_de_Lennard-Jones) type):
-  - `sigma`: (σ) is the distance to the zero potential point in the potential
-  - `epsilon`: (ε) is the depth of the potential well.
+  - `sigma`: (σ) is the distance to the zero potential point in the potential. Units in angstroms.
+  - `epsilon`: (ε) is the depth of the potential well. Units in kelvin.
 
 
 ## Output files and plots <a name = "output"></a>
@@ -193,6 +191,18 @@ This directory also contains a [folder](./output/Helium@300K_example/) with the 
 
 Tests will be implemented in the next version.
 
+
+### Benchmark  <a name = "benchmark"></a>
+
+For the purpose, of maken easier to the user to decide the best parameters of a simulation, we have inglude the tool checck_parallel. This tool permits to run thorugh a selected range of processors and 125, 1000 and 10648 particles sets. The simulation always is runned for 1000 steps over all the range, but, you can choose the rest of parameters in the input file as the like any other simulation. To use the benchmark tool run the following commands, designed to run process from **MPI_minP=2** to **MPI_maxP=8** every  **MPI_stepP=2**.
+```
+make stats MPI_minP=2 MPI_maxP=8 MPI_stepP=2
+```
+Also this can be fixed modifying the top makefile of the program.
+Al the information relevant to this process can be accessed in the *bench.log file*, while the data is saved the *performance.dat* file, in the results directory. In the performance file the data ara arrange in three columns, particles, processors and seconds of CPU time, respectively.
+
+**NOTICE TO USERS**: The benchmark tool is very sensitive to the installation, check always the installation and that it runs correctly before run large simulations.
+
 ## Built Using <a name = "built_using"></a>
 
 - [Fortran](https://fortran-lang.org/) - Fortran programming language
@@ -200,25 +210,6 @@ Tests will be implemented in the next version.
 - [Python](https://www.python.org/) - Python programming language
 - [Numpy](https://numpy.org/) - Numerical computation module for paython
 - [Matplotlib](https://matplotlib.org/) - Graphical plotting module for python
-
-
-## TODO <a name = "todo"></a>
-**Parallelization:**
-- Initialization:
-  - sc: Raul
-  - fcc: Raul
-  - diamond: Marc
-  - bimodal: Marc
-- Thermostat:
-  - kinetic: Lucas
-  - andersen thermostat: Raul
-- Integration:
-  - velocity verlet: Pol
-  - velocity verlet with thermostat: Marc
-- Forces:
-  - Force + Lj: Lucas
-- Statistic:
-  - g(r): Pol
 
 ## Authors <a name = "authors"></a>
 - [@LucasFernandezStolpa](https://github.com/LucasFernandezStolpa) - Coordinator

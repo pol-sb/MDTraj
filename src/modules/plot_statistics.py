@@ -134,7 +134,7 @@ class MDSimulation:
         """
 
         # Plotting the RDF
-        plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1])
+        plt.plot(self.rdf_results[:, 0], self.rdf_results[:, 1],'-k')
         plt.xlim(self.rdf_results[0, 0], self.rdf_results[-2, 0])
         # plt.title("Radial Distribution Function")
         plt.xlabel(r"$r$ $(\AA)$")
@@ -161,7 +161,9 @@ class MDSimulation:
         plt.xlim(self.temp_results[0, 0], self.temp_results[-1, 0])
         # plt.title("Temperature")
         plt.xlabel("time (ps)")
-        plt.ylabel("$T$ ($K$)")
+        plt.ylabel("temperature ($K$)")
+        plt.grid()
+        plt.axhline(y=np.mean(self.temp_results[:,1]),linewidth=1, color='k')
 
         # Preparing a path for the T plot image.
         filename = self.OUT_PATH + self.fold_name + "/" + self.TMP_NAME + "plot.png"
@@ -179,11 +181,11 @@ class MDSimulation:
         """
 
         # Plotting the pressure
-        plt.plot(self.press_results[:, 0], self.press_results[:, 1])
+        plt.plot(self.press_results[:, 0], self.press_results[:, 3])
         plt.xlim(self.press_results[0, 0], self.press_results[-1, 0])
         # plt.title(r"Pressure")
         plt.xlabel(r"time (ps)")
-        plt.ylabel(r"Pressure (MPa)")
+        plt.ylabel(r"pressure (MPa)")
         plt.grid()
 
         # Preparing a path for the P plot image.
@@ -238,7 +240,7 @@ class MDSimulation:
 
         # Names for the x and y axis
         x_lab = "time (ps)"
-        y_lab = "energy E/N (kcal/mol)"
+        y_lab = "energy (kcal/mol)"
 
         # Preparing the plot for the potential energy
         # plt.title(r"Potential energy")
