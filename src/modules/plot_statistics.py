@@ -315,13 +315,13 @@ class MDSimulation:
 
         # Gathering all result files
         fl = [f for f in os.listdir(self.OUT_PATH) if f.endswith(self.F_EXTENS)]
-        fl.append(f"{self.OUT_PATH}/trajectory.xyz")
+        fl.append(f"trajectory.xyz")
 
         # Moving the files
         for f in fl:
             os.replace(
-                f"{self.OUT_PATH}/{f}",
-                f"{self.OUT_PATH}/{self.fold_name}/{f}",
+                f"{self.OUT_PATH}{f}",
+                f"{self.OUT_PATH}{self.fold_name}/{f}",
             )
 
 
