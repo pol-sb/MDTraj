@@ -1,0 +1,52 @@
+
+! Initialization parameters
+!---------------------------
+
+!Number of particles per side
+integer::nc = 5 
+
+!Longitude of the size box
+double precision::density = 0.7d0 
+
+! For SC:1
+! For FCC:2
+! For diamond:3
+integer::structure = 1 
+
+! Temperature (K)
+double precision::temp = 100 
+
+! if 1, bimodal distribution.
+! Else, set up to 0
+integer::vel_opt = 1 
+
+! Simulation set up
+! Steps of the simulation
+integer::ntimes = 500000
+
+! Multiple of steps at which the thermodynamic properties are saved
+integer::everyt = 100
+
+! Multiple of steps at which a frame is saved
+! for the trajectory
+integer::everyt_struct = 1000
+
+! Time step at which melting is from initial structure is done
+! and rdf can be computed
+integer::tmelt = 1000
+
+!Time step (ps)
+double precision:: dt = 0.001
+
+! VV no thermo = 0,
+! VV with thermostat = 1,
+! Euler = 2
+integer::thermo = 2
+
+!Lennard-Jones parameters
+!----------------
+double precision:: epsilon = 10.22, sigma = 2.556
+
+!Andersen thermostat random number generator seed
+!----------------
+integer :: rng_seed = 14

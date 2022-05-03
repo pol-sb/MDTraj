@@ -76,7 +76,7 @@ Move to main directory and run:
 make
 ```
 
-To run a simulation you must modify the parameter.h file, in the input directory, se the input parameter section. Since it is necessary to recompile if you want to add the changes on the input parameters, we recommend to use the command
+To run a simulation you must modify the parameter file, in the input directory, se the input parameter section. Since it is necessary to recompile if you want to add the changes on the input parameters, we recommend to use the command
 
 ```
 make

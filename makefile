@@ -26,6 +26,7 @@ plot:
 clean:
 	rm -r src/build
 	rm -r src/program.exe
+	rm ./output/structure/*
 
 
 ## [!] WARNING: If you change the parameters, you need to recompile. 
