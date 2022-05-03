@@ -131,19 +131,25 @@ contains
         double precision, allocatable, intent(inout) :: gr(:)
         double precision, intent(in) :: dt, rc, boxlength, deltag
         double precision, intent(out) :: Upot, pressp
+        double precision :: dmc_c, gamm, zeta, zeta_2
+        gamm = 2
+
+        call normal_rand2(1d0, zeta, zeta_2)
+        dmc_c = gamm*dt
 
         do ii = 1, natoms
             do jj = 1, 3
                 r(jj, ii) = r(jj, ii) + vel(jj, ii)*dt + 0.5d0*F(jj, ii)*dt*dt
-                vel(jj, ii) = vel(jj, ii) + F(jj, ii)*0.5d0*dt
+                vel(jj, ii) = vel(jj, ii) + F(jj, ii)*dt+zeta*sqrt(dmc_c)
             end do
         end do
 
-        call force_dpd(natoms, r, boxlength, rc, F, Upot, pressp, dt, vel)
+
+        call force(natoms, r, boxlength, rc, F, Upot, pressp, gr, deltag)
 
         do ii = 1, natoms
             do jj = 1, 3
-                vel(jj, ii) = vel(jj, ii) + F(jj, ii)*0.5d0*dt
+                vel(jj, ii) = vel(jj, ii) + F(jj, ii)*dt+zeta*sqrt(dmc_c)
             end do
         end do
 
@@ -200,6 +206,21 @@ contains
         call andersen_thermo(Temp, vel, natoms)
 
     end subroutine vel_verlet_with_thermo
+
+subroutine normal_rand2(sigma, xout1, xout2)
+    double precision,  intent(in) :: sigma
+    double precision xout1, xout2
+    double precision :: x(2)
+    double precision, parameter :: PI = 4.d0*datan(1.d0)
+
+    call random_number(x)
+
+    xout1 = sigma*dsqrt(-2d0*(dlog(1d0 - x(1))))*dcos(2d0*PI*x(2))
+    xout2 = sigma*dsqrt(-2d0*(dlog(1d0 - x(1))))*dsin(2d0*PI*x(2))
+
+end subroutine normal_rand2
+
+
 
 end module integrators
 

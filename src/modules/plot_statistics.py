@@ -45,6 +45,13 @@ class MDSimulation:
         # Making the plot line thinner.
         plt.rc("lines", linewidth=1)
 
+        plt.rc("font", family="serif")
+        plt.rcParams.update({"font.size": 14})
+        plt.tick_params(labelsize=14)
+        plt.rcParams["axes.linewidth"] = 0.5
+        #plt.style.use("grayscale")
+        plt.grid()
+
         self._gather_results()
 
     def generate_plots(self):
@@ -72,7 +79,7 @@ class MDSimulation:
         self._plot_temperature()
         self._plot_pressure()
         self._plot_energies()
-        self._plot_rdf()
+        # self._plot_rdf()
         print(f"Done - Result plots saved in ./output/{self.fold_name}")
         # self._plot_msd()
 
@@ -109,7 +116,7 @@ class MDSimulation:
         self.temp_results = np.loadtxt(temp)
         self.energ_results = np.loadtxt(ene)
         self.press_results = np.loadtxt(press)
-        self.rdf_results = np.loadtxt(rdf)
+        #self.rdf_results = np.loadtxt(rdf)
         # self.msd_results = np.loadtxt(msd)
 
     def _result_folder(self):
@@ -164,9 +171,9 @@ class MDSimulation:
         # Plotting the Temperature
         plt.plot(self.temp_results[:, 0], self.temp_results[:, 1])
         plt.xlim(self.temp_results[0, 0], self.temp_results[-1, 0])
-        plt.title("Temperature")
-        plt.xlabel("Time [r.u.]")
-        plt.ylabel("T [K]")
+        #plt.title("Temperature")
+        plt.xlabel("Iteration")
+        plt.ylabel(r"$k_BT-1$")
 
         # Preparing a path for the T plot image.
         filename = (
@@ -174,7 +181,8 @@ class MDSimulation:
         )
 
         # Saving the image and clearing the current plot.
-        plt.savefig(filename, bbox_inches='tight')
+        plt.tight_layout()
+        plt.savefig(filename, dpi=400)
         plt.clf()
 
     def _plot_pressure(self):
